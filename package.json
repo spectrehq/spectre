@@ -1,0 +1,36 @@
+{
+  "name": "spectre",
+  "version": "0.0.0",
+  "description": "Spectre liquidity protocol on Aleo: Stake credits, earn rewards, and borrow assets",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/spectrehq/spectre.git"
+  },
+  "private": true,
+  "lint-staged": {
+    "*.{ts,tsx}": "eslint --cache --fix",
+    "*.{ts,tsx,css,md,mdx}": "prettier --write"
+  },
+  "scripts": {
+    "build": "pnpm recursive run build",
+    "dev": "mprocs",
+    "dev:ui": "pnpm --filter 'ui' run dev",
+    "prepare": "husky",
+    "test": "pnpm recursive run test",
+    "lint": "pnpm prettier:check && eslint . --ext .ts --ext .tsx",
+    "prettier": "prettier --write '**/*.{ts,tsx,css,md,mdx}'",
+    "prettier:check": "prettier --check '**/*.{ts,tsx,css,md,mdx}'"
+  },
+  "devDependencies": {
+    "@types/debug": "4.1.7",
+    "@typescript-eslint/eslint-plugin": "7.1.1",
+    "@typescript-eslint/parser": "7.1.1",
+    "eslint": "8.57.0",
+    "husky": "^9.0.11",
+    "lint-staged": "^15.2.2",
+    "mprocs": "^0.6.4",
+    "prettier": "3.2.5",
+    "rimraf": "^3.0.2",
+    "typescript": "5.4.2"
+  }
+}

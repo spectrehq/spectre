@@ -1,2 +1,2 @@
 # spectre
-Spectre liquidity protocol: Stake credits, earn rewards, and borrow assets.
+Spectre liquidity protocol on Aleo: Stake credits, earn rewards, and borrow assets.

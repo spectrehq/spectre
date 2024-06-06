@@ -1,0 +1,18 @@
+{
+  "program": "spectre_v1.aleo",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "spectre_access_control_v1.aleo",
+      "location": "local",
+      "path": "access_control"
+    },
+    {
+      "name": "spectre_treasury_v1.aleo",
+      "location": "local",
+      "path": "treasury"
+    }
+  ]
+}
