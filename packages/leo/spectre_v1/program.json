@@ -10,6 +10,11 @@
       "path": "access_control"
     },
     {
+      "name": "spectre_acl_manager_v1.aleo",
+      "location": "local",
+      "path": "acl_manager"
+    },
+    {
       "name": "spectre_treasury_v1.aleo",
       "location": "local",
       "path": "treasury"

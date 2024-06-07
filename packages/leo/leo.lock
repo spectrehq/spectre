@@ -2,8 +2,15 @@
 name = "spectre_access_control_v1.aleo"
 location = "local"
 path = "/Users/ridewindx/Code/aleo/spectre/packages/leo/spectre_v1/access_control"
-checksum = "d13e448aa338b3434b6ce1c547b7ec0bb15c61942312535ad757a706893d3def"
+checksum = "84092e7354f99fa54b97fb957951ad346919b8581fb12e959e268ffa8d987b13"
 dependencies = []
+
+[[package]]
+name = "spectre_acl_manager_v1.aleo"
+location = "local"
+path = "/Users/ridewindx/Code/aleo/spectre/packages/leo/spectre_v1/acl_manager"
+checksum = "8d600800ce7edf79fbef63664c93077a1d2a88fe5e57c6d7b4f0b5ff324404a7"
+dependencies = ["spectre_access_control_v1.aleo"]
 
 [[package]]
 name = "spectre_treasury_v1.aleo"
@@ -17,4 +24,4 @@ name = "spectre_v1.aleo"
 location = "local"
 path = "/Users/ridewindx/Code/aleo/spectre/packages/leo/spectre_v1"
 checksum = "cf7bd522e9b2bd1e70f9fb4696141144d5e58fc9b2879b2b7b844bf26eb30a2f"
-dependencies = ["spectre_access_control_v1.aleo", "spectre_treasury_v1.aleo"]
+dependencies = ["spectre_access_control_v1.aleo", "spectre_acl_manager_v1.aleo", "spectre_treasury_v1.aleo"]
