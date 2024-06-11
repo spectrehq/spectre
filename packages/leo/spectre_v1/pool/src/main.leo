@@ -44,5 +44,85 @@ program spectre_pool_v1.aleo {
         debt_ceiling: u64;
     }
 
+    struct UserConfigurationMap {
+        data1: u128;
+        data2: u128;
+    }
+
+    mapping reserves: address => ReserveData;
+
+    mapping users_config: address => UserConfigurationMap;
+
+    mapping reserves_list: u128 => address;
+
+    const WAD: field = 1000000000000000000field; // 1e18
+    const HALF_WAD: field = 500000000000000000field; // 0.5e18
+    const RAY: field = 1000000000000000000000000000field; // 1e27
+    const HALF_RAY: field = 500000000000000000000000000field; // 0.5e27
+    const WAD_RAY_RATIO: field = 1000000000field; // 1e9
+
+    /**
+     * Multiplies two wad, rounding half up to the nearest wad
+     * @param a Wad
+     * @param b Wad
+     * @return c = a*b, in wad
+     */
+    function way_mul(a: field, b: field) -> field {
+        return (a * b + HALF_WAD) / WAD;
+    }
+
+    /**
+     * Divides two wad, rounding half up to the nearest wad
+     * @param a Wad
+     * @param b Wad
+     * @return c = a/b, in wad
+     */
+    function way_div(a: field, b: field) -> field {
+        return (a * WAD + b / 2field) / b;
+    }
+
+    /**
+     * Multiplies two ray, rounding half up to the nearest ray
+     * @param a Ray
+     * @param b Ray
+     * @return c = a raymul b
+     */
+    function ray_mul(a: field, b: field) -> field {
+        return (a * b + HALF_RAY) / RAY;
+    }
+
+    /**
+     * Divides two ray, rounding half up to the nearest ray
+     * @param a Ray
+     * @param b Ray
+     * @return c = a raydiv b
+     */
+    function ray_div(a: field, b: field) -> field {
+        return (a * RAY + b / 2field) / b;
+    }
+
+    /**
+     * Casts ray down to wad
+     * @param a Ray
+     * @return b = a converted to wad, rounded half up to the nearest wad
+     */
+    function ray_to_wad(a: field) -> field {
+        let b: field = a / WAD_RAY_RATIO;
+        let remainder: field = a - b * WAD_RAY_RATIO;
+        if (remainder >= WAD_RAY_RATIO / 2field) {
+            b += 1field;
+        }
+        return b;
+    }
+
+    /**
+     * Converts wad up to ray
+     * @param a Wad
+     * @return b = a converted in ray
+     */
+    function wad_to_ray(a: field) -> field {
+        return a * WAD_RAY_RATIO;
+    }
+
     transition main() {}
 }

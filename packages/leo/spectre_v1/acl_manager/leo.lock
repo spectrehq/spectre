@@ -1,6 +1,0 @@
-[[package]]
-name = "spectre_access_control_v1.aleo"
-location = "local"
-path = "/Users/ridewindx/Code/aleo/spectre/packages/leo/spectre_v1/access_control"
-checksum = "84092e7354f99fa54b97fb957951ad346919b8581fb12e959e268ffa8d987b13"
-dependencies = []
