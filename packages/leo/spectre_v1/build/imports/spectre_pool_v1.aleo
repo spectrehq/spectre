@@ -36,6 +36,21 @@ struct UserConfigurationMap:
     data1 as u128;
     data2 as u128;
 
+struct ReserveCache:
+    curr_scaled_variable_debt as field;
+    next_scaled_variable_debt as field;
+    curr_liquidity_index as field;
+    next_liquidity_index as field;
+    curr_variable_borrow_index as field;
+    next_variable_borrow_index as field;
+    curr_liquidity_rate as field;
+    curr_variable_borrow_rate as field;
+    reserve_factor as field;
+    reserve_configuration as ReserveConfiguration;
+    stoken_address as address;
+    variable_debt_token_address as address;
+    reserve_last_update_timestamp as u64;
+
 
 mapping reserves:
 	key as address.public;
@@ -108,3 +123,5 @@ closure wad_to_ray:
     input r0 as field;
     mul r0 1000000000field into r1;
     output r1 as field;
+
+

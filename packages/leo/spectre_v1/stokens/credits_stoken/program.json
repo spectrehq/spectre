@@ -13,6 +13,11 @@
       "name": "spectre_acl_manager_v1.aleo",
       "location": "local",
       "path": "../../acl_manager"
+    },
+    {
+      "name": "spectre_pool_v1.aleo",
+      "location": "local",
+      "path": "../../pool"
     }
   ]
 }

@@ -49,6 +49,22 @@ program spectre_pool_v1.aleo {
         data2: u128;
     }
 
+    struct ReserveCache {
+        curr_scaled_variable_debt: field;
+        next_scaled_variable_debt: field;
+        curr_liquidity_index: field;
+        next_liquidity_index: field;
+        curr_variable_borrow_index: field;
+        next_variable_borrow_index: field;
+        curr_liquidity_rate: field;
+        curr_variable_borrow_rate: field;
+        reserve_factor: field;
+        reserve_configuration: ReserveConfiguration;
+        stoken_address: address;
+        variable_debt_token_address: address;
+        reserve_last_update_timestamp: u64;
+    }
+
     mapping reserves: address => ReserveData;
 
     mapping users_config: address => UserConfigurationMap;
@@ -122,6 +138,24 @@ program spectre_pool_v1.aleo {
      */
     function wad_to_ray(a: field) -> field {
         return a * WAD_RAY_RATIO;
+    }
+
+    inline reserve_cache(reserve: ReserveData) -> ReserveCache {
+        return ReserveCache {
+            curr_scaled_variable_debt: 0field,
+            next_scaled_variable_debt: 0field,
+            curr_liquidity_index: reserve.liquidity_index as field,
+            next_liquidity_index: reserve.liquidity_index as field,
+            curr_variable_borrow_index: reserve.variable_borrow_index as field,
+            next_variable_borrow_index: reserve.variable_borrow_index as field,
+            curr_liquidity_rate: reserve.current_liquidity_rate as field,
+            curr_variable_borrow_rate: reserve.current_variable_borrow_rate as field,
+            reserve_factor: reserve.configuration.reserve_factor as field,
+            reserve_configuration: reserve.configuration,
+            stoken_address: reserve.stoken_address,
+            variable_debt_token_address: reserve.variable_debt_token_address,
+            reserve_last_update_timestamp: reserve.last_update_timestamp
+        };
     }
 
     transition main() {}
