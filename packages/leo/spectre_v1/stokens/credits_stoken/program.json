@@ -8,6 +8,11 @@
       "name": "credits.aleo",
       "location": "network",
       "network": "testnet"
+    },
+    {
+      "name": "spectre_acl_manager_v1.aleo",
+      "location": "local",
+      "path": "../../acl_manager"
     }
   ]
 }

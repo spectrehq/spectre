@@ -1,3 +1,5 @@
+import spectre_access_control_v1.aleo;
+import spectre_acl_manager_v1.aleo;
 import credits.aleo;
 program spectre_credits_stoken_v1.aleo;
 
@@ -164,4 +166,21 @@ finalize transfer_from_public:
     get.or_use account[r2] 0u64 into r8;
     add r8 r3 into r9;
     set r9 into account[r2];
+
+
+
+
+function rescue_tokens:
+    input r0 as address.public;
+    input r1 as u64.public;
+    call spectre_acl_manager_v1.aleo/only_pool_admin self.caller into r2;
+    call credits.aleo/transfer_public r0 r1 into r3;
+    async rescue_tokens r2 r3 into r4;
+    output r4 as spectre_credits_stoken_v1.aleo/rescue_tokens.future;
+
+finalize rescue_tokens:
+    input r0 as spectre_acl_manager_v1.aleo/only_pool_admin.future;
+    input r1 as credits.aleo/transfer_public.future;
+    await r0;
+    await r1;
 

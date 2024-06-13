@@ -1,4 +1,5 @@
 import credits.aleo;
+import spectre_acl_manager_v1.aleo;
 
 program spectre_credits_stoken_v1.aleo {
     struct metadata {
@@ -160,5 +161,16 @@ program spectre_credits_stoken_v1.aleo {
         // If `account[sender] - amount` underflows, `transfer_public_to_private` is reverted.
         let current_amount: u64 = Mapping::get_or_use(account, sender, 0u64);
         Mapping::set(account, sender, current_amount - amount);
+    }
+
+    async transition rescue_tokens(public receiver: address, public amount: u64) -> Future {
+        let f1: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.caller);
+        let f2: Future = credits.aleo/transfer_public(receiver, amount);
+        return finalize_rescue_tokens(f1, f2);
+    }
+
+    async function finalize_rescue_tokens(f1: Future, f2: Future) {
+        f1.await();
+        f2.await();
     }
 }
