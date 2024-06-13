@@ -23,6 +23,11 @@
       "name": "spectre_treasury_v1.aleo",
       "location": "local",
       "path": "treasury"
+    },
+    {
+      "name": "spectre_credits_stoken_v1.aleo",
+      "location": "local",
+      "path": "stokens/credits_stoken"
     }
   ]
 }
