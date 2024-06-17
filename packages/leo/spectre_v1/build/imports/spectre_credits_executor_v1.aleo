@@ -31,9 +31,10 @@ function supply:
     cast spectre_credits_executor_v1.aleo into r2 as address;
     call credits.aleo/transfer_public_as_signer r2 r0 into r3;
     cast spectre_test_token.aleo into r4 as address;
-    call spectre_pool_v1.aleo/supply r4 r0 r1 into r5;
-    async supply r3 r5 into r6;
-    output r6 as spectre_credits_executor_v1.aleo/supply.future;
+    cast r0 into r5 as u128;
+    call spectre_pool_v1.aleo/supply r4 r5 r1 into r6;
+    async supply r3 r6 into r7;
+    output r7 as spectre_credits_executor_v1.aleo/supply.future;
 
 finalize supply:
     input r0 as credits.aleo/transfer_public_as_signer.future;
@@ -49,9 +50,10 @@ function withdraw:
     input r1 as address.public;
     call credits.aleo/transfer_public r1 r0 into r2;
     cast spectre_test_token.aleo into r3 as address;
-    call spectre_pool_v1.aleo/withdraw r3 r0 r1 into r4;
-    async withdraw r2 r4 into r5;
-    output r5 as spectre_credits_executor_v1.aleo/withdraw.future;
+    cast r0 into r4 as u128;
+    call spectre_pool_v1.aleo/withdraw r3 r4 self.caller into r5;
+    async withdraw r2 r5 into r6;
+    output r6 as spectre_credits_executor_v1.aleo/withdraw.future;
 
 finalize withdraw:
     input r0 as credits.aleo/transfer_public.future;

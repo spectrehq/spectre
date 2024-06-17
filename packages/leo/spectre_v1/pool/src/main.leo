@@ -11,7 +11,7 @@ program spectre_pool_v1.aleo {
      * @param b Wad
      * @return c = a*b, in wad
      */
-    function way_mul(a: field, b: field) -> field {
+    inline way_mul(a: field, b: field) -> field {
         return (a * b + HALF_WAD) / WAD;
     }
 
@@ -21,7 +21,7 @@ program spectre_pool_v1.aleo {
      * @param b Wad
      * @return c = a/b, in wad
      */
-    function way_div(a: field, b: field) -> field {
+    inline way_div(a: field, b: field) -> field {
         return (a * WAD + b / 2field) / b;
     }
 
@@ -31,7 +31,7 @@ program spectre_pool_v1.aleo {
      * @param b Ray
      * @return c = a raymul b
      */
-    function ray_mul(a: field, b: field) -> field {
+    inline ray_mul(a: field, b: field) -> field {
         return (a * b + HALF_RAY) / RAY;
     }
 
@@ -41,7 +41,7 @@ program spectre_pool_v1.aleo {
      * @param b Ray
      * @return c = a raydiv b
      */
-    function ray_div(a: field, b: field) -> field {
+    inline ray_div(a: field, b: field) -> field {
         return (a * RAY + b / 2field) / b;
     }
 
@@ -50,7 +50,7 @@ program spectre_pool_v1.aleo {
      * @param a Ray
      * @return b = a converted to wad, rounded half up to the nearest wad
      */
-    function ray_to_wad(a: field) -> field {
+    inline ray_to_wad(a: field) -> field {
         let b: field = a / WAD_RAY_RATIO;
         let remainder: field = a - b * WAD_RAY_RATIO;
         if (remainder >= WAD_RAY_RATIO / 2field) {
@@ -64,7 +64,7 @@ program spectre_pool_v1.aleo {
      * @param a Wad
      * @return b = a converted in ray
      */
-    function wad_to_ray(a: field) -> field {
+    inline wad_to_ray(a: field) -> field {
         return a * WAD_RAY_RATIO;
     }
 
@@ -74,11 +74,11 @@ program spectre_pool_v1.aleo {
     // Half percentage factor (50.00%)
     const HALF_PERCENTAGE_FACTOR: field = 5000field; // 0.5e4
 
-    function percent_mul(value: field, percentage: field) -> field {
+    inline percent_mul(value: field, percentage: field) -> field {
         return (value * percentage + HALF_PERCENTAGE_FACTOR) / PERCENTAGE_FACTOR;
     }
 
-    function percent_div(value: field, percentage: field) -> field {
+    inline percent_div(value: field, percentage: field) -> field {
         return (value * PERCENTAGE_FACTOR + percentage / 2field) / percentage;
     }
 
@@ -157,20 +157,61 @@ program spectre_pool_v1.aleo {
     // Not used. Just make the type `ReserveCache` visible.
     mapping reserves_cache: u8 => ReserveCache;
 
-    async transition supply(public asset: address, amount: u64, on_behalf_of: address) -> Future {
+    async transition supply(public asset: address, amount: u128, on_behalf_of: address) -> Future {
         return finalize_supply(asset, amount, on_behalf_of);
     }
 
-    async function finalize_supply(asset: address, amount: u64, on_behalf_of: address) {
-        let reserve: ReserveData = Mapping::get(reserves, asset);
+    async function finalize_supply(asset: address, amount: u128, on_behalf_of: address) {
+        let reserve_1: ReserveData = Mapping::get(reserves, asset);
+        let reserve_cache_1: ReserveCache = cache_reserve(reserve_1);
+
+        let (reserve, reserve_cache): (ReserveData, ReserveCache) = update_reserve_state(reserve_1, reserve_cache_1, block.height as u64);
+
+        // Mint stoken
+        let is_first_supply: bool = false;
+        {
+            let amount_scaled: field = ray_div(amount as field, reserve_cache.next_liquidity_index);
+            assert(amount_scaled != 0field);
+
+            let user_hash: field = stoken_hash_user(asset, on_behalf_of);
+            let user_state: STokenUserState = Mapping::get_or_use(stoken_user_states, user_hash, STokenUserState {balance: 0u128, index: 0u128});
+            let scaled_balance: field = user_state.balance as field;
+            // let balance_increase: field = ray_mul(scaled_balance, reserve_cache.next_liquidity_index) - ray_mul(scaled_balance, user_state.index as field);
+
+            let stoken_metadata: STokenMetadata = Mapping::get(stoken_metadatas, asset);
+            Mapping::set(stoken_metadatas, asset, STokenMetadata {name: stoken_metadata.name, symbol: stoken_metadata.symbol, decimals: stoken_metadata.decimals, total_supply: stoken_metadata.total_supply + amount_scaled as u128});
+
+            Mapping::set(stoken_user_states, user_hash, STokenUserState {balance: user_state.balance + amount_scaled as u128, index: reserve_cache.next_liquidity_index as u128});
+
+            is_first_supply = scaled_balance == 0field;
+        }
     }
 
-    async transition withdraw(public asset: address, amount: u64, to: address) -> Future {
-        return finalize_withdraw(asset, amount, to);
+    async transition withdraw(public asset: address, amount: u128, on_behalf_of: address) -> Future {
+        return finalize_withdraw(asset, amount, on_behalf_of);
     }
 
-    async function finalize_withdraw(asset: address, amount: u64, to: address) {
-        let reserve: ReserveData = Mapping::get(reserves, asset);
+    async function finalize_withdraw(asset: address, amount: u128, on_behalf_of: address) {
+        let reserve_1: ReserveData = Mapping::get(reserves, asset);
+        let reserve_cache_1: ReserveCache = cache_reserve(reserve_1);
+
+        let (reserve, reserve_cache): (ReserveData, ReserveCache) = update_reserve_state(reserve_1, reserve_cache_1, block.height as u64);
+
+        // Burn stoken
+        {
+            let amount_scaled: field = ray_div(amount as field, reserve_cache.next_liquidity_index);
+            assert(amount_scaled != 0field);
+
+            let user_hash: field = stoken_hash_user(asset, on_behalf_of);
+            let user_state: STokenUserState = Mapping::get_or_use(stoken_user_states, user_hash, STokenUserState {balance: 0u128, index: 0u128});
+            let scaled_balance: field = user_state.balance as field;
+            // let balance_increase: field = ray_mul(scaled_balance, reserve_cache.next_liquidity_index) - ray_mul(scaled_balance, user_state.index as field);
+
+            let stoken_metadata: STokenMetadata = Mapping::get(stoken_metadatas, asset);
+            Mapping::set(stoken_metadatas, asset, STokenMetadata {name: stoken_metadata.name, symbol: stoken_metadata.symbol, decimals: stoken_metadata.decimals, total_supply: stoken_metadata.total_supply - amount_scaled as u128});
+
+            Mapping::set(stoken_user_states, user_hash, STokenUserState {balance: user_state.balance - amount_scaled as u128, index: reserve_cache.next_liquidity_index as u128});
+        }
     }
 
     inline update_reserve_state(reserve: ReserveData, reserve_cache: ReserveCache, current_timestamp: u64) -> (ReserveData, ReserveCache) {
@@ -253,7 +294,7 @@ program spectre_pool_v1.aleo {
         });
     }
 
-    inline reserve_cache(reserve: ReserveData) -> ReserveCache {
+    inline cache_reserve(reserve: ReserveData) -> ReserveCache {
         return ReserveCache {
             curr_scaled_variable_debt: 0field,
             next_scaled_variable_debt: 0field,
@@ -334,5 +375,139 @@ program spectre_pool_v1.aleo {
         let thirdTerm: field = exp * expMinusOne * expMinusTwo * basePowerThree / 6field;
 
         return RAY + (rate * exp) / SECONDS_PER_YEAR + secondTerm + thirdTerm;
+    }
+
+    /******************** Validation Logic ********************/
+
+    inline validate_supply(reserve_cache: ReserveCache, reserve: ReserveData, amount: u64) {
+        assert(amount != 0u64);
+
+        assert(reserve_cache.reserve_configuration.is_active);
+        assert(!reserve_cache.reserve_configuration.is_frozen);
+        assert(!reserve_cache.reserve_configuration.is_paused);
+
+        let supply_cap: u64 = reserve_cache.reserve_configuration.supply_cap;
+        assert(supply_cap == 0u64);
+    }
+
+    /******************** SToken: implementation of the interest bearing token for the Spectre protocol ********************/
+
+    struct STokenMetadata {
+        name: u128, // 16 bytes -> 16 characters with ASCII encoding
+        symbol: u64, // 8 bytes -> 8 characters with ASCII encoding
+        decimals: u8,
+        total_supply: u128,
+    }
+
+    struct STokenUser {
+        reserve: address,
+        account: address,
+    }
+
+    struct STokenUserState {
+        balance: u128,
+        index: u128,
+    }
+
+    struct STokenApproval {
+        reserve: address,
+        approver: address,
+        spender: address,
+    }
+
+    mapping stoken_metadatas: address => STokenMetadata; // reserve => metadata
+    mapping stoken_user_states: field => STokenUserState; // hash(reserve, account) => user state
+    mapping stoken_approvals: field => u128; // hash(reserve, approver, spender) => approved amount
+
+    async transition stoken_total_supply(public reserve: address) -> Future {
+        return finalize_stoken_total_supply(reserve);
+    }
+
+    async function finalize_stoken_total_supply(reserve: address) {
+        let metadata: STokenMetadata = Mapping::get(stoken_metadatas, reserve);
+        let total_supply: field = ray_mul(metadata.total_supply as field, get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64));
+    }
+
+    async transition stoken_balance_of(public reserve: address, public account: address) -> Future {
+        return finalize_stoken_balance_of(reserve, account);
+    }
+
+    async function finalize_stoken_balance_of(reserve: address, account: address) {
+        let user_hash: field = stoken_hash_user(reserve, account);
+        let user_state: STokenUserState = Mapping::get_or_use(stoken_user_states, user_hash, STokenUserState {balance: 0u128, index: 0u128});
+        let balance: field = ray_mul(user_state.balance as field, get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64));
+    }
+
+    async transition stoken_approve_public(public reserve: address, public spender: address, public amount: u128) -> Future {
+        return finalize_stoken_approve_public(reserve, stoken_hash_approval(reserve, self.caller, spender), amount);
+    }
+
+    async function finalize_stoken_approve_public(reserve: address, hash: field, amount: u128) {
+        let index: field = get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64);
+        let amount_scaled: field = ray_div(amount as field, index);
+
+        let approval_amount: u128 = Mapping::get_or_use(stoken_approvals, hash, 0u128);
+        Mapping::set(stoken_approvals, hash, approval_amount + amount_scaled as u128);
+    }
+
+    async transition stoken_unapprove_public(public reserve: address, public spender: address, public amount: u128) -> Future {
+        return finalize_stoken_unapprove_public(reserve, stoken_hash_approval(reserve, self.caller, spender), amount);
+    }
+
+    async function finalize_stoken_unapprove_public(reserve: address, hash: field, amount: u128) {
+        let index: field = get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64);
+        let amount_scaled: field = ray_div(amount as field, index);
+
+        let approval_amount: u128 = Mapping::get(stoken_approvals, hash);
+        Mapping::set(stoken_approvals, hash, approval_amount - amount_scaled as u128);
+    }
+
+    async transition stoken_transfer_from_public(public reserve: address, public approver: address, public receiver: address, public amount: u128) -> Future {
+        return finalize_stoken_transfer_from_public(reserve, stoken_hash_approval(reserve, approver, self.caller), approver, receiver, amount);
+    }
+
+    async function finalize_stoken_transfer_from_public(reserve: address, hash: field, approver: address, receiver: address, amount: u128) {
+        let index: field = get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64);
+        let amount_scaled: field = ray_div(amount as field, index);
+
+        let approval_amount: u128 = Mapping::get(stoken_approvals, hash);
+        Mapping::set(stoken_approvals, hash, approval_amount - amount_scaled as u128);
+
+        let approver_hash: field = stoken_hash_user(reserve, approver);
+        let approver_state: STokenUserState = Mapping::get_or_use(stoken_user_states, approver_hash, STokenUserState {balance: 0u128, index: 0u128});
+        Mapping::set(stoken_user_states, approver_hash, STokenUserState {balance: approver_state.balance - amount_scaled as u128, index: approver_state.index});
+
+        let receiver_hash: field = stoken_hash_user(reserve, receiver);
+        let receiver_state: STokenUserState = Mapping::get_or_use(stoken_user_states, receiver_hash, STokenUserState {balance: 0u128, index: 0u128});
+        Mapping::set(stoken_user_states, receiver_hash, STokenUserState {balance: receiver_state.balance + amount_scaled as u128, index: receiver_state.index});
+
+        // TODO: validate
+    }
+
+    async transition stoken_transfer_public(public reserve: address, public receiver: address, public amount: u128) -> Future {
+        return finalize_stoken_transfer_public(reserve, self.caller, receiver, amount);
+    }
+
+    async function finalize_stoken_transfer_public(public reserve: address, public sender: address, public receiver: address, public amount: u128) {
+        let index: field = get_reserve_normalized_income(Mapping::get(reserves, reserve), block.height as u64);
+        let amount_scaled: field = ray_div(amount as field, index);
+
+        let sender_hash: field = stoken_hash_user(reserve, sender);
+        let sender_state: STokenUserState = Mapping::get_or_use(stoken_user_states, sender_hash, STokenUserState {balance: 0u128, index: 0u128});
+        Mapping::set(stoken_user_states, sender_hash, STokenUserState {balance: sender_state.balance - amount_scaled as u128, index: index as u128});
+
+        let receiver_hash: field = stoken_hash_user(reserve, receiver);
+        let receiver_state: STokenUserState = Mapping::get_or_use(stoken_user_states, receiver_hash, STokenUserState {balance: 0u128, index: 0u128});
+        Mapping::set(stoken_user_states, receiver_hash, STokenUserState {balance: receiver_state.balance + amount_scaled as u128, index: index as u128});
+
+        // TODO: validate
+    }
+
+    inline stoken_hash_user(reserve: address, account: address) -> field {
+        return BHP256::hash_to_field(STokenUser {reserve, account});
+    }
+
+    inline stoken_hash_approval(reserve: address, approver: address, spender: address) -> field {
+        return BHP256::hash_to_field(STokenApproval {reserve, approver, spender});
     }
 }

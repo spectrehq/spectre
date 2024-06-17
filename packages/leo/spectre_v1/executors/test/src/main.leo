@@ -8,7 +8,7 @@ program spectre_test_token_executor_v1.aleo {
         // Note: The caller must have approved the executor to transfer tokens on its behalf.
         let f1: Future = spectre_test_token.aleo/transfer_from_public(self.caller, spectre_test_token_executor_v1.aleo as address, amount);
 
-        let f2: Future = spectre_pool_v1.aleo/supply(spectre_test_token.aleo as address, amount, on_behalf_of);
+        let f2: Future = spectre_pool_v1.aleo/supply(spectre_test_token.aleo as address, amount as u128, on_behalf_of);
 
         return finalize_supply(f1, f2);
     }
@@ -21,7 +21,7 @@ program spectre_test_token_executor_v1.aleo {
     async transition withdraw(public amount: u64, public to: address) -> Future {
         let f1: Future = spectre_test_token.aleo/transfer_public(to, amount);
 
-        let f2: Future = spectre_pool_v1.aleo/withdraw(spectre_test_token.aleo as address, amount, to);
+        let f2: Future = spectre_pool_v1.aleo/withdraw(spectre_test_token.aleo as address, amount as u128, self.caller);
 
         return finalize_withdraw(f1, f2);
     }
