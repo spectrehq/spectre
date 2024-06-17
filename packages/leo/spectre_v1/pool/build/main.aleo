@@ -66,7 +66,41 @@ mapping reserves_list:
 	key as u128.public;
 	value as address.public;
 
-function main:
+
+mapping reserves_cache:
+	key as u8.public;
+	value as ReserveCache.public;
+
+
+function supply:
+    input r0 as address.public;
+    input r1 as u64.private;
+    input r2 as address.private;
+    async supply r0 r1 r2 into r3;
+    output r3 as spectre_pool_v1.aleo/supply.future;
+
+finalize supply:
+    input r0 as address.public;
+    input r1 as u64.public;
+    input r2 as address.public;
+    get reserves[r0] into r3;
+
+
+
+
+function withdraw:
+    input r0 as address.public;
+    input r1 as u64.private;
+    input r2 as address.private;
+    async withdraw r0 r1 r2 into r3;
+    output r3 as spectre_pool_v1.aleo/withdraw.future;
+
+finalize withdraw:
+    input r0 as address.public;
+    input r1 as u64.public;
+    input r2 as address.public;
+    get reserves[r0] into r3;
+
 
 
 closure way_mul:
@@ -123,5 +157,34 @@ closure wad_to_ray:
     input r0 as field;
     mul r0 1000000000field into r1;
     output r1 as field;
+
+
+closure percent_mul:
+    input r0 as field;
+    input r1 as field;
+    mul r0 r1 into r2;
+    add r2 5000field into r3;
+    div r3 10000field into r4;
+    output r4 as field;
+
+
+closure percent_div:
+    input r0 as field;
+    input r1 as field;
+    mul r0 10000field into r2;
+    div r1 2field into r3;
+    add r2 r3 into r4;
+    div r4 r1 into r5;
+    output r5 as field;
+
+
+
+
+
+
+
+
+
+
 
 

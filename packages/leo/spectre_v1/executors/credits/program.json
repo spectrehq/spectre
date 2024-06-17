@@ -1,18 +1,18 @@
 {
-  "program": "spectre_credits_stoken_v1.aleo",
+  "program": "spectre_credits_executor_v1.aleo",
   "version": "0.0.0",
   "description": "",
   "license": "MIT",
   "dependencies": [
     {
-      "name": "credits.aleo",
-      "location": "network",
-      "network": "testnet"
-    },
-    {
       "name": "spectre_acl_manager_v1.aleo",
       "location": "local",
       "path": "../../acl_manager"
+    },
+    {
+      "name": "credits.aleo",
+      "location": "network",
+      "network": "testnet"
     },
     {
       "name": "spectre_pool_v1.aleo",

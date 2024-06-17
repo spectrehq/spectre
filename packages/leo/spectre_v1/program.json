@@ -25,9 +25,14 @@
       "path": "treasury"
     },
     {
-      "name": "spectre_credits_stoken_v1.aleo",
+      "name": "spectre_credits_executor_v1.aleo",
       "location": "local",
-      "path": "stokens/credits_stoken"
+      "path": "executors/credits"
+    },
+    {
+      "name": "spectre_test_token_executor_v1.aleo",
+      "location": "local",
+      "path": "executors/test"
     }
   ]
 }

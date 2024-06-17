@@ -1,0 +1,23 @@
+{
+  "program": "spectre_test_token_executor_v1.aleo",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "spectre_acl_manager_v1.aleo",
+      "location": "local",
+      "path": "../../acl_manager"
+    },
+    {
+      "name": "spectre_test_token.aleo",
+      "location": "local",
+      "path": "../../tokens/test"
+    },
+    {
+      "name": "spectre_pool_v1.aleo",
+      "location": "local",
+      "path": "../../pool"
+    }
+  ]
+}
