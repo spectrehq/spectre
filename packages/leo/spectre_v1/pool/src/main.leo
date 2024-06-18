@@ -157,6 +157,8 @@ program spectre_pool_v1.aleo {
     // Not used. Just make the type `ReserveCache` visible.
     mapping reserves_cache: u8 => ReserveCache;
 
+    /******************** Supply logic ********************/
+
     async transition supply(public asset: address, amount: u128, on_behalf_of: address) -> Future {
         return finalize_supply(asset, amount, on_behalf_of);
     }
@@ -204,13 +206,79 @@ program spectre_pool_v1.aleo {
 
             let user_hash: field = stoken_hash_user(asset, on_behalf_of);
             let user_state: STokenUserState = Mapping::get_or_use(stoken_user_states, user_hash, STokenUserState {balance: 0u128, index: 0u128});
-            let scaled_balance: field = user_state.balance as field;
+            // let scaled_balance: field = user_state.balance as field;
             // let balance_increase: field = ray_mul(scaled_balance, reserve_cache.next_liquidity_index) - ray_mul(scaled_balance, user_state.index as field);
 
             let stoken_metadata: STokenMetadata = Mapping::get(stoken_metadatas, asset);
             Mapping::set(stoken_metadatas, asset, STokenMetadata {name: stoken_metadata.name, symbol: stoken_metadata.symbol, decimals: stoken_metadata.decimals, total_supply: stoken_metadata.total_supply - amount_scaled as u128});
 
             Mapping::set(stoken_user_states, user_hash, STokenUserState {balance: user_state.balance - amount_scaled as u128, index: reserve_cache.next_liquidity_index as u128});
+        }
+    }
+
+    /******************** Borrow logic ********************/
+
+    async transition borrow(public asset: address, amount: u128, on_behalf_of: address) -> Future {
+        return finalize_borrow(asset, amount, on_behalf_of);
+    }
+
+    async function finalize_borrow(asset: address, amount: u128, on_behalf_of: address) {
+        let reserve_1: ReserveData = Mapping::get(reserves, asset);
+        let reserve_cache_1: ReserveCache = cache_reserve(reserve_1);
+
+        let (reserve, reserve_cache): (ReserveData, ReserveCache) = update_reserve_state(reserve_1, reserve_cache_1, block.height as u64);
+
+        // Mint dtoken
+        let is_first_borrow: bool = false;
+        let next_scaled_variable_debt: field = reserve_cache.next_scaled_variable_debt;
+        {
+            let amount_scaled: field = ray_div(amount as field, reserve_cache.next_variable_borrow_index);
+            assert(amount_scaled != 0field);
+
+            let user_hash: field = dtoken_hash_user(asset, on_behalf_of);
+            let user_state: DTokenUserState = Mapping::get_or_use(dtoken_user_states, user_hash, DTokenUserState {balance: 0u128, index: 0u128});
+            let scaled_balance: field = user_state.balance as field;
+
+            let dtoken_metadata: DTokenMetadata = Mapping::get(dtoken_metadatas, asset);
+            let total_supply: u128 = dtoken_metadata.total_supply + amount_scaled as u128;
+            Mapping::set(dtoken_metadatas, asset, DTokenMetadata {name: dtoken_metadata.name, symbol: dtoken_metadata.symbol, decimals: dtoken_metadata.decimals, total_supply});
+
+            Mapping::set(dtoken_user_states, user_hash, DTokenUserState {balance: user_state.balance + amount_scaled as u128, index: reserve_cache.next_variable_borrow_index as u128});
+
+            is_first_borrow = scaled_balance == 0field;
+            next_scaled_variable_debt = total_supply as field;
+        }
+    }
+
+    async transition repay(public asset: address, amount: u128, on_behalf_of: address) -> Future {
+        return finalize_repay(asset, amount, on_behalf_of);
+    }
+
+    async function finalize_repay(asset: address, amount: u128, on_behalf_of: address) {
+        let reserve_1: ReserveData = Mapping::get(reserves, asset);
+        let reserve_cache_1: ReserveCache = cache_reserve(reserve_1);
+
+        let (reserve, reserve_cache): (ReserveData, ReserveCache) = update_reserve_state(reserve_1, reserve_cache_1, block.height as u64);
+
+        let user_hash: field = dtoken_hash_user(asset, on_behalf_of);
+        let user_state: DTokenUserState = Mapping::get_or_use(dtoken_user_states, user_hash, DTokenUserState {balance: 0u128, index: 0u128});
+        let variable_debt: field = ray_mul(user_state.balance as field, get_reserve_normalized_debt(Mapping::get(reserves, asset), block.height as u64));
+
+        let payback_amount: field = (amount as field) < variable_debt ? amount as field : variable_debt;
+
+        // Burn dtoken
+        let next_scaled_variable_debt: field = reserve_cache.next_scaled_variable_debt;
+        {
+            let amount_scaled: field = ray_div(payback_amount, reserve_cache.next_variable_borrow_index);
+            assert(amount_scaled != 0field);
+
+            let dtoken_metadata: DTokenMetadata = Mapping::get(dtoken_metadatas, asset);
+            let total_supply: u128 = dtoken_metadata.total_supply - amount_scaled as u128;
+            Mapping::set(dtoken_metadatas, asset, DTokenMetadata {name: dtoken_metadata.name, symbol: dtoken_metadata.symbol, decimals: dtoken_metadata.decimals, total_supply});
+
+            Mapping::set(dtoken_user_states, user_hash, DTokenUserState {balance: user_state.balance - amount_scaled as u128, index: reserve_cache.next_variable_borrow_index as u128});
+
+            next_scaled_variable_debt = total_supply as field;
         }
     }
 
@@ -509,5 +577,50 @@ program spectre_pool_v1.aleo {
 
     inline stoken_hash_approval(reserve: address, approver: address, spender: address) -> field {
         return BHP256::hash_to_field(STokenApproval {reserve, approver, spender});
+    }
+
+    /******************** DebtToken: implementation of a variable debt token to track the borrowing positions of user at variable rate mode ********************/
+
+    struct DTokenMetadata {
+        name: u128, // 16 bytes -> 16 characters with ASCII encoding
+        symbol: u64, // 8 bytes -> 8 characters with ASCII encoding
+        decimals: u8,
+        total_supply: u128,
+    }
+
+    struct DTokenUser {
+        reserve: address,
+        account: address,
+    }
+
+    struct DTokenUserState {
+        balance: u128,
+        index: u128,
+    }
+
+    mapping dtoken_metadatas: address => DTokenMetadata; // reserve => metadata
+    mapping dtoken_user_states: field => DTokenUserState; // hash(reserve, account) => user state
+
+    async transition dtoken_total_supply(public reserve: address) -> Future {
+        return finalize_dtoken_total_supply(reserve);
+    }
+
+    async function finalize_dtoken_total_supply(reserve: address) {
+        let metadata: DTokenMetadata = Mapping::get(dtoken_metadatas, reserve);
+        let total_supply: field = ray_mul(metadata.total_supply as field, get_reserve_normalized_debt(Mapping::get(reserves, reserve), block.height as u64));
+    }
+
+    async transition dtoken_balance_of(public reserve: address, public account: address) -> Future {
+        return finalize_dtoken_balance_of(reserve, account);
+    }
+
+    async function finalize_dtoken_balance_of(reserve: address, account: address) {
+        let user_hash: field = dtoken_hash_user(reserve, account);
+        let user_state: DTokenUserState = Mapping::get_or_use(dtoken_user_states, user_hash, DTokenUserState {balance: 0u128, index: 0u128});
+        let balance: field = ray_mul(user_state.balance as field, get_reserve_normalized_debt(Mapping::get(reserves, reserve), block.height as u64));
+    }
+
+    inline dtoken_hash_user(reserve: address, account: address) -> field {
+        return BHP256::hash_to_field(DTokenUser {reserve, account});
     }
 }
