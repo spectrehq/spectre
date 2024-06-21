@@ -15,6 +15,16 @@
       "path": "acl_manager"
     },
     {
+      "name": "spectre_stcredits_v1.aleo",
+      "location": "local",
+      "path": "stcredits"
+    },
+    {
+      "name": "spectre_delegator_v1.aleo",
+      "location": "local",
+      "path": "delegator"
+    },
+    {
       "name": "spectre_pool_v1.aleo",
       "location": "local",
       "path": "pool"
