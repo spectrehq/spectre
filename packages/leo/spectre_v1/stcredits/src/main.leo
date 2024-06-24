@@ -179,14 +179,21 @@ program spectre_stcredits_v1.aleo {
 
     const TOTAL_WITHDRAW_KEY: u8 = 0u8; // total withdrawal in credits
     const TOTAL_PENDING_WITHDRAW_KEY: u8 = 1u8; // total pending withdrawal in credits
-    const CACHE_HEIGHT_KEY: u8 = 2u8; // cache at block height
-    const CACHE_NEXT_INDEX_KEY: u8 = 3u8; // cache at next index
-    const CACHED_TOTAL_BONDED_KEY: u8 = 4u8; // cached total bonded credits
-    const CACHED_TOTAL_UNBONDING_KEY: u8 = 5u8; // cached total unbonding credits
-    const DELEGATION_LOWER_BOUND_KEY: u8 = 6u8; // delegation lower bound in credits
-    const REWARD_DISTRIBUTION_LOWER_BOUND_KEY: u8 = 7u8; // reward distribution lower bound in credits
+    const TRANSITION_COUNTER_KEY: u8 = 2u8; // transition counter
+    const CACHED_TOTAL_BONDED_KEY: u8 = 3u8; // cached total bonded credits
+    const CACHED_TOTAL_UNBONDING_KEY: u8 = 4u8; // cached total unbonding credits
+    const DELEGATION_LOWER_BOUND_KEY: u8 = 5u8; // delegation lower bound in credits
+    const REWARD_DISTRIBUTION_LOWER_BOUND_KEY: u8 = 6u8; // reward distribution lower bound in credits
 
     mapping state: u8 => field; // index key => value
+
+    struct CacheState {
+        height: u32,
+        beacon: field,
+        next_index: u32,
+    }
+
+    mapping cache_state: u8 => CacheState; // 0u8 => cache state
 
     struct Withdraw {
         amount: field, // credits
@@ -224,8 +231,8 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_add_validator(validator: address) {
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         let validator_state: committee_state = Mapping::get_or_use(
             credits.aleo/committee, validator,
@@ -241,8 +248,8 @@ program spectre_stcredits_v1.aleo {
         // Add the validator to the validators set,
         // and use the zero address as the delegator.
         let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
-        Mapping::set(validators, count, validator);
         Mapping::set(validators_count, 0u8, count + 1u32);
+        Mapping::set(validators, count, validator);
         Mapping::set(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
     }
 
@@ -251,22 +258,23 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_remove_validator(validator_index: u32, validator: address) {
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
 
         let delegator: address = Mapping::get(validator_delegators, validator);
-        assert(Mapping::contains(delegators, delegator));
+        assert(Mapping::contains(delegators, delegator) || delegator == aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
         // Ensure we have neither bonding nor unboning in the validator.
         {
-            let bond: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+            assert(bonded.validator == validator);
             let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-            assert(bond.microcredits == 0u64 && unbonding.microcredits == 0u64);
+            assert(bonded.microcredits == 0u64 && unbonding.microcredits == 0u64);
         }
 
-        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
+        let count: u32 = Mapping::get(validators_count, 0u8);
         assert(count >= 1u32);
 
         // If the removed validator is not the last one,
@@ -299,8 +307,8 @@ program spectre_stcredits_v1.aleo {
     async function finalize_register_delegator(f: Future, validator_index: u32, validator: address, delegator: address) {
         f.await();
 
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -333,8 +341,8 @@ program spectre_stcredits_v1.aleo {
         f1.await();
         f2.await();
 
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -367,8 +375,8 @@ program spectre_stcredits_v1.aleo {
         f1.await();
         f2.await();
 
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -389,8 +397,8 @@ program spectre_stcredits_v1.aleo {
     async function finalize_claim_unbond(f: Future, validator_index: u32, validator: address, delegator: address) {
         f.await();
 
-        // Ensure caching is not active in the current block.
-        assert(block.height != Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -405,6 +413,9 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_resolve_withdrawal() {
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
+
         for i: u32 in 0u32..RESOLVE_WITHDRAWAL_BATCH_NUM {
             let start_end: QueueStartEnd = Mapping::get_or_use(pending_queue_start_end, 0u8, QueueStartEnd {start: 0field, end: 0field});
             if (start_end.end - start_end.start <= 0field) {
@@ -453,16 +464,24 @@ program spectre_stcredits_v1.aleo {
     async function finalize_supply(f1: Future, user: address, credits: field) {
         f1.await();
 
-        // Ensure caching is active and finished in the current block.
-        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
-        assert_eq(block.height, Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
-        assert_eq(count, Mapping::get(state, CACHE_NEXT_INDEX_KEY) as u32);
+        // Increment the transition counter.
+        let transition_counter: field = Mapping::get(state, TRANSITION_COUNTER_KEY) + 1field;
+        Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
 
-        let total_bonded: field = Mapping::get(state, CACHED_TOTAL_BONDED_KEY);
+        // Ensure caching is active and
+        // finished immediately before this transition in the current block.
+        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
+        let cache: CacheState = Mapping::get(cache_state, 0u8);
+        assert_eq(block.height, cache.height);
+        assert_eq(count, cache.next_index);
+        assert_eq(transition_counter, cache.beacon);
+
+        // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
-        let total_unbonding: field = Mapping::get(state, CACHED_TOTAL_UNBONDING_KEY);
-        let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_bonded: field = Mapping::get_or_use(state, CACHED_TOTAL_BONDED_KEY, 0field);
+        let total_unbonding: field = Mapping::get_or_use(state, CACHED_TOTAL_UNBONDING_KEY, 0field);
+        let total_withdraw: field = Mapping::get_or_use(state, TOTAL_WITHDRAW_KEY, 0field);
+        let total_pending_withdraw: field = Mapping::get_or_use(state, TOTAL_PENDING_WITHDRAW_KEY, 0field);
 
         let total_pooled: field = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
 
@@ -482,17 +501,24 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_withdraw(user: address, stcredits: field) {
-        // Ensure caching is active and finished in the current block.
-        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
-        assert_eq(block.height, Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
-        assert_eq(count, Mapping::get(state, CACHE_NEXT_INDEX_KEY) as u32);
+        // Increment the transition counter.
+        let transition_counter: field = Mapping::get(state, TRANSITION_COUNTER_KEY) + 1field;
+        Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
 
-        let total_bonded: field = Mapping::get(state, CACHED_TOTAL_BONDED_KEY);
+        // Ensure caching is active and
+        // finished immediately before this transition in the current block.
+        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
+        let cache: CacheState = Mapping::get(cache_state, 0u8);
+        assert_eq(block.height, cache.height);
+        assert_eq(count, cache.next_index);
+        assert_eq(transition_counter, cache.beacon);
+
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
-        let total_unbonding: field = Mapping::get(state, CACHED_TOTAL_UNBONDING_KEY);
-        let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_bonded: field = Mapping::get_or_use(state, CACHED_TOTAL_BONDED_KEY, 0field);
+        let total_unbonding: field = Mapping::get_or_use(state, CACHED_TOTAL_UNBONDING_KEY, 0field);
+        let total_withdraw: field = Mapping::get_or_use(state, TOTAL_WITHDRAW_KEY, 0field);
+        let total_pending_withdraw: field = Mapping::get_or_use(state, TOTAL_PENDING_WITHDRAW_KEY, 0field);
 
         let total_pooled: field = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
 
@@ -560,6 +586,9 @@ program spectre_stcredits_v1.aleo {
     async function finalize_claim(f: Future, user: address, amount: field) {
         f.await();
 
+        // Increment the transition counter.
+        Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
+
         let withdraw: Withdraw = Mapping::get(withdraws, user);
         assert(withdraw.height <= block.height);
         assert_eq(withdraw.amount, amount);
@@ -567,35 +596,55 @@ program spectre_stcredits_v1.aleo {
         Mapping::remove(withdraws, user);
     }
 
-    async transition cache_total_bonded_unbonding(public start: u32, public num: u32) -> Future {
-        return finalize_cache_total_bonded_unbonding(start, num);
+    /**
+     * This function should be called several times just before the supply/withdraw transition.
+     * The number of calls should be equal to: `ceil(validators_count / CACHE_BATCH_NUM)`.
+     * Like: cache_total_bonded_unbonding, cache_total_bonded_unbonding, ..., supply/withdraw
+     * These transitions should be called in the same transaction,
+     * which is ensured by the `transition_counter`.
+     */
+    async transition cache_total_bonded_unbonding(public start: u32) -> Future {
+        return finalize_cache_total_bonded_unbonding(start);
     }
 
-    async function finalize_cache_total_bonded_unbonding(start: u32, num: u32) {
-        if (start == 0u32) { // new cache flow
-            Mapping::set(state, CACHE_HEIGHT_KEY, block.height as field);
-            Mapping::set(state, CACHE_NEXT_INDEX_KEY, 0field);
+    async function finalize_cache_total_bonded_unbonding(start: u32) {
+        // Increment the transition counter.
+        let transition_counter: field = Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field;
+        Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
+
+        // Get the total number of validators.
+        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
+
+        // If new cache flow.
+        if (start == 0u32) {
+            // Set beacon as the future transition counter at which the supply/withdraw is called
+            // immediately after caching is finished.
+            let beacon: field = transition_counter + ((count + CACHE_BATCH_NUM - 1u32) / CACHE_BATCH_NUM) as field;
+            Mapping::set(cache_state, 0u8, CacheState {height: block.height, beacon, next_index: 0u32});
+
             Mapping::set(state, CACHED_TOTAL_BONDED_KEY, 0field);
             Mapping::set(state, CACHED_TOTAL_UNBONDING_KEY, 0field);
         }
 
-        assert_eq(block.height, Mapping::get(state, CACHE_HEIGHT_KEY) as u32);
-        assert_eq(start, Mapping::get(state, CACHE_NEXT_INDEX_KEY) as u32);
+        // Check cache flow.
+        let cache: CacheState = Mapping::get(cache_state, 0u8);
+        assert_eq(block.height, cache.height);
+        assert_eq(start, cache.next_index);
 
-        let count: u32 = Mapping::get_or_use(validators_count, 0u8, 0u32);
-        assert(start + num <= count);
-        assert(num <= CACHE_BATCH_NUM);
+        // Set the next index.
+        let next_index: u32 = start + CACHE_BATCH_NUM;
+        Mapping::set(cache_state, 0u8, CacheState {height: cache.height, beacon: cache.beacon, next_index: next_index < count ? next_index : count});
 
-        Mapping::set(state, CACHE_NEXT_INDEX_KEY, (start + num) as field);
-
+        // Cache total bonded and unbonding credits.
         for i: u32 in 0u32..CACHE_BATCH_NUM {
             let index: u32 = start + i;
             if index < count {
                 let validator: address = Mapping::get(validators, index);
                 let delegator: address = Mapping::get(validator_delegators, validator);
 
-                let bond: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-                Mapping::set(state, CACHED_TOTAL_BONDED_KEY, bond.microcredits as field + Mapping::get(state, CACHED_TOTAL_BONDED_KEY));
+                let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+                assert(bonded.validator == validator);
+                Mapping::set(state, CACHED_TOTAL_BONDED_KEY, bonded.microcredits as field + Mapping::get(state, CACHED_TOTAL_BONDED_KEY));
 
                 let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
                 Mapping::set(state, CACHED_TOTAL_UNBONDING_KEY, unbonding.microcredits as field + Mapping::get(state, CACHED_TOTAL_UNBONDING_KEY));
