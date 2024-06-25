@@ -29,6 +29,9 @@ struct approval:
     approver as address;
     spender as address;
 
+struct Config:
+    treasury as address;
+
 struct CacheState:
     height as u32;
     beacon as field;
@@ -60,6 +63,11 @@ mapping account:
 mapping approvals:
 	key as field.public;
 	value as u64.public;
+
+
+mapping config:
+	key as u8.public;
+	value as Config.public;
 
 
 mapping state:
@@ -110,6 +118,11 @@ mapping delegators:
 mapping validator_delegators:
 	key as address.public;
 	value as address.public;
+
+
+mapping validator_bonded:
+	key as address.public;
+	value as u64.public;
 
 
 function transfer_public:
@@ -356,6 +369,8 @@ finalize register_delegator:
 
 
 
+
+
 function bond:
     input r0 as u32.public;
     input r1 as address.public;
@@ -393,6 +408,45 @@ finalize bond:
     sub r16 r14 into r17;
     lte r15 r17 into r18;
     assert.eq r18 true;
+    cast r3 0u64 into r19 as bond_state;
+    get.or_use credits.aleo/bonded[r4] r19 into r20;
+    is.eq r20.validator r3 into r21;
+    assert.eq r21 true;
+    get.or_use validator_bonded[r3] 0u64 into r22;
+    sub r20.microcredits r22 into r23;
+    cast r23 into r24 as field;
+    get.or_use state[5u8] 0field into r25;
+    mul r24 r25 into r26;
+    div r26 100field into r27;
+    gt r27 0field into r28;
+    branch.eq r28 false to end_then_0_2;
+    get.or_use state[3u8] 0field into r29;
+    get.or_use state[4u8] 0field into r30;
+    add r29 r12 into r31;
+    add r31 r30 into r32;
+    sub r32 r13 into r33;
+    sub r33 r14 into r34;
+    get.or_use total_supply[0u8] 0u64 into r35;
+    cast r35 into r36 as field;
+    gt r34 0field into r37;
+    ternary r37 r34 1field into r38;
+    gt r36 0field into r39;
+    ternary r39 r36 1field into r40;
+    mul r27 r40 into r41;
+    div r41 r38 into r42;
+    get config[0u8] into r43;
+    get.or_use account[r43.treasury] 0u64 into r44;
+    cast r42 into r45 as u64;
+    add r44 r45 into r46;
+    set r46 into account[r43.treasury];
+    add r36 r42 into r47;
+    cast r47 into r48 as u64;
+    set r48 into total_supply[0u8];
+    branch.eq true true to end_otherwise_0_3;
+    position end_then_0_2;
+    position end_otherwise_0_3;
+    add r20.microcredits r5 into r49;
+    set r49 into validator_bonded[r3];
 
 
 
@@ -415,7 +469,6 @@ finalize unbond:
     input r4 as address.public;
     input r5 as u64.public;
     await r0;
-    await r1;
     get.or_use state[2u8] 0field into r6;
     add r6 1field into r7;
     set r7 into state[2u8];
@@ -423,6 +476,52 @@ finalize unbond:
     assert.eq r8 r3;
     get validator_delegators[r3] into r9;
     assert.eq r9 r4;
+    cast r3 0u64 into r10 as bond_state;
+    get.or_use credits.aleo/bonded[r4] r10 into r11;
+    is.eq r11.validator r3 into r12;
+    assert.eq r12 true;
+    get.or_use validator_bonded[r3] 0u64 into r13;
+    sub r11.microcredits r13 into r14;
+    cast r14 into r15 as field;
+    get.or_use state[5u8] 0field into r16;
+    mul r15 r16 into r17;
+    div r17 100field into r18;
+    gt r18 0field into r19;
+    branch.eq r19 false to end_then_0_4;
+    cast spectre_stcredits_v1.aleo into r20 as address;
+    get.or_use credits.aleo/account[r20] 0u64 into r21;
+    cast r21 into r22 as field;
+    get.or_use state[3u8] 0field into r23;
+    get.or_use state[4u8] 0field into r24;
+    get.or_use state[0u8] 0field into r25;
+    get.or_use state[1u8] 0field into r26;
+    add r23 r22 into r27;
+    add r27 r24 into r28;
+    sub r28 r25 into r29;
+    sub r29 r26 into r30;
+    get.or_use total_supply[0u8] 0u64 into r31;
+    cast r31 into r32 as field;
+    gt r30 0field into r33;
+    ternary r33 r30 1field into r34;
+    gt r32 0field into r35;
+    ternary r35 r32 1field into r36;
+    mul r18 r36 into r37;
+    div r37 r34 into r38;
+    get config[0u8] into r39;
+    get.or_use account[r39.treasury] 0u64 into r40;
+    cast r38 into r41 as u64;
+    add r40 r41 into r42;
+    set r42 into account[r39.treasury];
+    add r32 r38 into r43;
+    cast r43 into r44 as u64;
+    set r44 into total_supply[0u8];
+    branch.eq true true to end_otherwise_0_5;
+    position end_then_0_4;
+    position end_otherwise_0_5;
+    await r1;
+    cast r3 0u64 into r45 as bond_state;
+    get.or_use credits.aleo/bonded[r4] r45 into r46;
+    set r46.microcredits into validator_bonded[r3];
 
 
 
@@ -464,10 +563,10 @@ finalize resolve_withdrawal:
     get.or_use pending_queue_start_end[0u8] r2 into r3;
     sub r3.end r3.start into r4;
     lte r4 0field into r5;
-    branch.eq r5 false to end_then_0_2;
-    branch.eq true true to end_otherwise_0_3;
-    position end_then_0_2;
-    position end_otherwise_0_3;
+    branch.eq r5 false to end_then_0_6;
+    branch.eq true true to end_otherwise_0_7;
+    position end_then_0_6;
+    position end_otherwise_0_7;
     get pending_queue[r3.start] into r6;
     get pending_withdraws[r6] into r7;
     is.eq r7.index r3.start into r8;
@@ -480,10 +579,10 @@ finalize resolve_withdrawal:
     get.or_use state[0u8] 0field into r13;
     sub r12 r13 into r14;
     lt r14 r7.amount into r15;
-    branch.eq r15 false to end_then_0_4;
-    branch.eq true true to end_otherwise_0_5;
-    position end_then_0_4;
-    position end_otherwise_0_5;
+    branch.eq r15 false to end_then_0_8;
+    branch.eq true true to end_otherwise_0_9;
+    position end_then_0_8;
+    position end_otherwise_0_9;
     add r3.start 1field into r16;
     cast r16 r3.end into r17 as QueueStartEnd;
     set r17 into pending_queue_start_end[0u8];
@@ -504,10 +603,10 @@ finalize resolve_withdrawal:
     get.or_use pending_queue_start_end[0u8] r26 into r27;
     sub r27.end r27.start into r28;
     lte r28 0field into r29;
-    branch.eq r29 false to end_then_0_6;
-    branch.eq true true to end_otherwise_0_7;
-    position end_then_0_6;
-    position end_otherwise_0_7;
+    branch.eq r29 false to end_then_0_10;
+    branch.eq true true to end_otherwise_0_11;
+    position end_then_0_10;
+    position end_otherwise_0_11;
     get pending_queue[r27.start] into r30;
     get pending_withdraws[r30] into r31;
     is.eq r31.index r27.start into r32;
@@ -520,10 +619,10 @@ finalize resolve_withdrawal:
     get.or_use state[0u8] 0field into r37;
     sub r36 r37 into r38;
     lt r38 r31.amount into r39;
-    branch.eq r39 false to end_then_0_8;
-    branch.eq true true to end_otherwise_0_9;
-    position end_then_0_8;
-    position end_otherwise_0_9;
+    branch.eq r39 false to end_then_0_12;
+    branch.eq true true to end_otherwise_0_13;
+    position end_then_0_12;
+    position end_otherwise_0_13;
     add r27.start 1field into r40;
     cast r40 r27.end into r41 as QueueStartEnd;
     set r41 into pending_queue_start_end[0u8];
@@ -540,8 +639,6 @@ finalize resolve_withdrawal:
     set r48 into state[1u8];
     add r37 r31.amount into r49;
     set r49 into state[0u8];
-
-
 
 
 
@@ -647,22 +744,22 @@ finalize withdraw:
     sub r8 r11 into r30;
     contains withdraws[r0] into r31;
     not r31 into r32;
-    branch.eq r32 false to end_then_0_10;
+    branch.eq r32 false to end_then_0_14;
     gte r30 r24 into r33;
-    branch.eq r33 false to end_then_1_12;
+    branch.eq r33 false to end_then_1_16;
     add r11 r24 into r34;
     set r34 into state[0u8];
     add block.height 360u32 into r35;
     cast r24 r35 into r36 as Withdraw;
     set r36 into withdraws[r0];
-    branch.eq true true to end_otherwise_1_13;
-    position end_then_1_12;
+    branch.eq true true to end_otherwise_1_17;
+    position end_then_1_16;
     add r11 r30 into r37;
     set r37 into state[0u8];
-    position end_otherwise_1_13;
-    branch.eq true true to end_otherwise_0_11;
-    position end_then_0_10;
-    position end_otherwise_0_11;
+    position end_otherwise_1_17;
+    branch.eq true true to end_otherwise_0_15;
+    position end_then_0_14;
+    position end_otherwise_0_15;
     not r31 into r38;
     sub r24 r30 into r39;
     ternary r38 r39 r24 into r40;
@@ -670,15 +767,15 @@ finalize withdraw:
     get.or_use pending_queue_start_end[0u8] r41 into r42;
     contains pending_withdraws[r0] into r43;
     not r43 into r44;
-    branch.eq r44 false to end_then_0_14;
+    branch.eq r44 false to end_then_0_18;
     set r0 into pending_queue[r42.end];
     add r42.end 1field into r45;
     cast r42.start r45 into r46 as QueueStartEnd;
     set r46 into pending_queue_start_end[0u8];
     cast r40 r42.end into r47 as PendingWithdraw;
     set r47 into pending_withdraws[r0];
-    branch.eq true true to end_otherwise_0_15;
-    position end_then_0_14;
+    branch.eq true true to end_otherwise_0_19;
+    position end_then_0_18;
     get pending_withdraws[r0] into r48;
     gte r48.index r42.start into r49;
     lt r48.index r42.end into r50;
@@ -686,20 +783,20 @@ finalize withdraw:
     assert.eq r51 true;
     sub r42.end 1field into r52;
     is.neq r48.index r52 into r53;
-    branch.eq r53 false to end_then_1_16;
+    branch.eq r53 false to end_then_1_20;
     get pending_queue[r52] into r54;
     get pending_withdraws[r54] into r55;
     set r54 into pending_queue[r48.index];
     set r0 into pending_queue[r52];
     cast r55.amount r48.index into r56 as PendingWithdraw;
     set r56 into pending_withdraws[r54];
-    branch.eq true true to end_otherwise_1_17;
-    position end_then_1_16;
-    position end_otherwise_1_17;
+    branch.eq true true to end_otherwise_1_21;
+    position end_then_1_20;
+    position end_otherwise_1_21;
     add r48.amount r40 into r57;
     cast r57 r52 into r58 as PendingWithdraw;
     set r58 into pending_withdraws[r0];
-    position end_otherwise_0_15;
+    position end_otherwise_0_19;
     get.or_use state[1u8] 0field into r59;
     add r59 r40 into r60;
     set r60 into state[1u8];
@@ -743,7 +840,7 @@ finalize cache_total_bonded_unbonding:
     set r2 into state[2u8];
     get.or_use validators_count[0u8] 0u32 into r3;
     is.eq r0 0u32 into r4;
-    branch.eq r4 false to end_then_0_18;
+    branch.eq r4 false to end_then_0_22;
     add r3 5u32 into r5;
     sub r5 1u32 into r6;
     div r6 5u32 into r7;
@@ -753,9 +850,9 @@ finalize cache_total_bonded_unbonding:
     set r10 into cache_state[0u8];
     set 0field into state[3u8];
     set 0field into state[4u8];
-    branch.eq true true to end_otherwise_0_19;
-    position end_then_0_18;
-    position end_otherwise_0_19;
+    branch.eq true true to end_otherwise_0_23;
+    position end_then_0_22;
+    position end_otherwise_0_23;
     get cache_state[0u8] into r11;
     assert.eq block.height r11.height;
     assert.eq r0 r11.next_index;
@@ -766,7 +863,7 @@ finalize cache_total_bonded_unbonding:
     set r15 into cache_state[0u8];
     add r0 0u32 into r16;
     lt r16 r3 into r17;
-    branch.eq r17 false to end_then_0_20;
+    branch.eq r17 false to end_then_0_24;
     get validators[r16] into r18;
     get validator_delegators[r18] into r19;
     cast r18 0u64 into r20 as bond_state;
@@ -783,12 +880,12 @@ finalize cache_total_bonded_unbonding:
     get state[4u8] into r29;
     add r28 r29 into r30;
     set r30 into state[4u8];
-    branch.eq true true to end_otherwise_0_21;
-    position end_then_0_20;
-    position end_otherwise_0_21;
+    branch.eq true true to end_otherwise_0_25;
+    position end_then_0_24;
+    position end_otherwise_0_25;
     add r0 1u32 into r31;
     lt r31 r3 into r32;
-    branch.eq r32 false to end_then_0_22;
+    branch.eq r32 false to end_then_0_26;
     get validators[r31] into r33;
     get validator_delegators[r33] into r34;
     cast r33 0u64 into r35 as bond_state;
@@ -805,12 +902,12 @@ finalize cache_total_bonded_unbonding:
     get state[4u8] into r44;
     add r43 r44 into r45;
     set r45 into state[4u8];
-    branch.eq true true to end_otherwise_0_23;
-    position end_then_0_22;
-    position end_otherwise_0_23;
+    branch.eq true true to end_otherwise_0_27;
+    position end_then_0_26;
+    position end_otherwise_0_27;
     add r0 2u32 into r46;
     lt r46 r3 into r47;
-    branch.eq r47 false to end_then_0_24;
+    branch.eq r47 false to end_then_0_28;
     get validators[r46] into r48;
     get validator_delegators[r48] into r49;
     cast r48 0u64 into r50 as bond_state;
@@ -827,12 +924,12 @@ finalize cache_total_bonded_unbonding:
     get state[4u8] into r59;
     add r58 r59 into r60;
     set r60 into state[4u8];
-    branch.eq true true to end_otherwise_0_25;
-    position end_then_0_24;
-    position end_otherwise_0_25;
+    branch.eq true true to end_otherwise_0_29;
+    position end_then_0_28;
+    position end_otherwise_0_29;
     add r0 3u32 into r61;
     lt r61 r3 into r62;
-    branch.eq r62 false to end_then_0_26;
+    branch.eq r62 false to end_then_0_30;
     get validators[r61] into r63;
     get validator_delegators[r63] into r64;
     cast r63 0u64 into r65 as bond_state;
@@ -849,12 +946,12 @@ finalize cache_total_bonded_unbonding:
     get state[4u8] into r74;
     add r73 r74 into r75;
     set r75 into state[4u8];
-    branch.eq true true to end_otherwise_0_27;
-    position end_then_0_26;
-    position end_otherwise_0_27;
+    branch.eq true true to end_otherwise_0_31;
+    position end_then_0_30;
+    position end_otherwise_0_31;
     add r0 4u32 into r76;
     lt r76 r3 into r77;
-    branch.eq r77 false to end_then_0_28;
+    branch.eq r77 false to end_then_0_32;
     get validators[r76] into r78;
     get validator_delegators[r78] into r79;
     cast r78 0u64 into r80 as bond_state;
@@ -871,7 +968,36 @@ finalize cache_total_bonded_unbonding:
     get state[4u8] into r89;
     add r88 r89 into r90;
     set r90 into state[4u8];
-    branch.eq true true to end_otherwise_0_29;
-    position end_then_0_28;
-    position end_otherwise_0_29;
+    branch.eq true true to end_otherwise_0_33;
+    position end_then_0_32;
+    position end_otherwise_0_33;
+
+
+
+
+function set_treasury:
+    input r0 as address.public;
+    async set_treasury r0 into r1;
+    output r1 as spectre_stcredits_v1.aleo/set_treasury.future;
+
+finalize set_treasury:
+    input r0 as address.public;
+    cast r0 into r1 as Config;
+    set r1 into config[0u8];
+
+
+
+
+function set_protocol_fee:
+    input r0 as field.public;
+    gt r0 0field into r1;
+    lte r0 100field into r2;
+    and r1 r2 into r3;
+    assert.eq r3 true;
+    async set_protocol_fee r0 into r4;
+    output r4 as spectre_stcredits_v1.aleo/set_protocol_fee.future;
+
+finalize set_protocol_fee:
+    input r0 as field.public;
+    set r0 into state[5u8];
 
