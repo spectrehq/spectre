@@ -656,7 +656,7 @@ function supply:
     cast spectre_stcredits_v1.aleo into r2 as address;
     call credits.aleo/transfer_public_as_signer r2 r0 into r3;
     cast r0 into r4 as field;
-    async supply r3 self.caller r4 into r5;
+    async supply r3 self.signer r4 into r5;
     output r5 as spectre_stcredits_v1.aleo/supply.future;
 
 finalize supply:
@@ -707,7 +707,7 @@ finalize supply:
 function withdraw:
     input r0 as u64.public;
     cast r0 into r1 as field;
-    async withdraw self.caller r1 into r2;
+    async withdraw self.signer r1 into r2;
     output r2 as spectre_stcredits_v1.aleo/withdraw.future;
 
 finalize withdraw:

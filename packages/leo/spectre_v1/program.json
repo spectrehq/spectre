@@ -25,6 +25,11 @@
       "path": "delegator"
     },
     {
+      "name": "spectre_stcredits_points_v1.aleo",
+      "location": "local",
+      "path": "stcredits_points"
+    },
+    {
       "name": "spectre_pool_v1.aleo",
       "location": "local",
       "path": "pool"

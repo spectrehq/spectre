@@ -536,7 +536,7 @@ program spectre_stcredits_v1.aleo {
 
         let f1: Future = credits.aleo/transfer_public_as_signer(spectre_stcredits_v1.aleo as address, credits);
 
-        return finalize_supply(f1, self.caller, credits as field);
+        return finalize_supply(f1, self.signer, credits as field);
     }
 
     async function finalize_supply(f1: Future, user: address, credits: field) {
@@ -575,7 +575,7 @@ program spectre_stcredits_v1.aleo {
      * Withdraw credits by user, to burn stcredits.
      */
     async transition withdraw(public stcredits: u64) -> Future {
-        return finalize_withdraw(self.caller, stcredits as field);
+        return finalize_withdraw(self.signer, stcredits as field);
     }
 
     async function finalize_withdraw(user: address, stcredits: field) {
