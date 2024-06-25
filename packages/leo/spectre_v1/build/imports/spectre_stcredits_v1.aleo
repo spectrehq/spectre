@@ -264,25 +264,28 @@ finalize transfer_from_public:
 
 function add_validator:
     input r0 as address.public;
-    async add_validator r0 into r1;
-    output r1 as spectre_stcredits_v1.aleo/add_validator.future;
+    call spectre_acl_manager_v1.aleo/only_staking_admin self.caller into r1;
+    async add_validator r1 r0 into r2;
+    output r2 as spectre_stcredits_v1.aleo/add_validator.future;
 
 finalize add_validator:
-    input r0 as address.public;
-    get.or_use state[2u8] 0field into r1;
-    add r1 1field into r2;
-    set r2 into state[2u8];
-    cast 0u64 true into r3 as committee_state;
-    get.or_use credits.aleo/committee[r0] r3 into r4;
-    assert.eq r4.is_open true;
-    contains validator_delegators[r0] into r5;
-    not r5 into r6;
-    assert.eq r6 true;
-    get.or_use validators_count[0u8] 0u32 into r7;
-    add r7 1u32 into r8;
-    set r8 into validators_count[0u8];
-    set r0 into validators[r7];
-    set aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc into validator_delegators[r0];
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_admin.future;
+    input r1 as address.public;
+    await r0;
+    get.or_use state[2u8] 0field into r2;
+    add r2 1field into r3;
+    set r3 into state[2u8];
+    cast 0u64 true into r4 as committee_state;
+    get.or_use credits.aleo/committee[r1] r4 into r5;
+    assert.eq r5.is_open true;
+    contains validator_delegators[r1] into r6;
+    not r6 into r7;
+    assert.eq r7 true;
+    get.or_use validators_count[0u8] 0u32 into r8;
+    add r8 1u32 into r9;
+    set r9 into validators_count[0u8];
+    set r1 into validators[r8];
+    set aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc into validator_delegators[r1];
 
 
 
@@ -290,50 +293,53 @@ finalize add_validator:
 function remove_validator:
     input r0 as u32.public;
     input r1 as address.public;
-    async remove_validator r0 r1 into r2;
-    output r2 as spectre_stcredits_v1.aleo/remove_validator.future;
+    call spectre_acl_manager_v1.aleo/only_staking_admin self.caller into r2;
+    async remove_validator r2 r0 r1 into r3;
+    output r3 as spectre_stcredits_v1.aleo/remove_validator.future;
 
 finalize remove_validator:
-    input r0 as u32.public;
-    input r1 as address.public;
-    get.or_use state[2u8] 0field into r2;
-    add r2 1field into r3;
-    set r3 into state[2u8];
-    get validators[r0] into r4;
-    assert.eq r4 r1;
-    get validator_delegators[r1] into r5;
-    contains delegators[r5] into r6;
-    is.eq r5 aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc into r7;
-    or r6 r7 into r8;
-    assert.eq r8 true;
-    cast r1 0u64 into r9 as bond_state;
-    get.or_use credits.aleo/bonded[r5] r9 into r10;
-    is.eq r10.validator r1 into r11;
-    assert.eq r11 true;
-    cast 0u64 0u32 into r12 as unbond_state;
-    get.or_use credits.aleo/unbonding[r5] r12 into r13;
-    is.eq r10.microcredits 0u64 into r14;
-    is.eq r13.microcredits 0u64 into r15;
-    and r14 r15 into r16;
-    assert.eq r16 true;
-    get validators_count[0u8] into r17;
-    gte r17 1u32 into r18;
-    assert.eq r18 true;
-    sub r17 1u32 into r19;
-    is.neq r0 r19 into r20;
-    branch.eq r20 false to end_then_0_0;
-    sub r17 1u32 into r21;
-    get validators[r21] into r22;
-    set r22 into validators[r0];
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_admin.future;
+    input r1 as u32.public;
+    input r2 as address.public;
+    await r0;
+    get.or_use state[2u8] 0field into r3;
+    add r3 1field into r4;
+    set r4 into state[2u8];
+    get validators[r1] into r5;
+    assert.eq r5 r2;
+    get validator_delegators[r2] into r6;
+    contains delegators[r6] into r7;
+    is.eq r6 aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc into r8;
+    or r7 r8 into r9;
+    assert.eq r9 true;
+    cast r2 0u64 into r10 as bond_state;
+    get.or_use credits.aleo/bonded[r6] r10 into r11;
+    is.eq r11.validator r2 into r12;
+    assert.eq r12 true;
+    cast 0u64 0u32 into r13 as unbond_state;
+    get.or_use credits.aleo/unbonding[r6] r13 into r14;
+    is.eq r11.microcredits 0u64 into r15;
+    is.eq r14.microcredits 0u64 into r16;
+    and r15 r16 into r17;
+    assert.eq r17 true;
+    get validators_count[0u8] into r18;
+    gte r18 1u32 into r19;
+    assert.eq r19 true;
+    sub r18 1u32 into r20;
+    is.neq r1 r20 into r21;
+    branch.eq r21 false to end_then_0_0;
+    sub r18 1u32 into r22;
+    get validators[r22] into r23;
+    set r23 into validators[r1];
     branch.eq true true to end_otherwise_0_1;
     position end_then_0_0;
     position end_otherwise_0_1;
-    sub r17 1u32 into r23;
-    set r23 into validators_count[0u8];
-    sub r17 1u32 into r24;
-    remove validators[r24];
-    remove validator_delegators[r1];
-    remove delegators[r5];
+    sub r18 1u32 into r24;
+    set r24 into validators_count[0u8];
+    sub r18 1u32 into r25;
+    remove validators[r25];
+    remove validator_delegators[r2];
+    remove delegators[r6];
 
 
 
@@ -343,12 +349,12 @@ function register_delegator:
     input r1 as address.public;
     input r2 as address.public;
     assert.eq r2 self.caller;
-    call spectre_acl_manager_v1.aleo/only_pool_admin self.signer into r3;
+    call spectre_acl_manager_v1.aleo/only_staking_admin self.signer into r3;
     async register_delegator r3 r0 r1 r2 into r4;
     output r4 as spectre_stcredits_v1.aleo/register_delegator.future;
 
 finalize register_delegator:
-    input r0 as spectre_acl_manager_v1.aleo/only_pool_admin.future;
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_admin.future;
     input r1 as u32.public;
     input r2 as address.public;
     input r3 as address.public;
@@ -377,13 +383,13 @@ function bond:
     input r2 as address.public;
     input r3 as u64.public;
     assert.eq r2 self.caller;
-    call spectre_acl_manager_v1.aleo/only_pool_admin self.signer into r4;
+    call spectre_acl_manager_v1.aleo/only_staking_operator self.signer into r4;
     call credits.aleo/transfer_public r2 r3 into r5;
     async bond r4 r5 r0 r1 self.caller r3 into r6;
     output r6 as spectre_stcredits_v1.aleo/bond.future;
 
 finalize bond:
-    input r0 as spectre_acl_manager_v1.aleo/only_pool_admin.future;
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_operator.future;
     input r1 as credits.aleo/transfer_public.future;
     input r2 as u32.public;
     input r3 as address.public;
@@ -456,13 +462,13 @@ function unbond:
     input r1 as address.public;
     input r2 as address.private;
     input r3 as u64.public;
-    call spectre_acl_manager_v1.aleo/only_pool_admin self.caller into r4;
+    call spectre_acl_manager_v1.aleo/only_staking_operator self.caller into r4;
     call credits.aleo/unbond_public r3 into r5;
     async unbond r4 r5 r0 r1 r2 r3 into r6;
     output r6 as spectre_stcredits_v1.aleo/unbond.future;
 
 finalize unbond:
-    input r0 as spectre_acl_manager_v1.aleo/only_pool_admin.future;
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_operator.future;
     input r1 as credits.aleo/unbond_public.future;
     input r2 as u32.public;
     input r3 as address.public;
@@ -977,13 +983,16 @@ finalize cache_total_bonded_unbonding:
 
 function set_treasury:
     input r0 as address.public;
-    async set_treasury r0 into r1;
-    output r1 as spectre_stcredits_v1.aleo/set_treasury.future;
+    call spectre_acl_manager_v1.aleo/only_staking_admin self.caller into r1;
+    async set_treasury r1 r0 into r2;
+    output r2 as spectre_stcredits_v1.aleo/set_treasury.future;
 
 finalize set_treasury:
-    input r0 as address.public;
-    cast r0 into r1 as Config;
-    set r1 into config[0u8];
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_admin.future;
+    input r1 as address.public;
+    await r0;
+    cast r1 into r2 as Config;
+    set r2 into config[0u8];
 
 
 
@@ -994,10 +1003,13 @@ function set_protocol_fee:
     lte r0 100field into r2;
     and r1 r2 into r3;
     assert.eq r3 true;
-    async set_protocol_fee r0 into r4;
-    output r4 as spectre_stcredits_v1.aleo/set_protocol_fee.future;
+    call spectre_acl_manager_v1.aleo/only_staking_admin self.caller into r4;
+    async set_protocol_fee r4 r0 into r5;
+    output r5 as spectre_stcredits_v1.aleo/set_protocol_fee.future;
 
 finalize set_protocol_fee:
-    input r0 as field.public;
-    set r0 into state[5u8];
+    input r0 as spectre_acl_manager_v1.aleo/only_staking_admin.future;
+    input r1 as field.public;
+    await r0;
+    set r1 into state[5u8];
 

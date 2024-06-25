@@ -4,7 +4,7 @@ import spectre_stcredits_v1.aleo;
 
 program spectre_delegator_v1.aleo {
     async transition register(public validator_index: u32, public validator: address) -> Future {
-        let f1: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.caller);
+        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 
         let f2: Future = spectre_stcredits_v1.aleo/register_delegator(validator_index, validator, spectre_delegator_v1.aleo as address);
 
@@ -17,7 +17,7 @@ program spectre_delegator_v1.aleo {
     }
 
     async transition bond(public validator_index: u32, public validator: address, public amount: u64) -> Future {
-        let f1: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.caller);
+        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
         let f2: Future = spectre_stcredits_v1.aleo/bond(validator_index, validator, spectre_delegator_v1.aleo as address, amount);
 

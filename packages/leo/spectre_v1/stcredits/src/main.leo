@@ -234,10 +234,14 @@ program spectre_stcredits_v1.aleo {
     mapping validator_bonded: address => u64; // validator => bonded credits
 
     async transition add_validator(public validator: address) -> Future {
-        return finalize_add_validator(validator);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+
+        return finalize_add_validator(f, validator);
     }
 
-    async function finalize_add_validator(validator: address) {
+    async function finalize_add_validator(f: Future, validator: address) {
+        f.await();
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -261,10 +265,14 @@ program spectre_stcredits_v1.aleo {
     }
 
     async transition remove_validator(public validator_index: u32, public validator: address) -> Future {
-        return finalize_remove_validator(validator_index, validator);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+
+        return finalize_remove_validator(f, validator_index, validator);
     }
 
-    async function finalize_remove_validator(validator_index: u32, validator: address) {
+    async function finalize_remove_validator(f: Future, validator_index: u32, validator: address) {
+        f.await();
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -306,7 +314,7 @@ program spectre_stcredits_v1.aleo {
         assert_eq(delegator, self.caller);
 
         // Check `self.signer` to ensure the delegator is called by the signer.
-        let f: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.signer);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.signer);
 
         return finalize_register_delegator(f, validator_index, validator, delegator);
     }
@@ -336,7 +344,7 @@ program spectre_stcredits_v1.aleo {
         assert_eq(delegator, self.caller);
 
         // Check `self.signer` to ensure the delegator is called by the signer.
-        let f1: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.signer);
+        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
 
         // Transfer `amount` credits to the `delegator` program.
         let f2: Future = credits.aleo/transfer_public(delegator, amount);
@@ -397,7 +405,7 @@ program spectre_stcredits_v1.aleo {
      */
     async transition unbond(public validator_index: u32, public validator: address, delegator: address, public amount: u64) -> Future {
         // Check the caller is the mediator.
-        let f1: Future = spectre_acl_manager_v1.aleo/only_pool_admin(self.caller);
+        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
         // TODO: add delegator
         // let f2: Future = credits.aleo/unbond_public(delegator, amount);
@@ -723,19 +731,23 @@ program spectre_stcredits_v1.aleo {
     }
 
     async transition set_treasury(public treasury: address) -> Future {
-        return finalize_set_treasury(treasury);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+        return finalize_set_treasury(f, treasury);
     }
 
-    async function finalize_set_treasury(treasury: address) {
+    async function finalize_set_treasury(f: Future, treasury: address) {
+        f.await();
         Mapping::set(config, 0u8, Config { treasury });
     }
 
     async transition set_protocol_fee(public fee: field) -> Future {
         assert(fee > 0field && fee <= 100field);
-        return finalize_set_protocol_fee(fee);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+        return finalize_set_protocol_fee(f, fee);
     }
 
-    async function finalize_set_protocol_fee(fee: field) {
+    async function finalize_set_protocol_fee(f: Future, fee: field) {
+        f.await();
         Mapping::set(state, PROTOCOL_FEE_KEY, fee);
     }
 
