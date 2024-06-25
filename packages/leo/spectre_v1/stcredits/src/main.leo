@@ -179,6 +179,7 @@ program spectre_stcredits_v1.aleo {
 
     struct Config {
         treasury: address,
+        paused: bool,
     }
 
     mapping config: u8 => Config; // 0u8 => config
@@ -356,6 +357,9 @@ program spectre_stcredits_v1.aleo {
         f1.await();
         f2.await();
 
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -417,6 +421,9 @@ program spectre_stcredits_v1.aleo {
     async function finalize_unbond(f1: Future, f2: Future, validator_index: u32, validator: address, delegator: address, amount: u64) {
         f1.await();
 
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -475,6 +482,9 @@ program spectre_stcredits_v1.aleo {
     async function finalize_claim_unbond(f: Future, validator_index: u32, validator: address, delegator: address) {
         f.await();
 
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -491,6 +501,9 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_resolve_withdrawal() {
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -542,6 +555,9 @@ program spectre_stcredits_v1.aleo {
     async function finalize_supply(f1: Future, user: address, credits: field) {
         f1.await();
 
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         let transition_counter: field = Mapping::get(state, TRANSITION_COUNTER_KEY) + 1field;
         Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
@@ -579,6 +595,9 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_withdraw(user: address, stcredits: field) {
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         let transition_counter: field = Mapping::get(state, TRANSITION_COUNTER_KEY) + 1field;
         Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
@@ -664,6 +683,9 @@ program spectre_stcredits_v1.aleo {
     async function finalize_claim(f: Future, user: address, amount: field) {
         f.await();
 
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         Mapping::set(state, TRANSITION_COUNTER_KEY, Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field);
 
@@ -686,6 +708,9 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_cache_total_bonded_unbonding(start: u32) {
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
         // Increment the transition counter.
         let transition_counter: field = Mapping::get_or_use(state, TRANSITION_COUNTER_KEY, 0field) + 1field;
         Mapping::set(state, TRANSITION_COUNTER_KEY, transition_counter);
@@ -737,7 +762,9 @@ program spectre_stcredits_v1.aleo {
 
     async function finalize_set_treasury(f: Future, treasury: address) {
         f.await();
-        Mapping::set(config, 0u8, Config { treasury });
+
+        let c: Config = Mapping::get_or_use(config, 0u8, Config {treasury, paused: false});
+        Mapping::set(config, 0u8, Config { treasury, paused: c.paused });
     }
 
     async transition set_protocol_fee(public fee: field) -> Future {
@@ -749,6 +776,32 @@ program spectre_stcredits_v1.aleo {
     async function finalize_set_protocol_fee(f: Future, fee: field) {
         f.await();
         Mapping::set(state, PROTOCOL_FEE_KEY, fee);
+    }
+
+    async transition pause() -> Future {
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+
+        return finalize_pause(f);
+    }
+
+    async function finalize_pause(f: Future) {
+        f.await();
+
+        let c: Config = Mapping::get_or_use(config, 0u8, Config {treasury: aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc, paused: false});
+        Mapping::set(config, 0u8, Config { treasury: c.treasury, paused: true });
+    }
+
+    async transition unpause() -> Future {
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+
+        return finalize_unpause(f);
+    }
+
+    async function finalize_unpause(f: Future) {
+        f.await();
+
+        let c: Config = Mapping::get_or_use(config, 0u8, Config {treasury: aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc, paused: false});
+        Mapping::set(config, 0u8, Config { treasury: c.treasury, paused: false });
     }
 
     inline getStCreditsFromCredits(credits: field, total_pooled_credits: field, total_stcredits_supply: field) -> field {

@@ -8,6 +8,11 @@
       "name": "spectre_stcredits_v1.aleo",
       "location": "local",
       "path": "../stcredits"
+    },
+    {
+      "name": "spectre_acl_manager_v1.aleo",
+      "location": "local",
+      "path": "../acl_manager"
     }
   ]
 }
