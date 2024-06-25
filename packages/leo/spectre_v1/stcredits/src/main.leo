@@ -28,8 +28,8 @@ program spectre_stcredits_v1.aleo {
 
     transition get_metadata() -> metadata {
         return metadata {
-            name: 110909517301300533074857324275280078190u128, // "SpectreTestToken" -> 0x5370656374726554657374546f6b656e -> 110909517301300533074857324275280078190
-            symbol: 357896115028u64, // "STEST" -> 0x5354455354 -> 357896115028
+            name: 8319383754638649716u128, // "stcredit" -> 0x7374637265646974 -> 8319383754638649716
+            symbol: 8319383754638649716u64, // "stcredit" -> 0x7374637265646974 -> 8319383754638649716
             decimals: 6u8,
         };
     }

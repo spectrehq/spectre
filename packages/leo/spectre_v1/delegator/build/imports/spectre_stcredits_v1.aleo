@@ -194,7 +194,7 @@ finalize transfer_public_to_private:
 
 
 function get_metadata:
-    cast 110909517301300533074857324275280078190u128 357896115028u64 6u8 into r0 as metadata;
+    cast 8319383754638649716u128 8319383754638649716u64 6u8 into r0 as metadata;
     output r0 as metadata.private;
 
 
