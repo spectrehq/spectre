@@ -281,8 +281,7 @@ program spectre_stcredits_v1.aleo {
         let validator_state: committee_state = Mapping::get_or_use(
             credits.aleo/committee, validator,
             // If the validator is not in the committee, the default state is open with zero commission.
-            // TODO: change `microcredits` to `commission`
-            committee_state {is_open: true, microcredits: 0u64},
+            committee_state {is_open: true, commission: 0u8},
         );
         assert(validator_state.is_open);
 
@@ -444,9 +443,7 @@ program spectre_stcredits_v1.aleo {
         // Check the caller is the mediator.
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
-        // TODO: add delegator
-        // let f2: Future = credits.aleo/unbond_public(delegator, amount);
-        let f2: Future = credits.aleo/unbond_public(amount);
+        let f2: Future = credits.aleo/unbond_public(delegator, amount);
 
         return finalize_unbond(f1, f2, validator_index, validator, delegator, amount);
     }
@@ -507,9 +504,7 @@ program spectre_stcredits_v1.aleo {
      * It will fail if the unbonding does not exist or the unbonding height is not reached.
      */
     async transition claim_unbond(public validator_index: u32, public validator: address, delegator: address) -> Future {
-        // TODO: add delegator
-        // let f: Future = credits.aleo/claim_unbond_public(delegator);
-        let f: Future = credits.aleo/claim_unbond_public();
+        let f: Future = credits.aleo/claim_unbond_public(delegator);
 
         return finalize_claim_unbond(f, validator_index, validator, delegator);
     }

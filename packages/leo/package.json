@@ -1,0 +1,15 @@
+{
+  "name": "leo",
+  "version": "0.0.1",
+  "private": "true",
+  "type": "module",
+  "scripts": {
+    "build": "tsx ./script/build.ts",
+    "deploy": "tsx ./script/deploy.ts"
+  },
+  "devDependencies": {
+    "@types/node": "^20.11.5",
+    "rimraf": "^5.0.7",
+    "tsx": "^4.15.7"
+  }
+}

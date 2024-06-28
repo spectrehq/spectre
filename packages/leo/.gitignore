@@ -1,6 +1,7 @@
-outputs/
 *.avm
 *.prover
 *.verifier
 
 leo.lock
+outputs/
+build/
