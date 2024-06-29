@@ -1,0 +1,3 @@
+cd packages/ts
+npx lint-staged
+cd -

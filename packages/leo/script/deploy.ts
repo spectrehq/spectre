@@ -25,9 +25,9 @@ async function deployProgram(program: string, cloneNo?: string) {
   } catch {}
 
   console.log(`Deploy program ${programJson.program}`)
-  console.log(`leo deploy --recursive ${programPath}`)
+  console.log(`leo deploy ${programPath}`)
 
-  const { stdout, stderr } = await exec("leo deploy --recursive", {
+  const { stdout, stderr } = await exec("leo deploy", {
     cwd: programPath,
   })
   if (stdout) {
