@@ -17,8 +17,8 @@ const getPackageNameCamelCase = () => {
 
 const fileName = {
   es: `${getPackageName()}.mjs`,
-  cjs: `${getPackageName()}.cjs`,
-  iife: `${getPackageName()}.iife.js`,
+  // cjs: `${getPackageName()}.cjs`,
+  // iife: `${getPackageName()}.iife.js`,
 };
 
 const formats = Object.keys(fileName) as Array<keyof typeof fileName>;
@@ -26,6 +26,7 @@ const formats = Object.keys(fileName) as Array<keyof typeof fileName>;
 module.exports = defineConfig({
   base: "./",
   build: {
+    target: 'esnext',
     outDir: "./build/dist",
     lib: {
       entry: path.resolve(__dirname, "src/index.ts"),
@@ -40,5 +41,8 @@ module.exports = defineConfig({
       { find: "@", replacement: path.resolve(__dirname, "src") },
       { find: "@@", replacement: path.resolve(__dirname) },
     ],
+  },
+  worker: {
+    format: 'es',
   },
 });
