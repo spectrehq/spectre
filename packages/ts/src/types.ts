@@ -109,139 +109,24 @@ export function fieldStr(i: bigint | number): string {
   return `${i}field`
 }
 
-export interface Approval {
-  approver: string
-  spender: string
-}
+export class ProgramBase {
+  constructor(private getMappingValueString: (mapping: string, key: string) => Promise<string>) {}
 
-export interface Config {
-  initialized: boolean
-  treasury: string
-  paused: boolean
-}
+  protected async getMappingValueOrNull(mapping: string, key: string): Promise<string | null> {
+    const value = await this.getMappingValueString(mapping, key)
+    return value === 'null' ? null : value
+  }
 
-export enum CacheStateEnum {
-  INVALID = 0,
-  IN_PROGRESS = 1,
-  VALID = 2,
-}
-
-export interface CacheState {
-  state: CacheStateEnum
-  height: bigint
-  total_bonded: bigint
-  total_unbonding: bigint
-  next_index: bigint
-}
-
-export interface Withdraw {
-  amount: bigint
-  height: bigint
-}
-
-export interface PendingWithdraw {
-  amount: bigint
-  index: bigint
-}
-
-export interface QueueStartEnd {
-  start: bigint
-  end: bigint
-}
-
-export function parsePlaintext(plaintext: string): unknown {
-  // TODO: call wasm api to parse the plaintext
-  return plaintext
-}
-
-export function bhp256HashToField(plaintext: string): string {
-  // TODO: call wasm api to hash the plaintext
-  return plaintext
-}
-
-export class StCredtisProgram {
-  constructor(private getMappingValueOrNull: (mapping: string, key: string) => Promise<string>) {}
-
-  private async getMappingValue(mapping: string, key: string): Promise<string> {
+  protected async getMappingValue(mapping: string, key: string): Promise<string> {
     const value = await this.getMappingValueOrNull(mapping, key)
-    if (value === 'null') {
-      throw new Error('mapping value not found')
+    if (value === null) {
+      throw new Error(`Mapping value not found for key: ${key}`)
     }
     return value
   }
 
-  async getTotalSupply() {
-    return u64(await this.getMappingValue('total_supply', u8Str(0)))
-  }
-
-  async getAccount(account: string) {
-    return u64(await this.getMappingValue('account', account))
-  }
-
-  async getBalance(account: string) {
-    return this.getAccount(account)
-  }
-
-  async getApproval(approver: string, spender: string) {
-    const hash = bhp256HashToField(`{
-      approver: ${approver},
-      spender: ${spender}
-    }`)
-    return u64(await this.getMappingValue('approvals', hash))
-  }
-
-  async getConfig() {
-    return parsePlaintext(await this.getMappingValue('config', u8Str(0))) as Config
-  }
-
-  static readonly TOTAL_WITHDRAW_KEY = 0
-  static readonly TOTAL_PENDING_WITHDRAW_KEY = 1
-  static readonly TOTAL_BONDED_KEY = 2
-  static readonly TOTAL_UNBONDING_KEY = 3
-  static readonly PROTOCOL_FEE_KEY = 4
-
-  async getState(key: number) {
-    return field(await this.getMappingValue('state', u8Str(key)))
-  }
-
-  async getCacheState() {
-    return parsePlaintext(await this.getMappingValue('cache_state', u8Str(0))) as CacheState
-  }
-
-  async getWithdraw(account: string) {
-    return parsePlaintext(await this.getMappingValue('withdraws', account)) as Withdraw
-  }
-
-  async getPendingWithdraw(account: string) {
-    return parsePlaintext(await this.getMappingValue('pending_withdraws', account)) as PendingWithdraw
-  }
-
-  async getPendingQueueUser(index: number) {
-    return await this.getMappingValue('pending_queue', fieldStr(index))
-  }
-
-  async getPendingQueueStartEnd() {
-    return parsePlaintext(await this.getMappingValue('pending_queue_start_end', u8Str(0))) as QueueStartEnd
-  }
-
-  async getValidatorsCount() {
-    return u32(await this.getMappingValue('validators_count', u8Str(0)))
-  }
-
-  async getValidator(index: number) {
-    return await this.getMappingValue('validators', u32Str(index))
-  }
-
-  async hasDelegator(delegator: string) {
-    // TODO
-    return bool(await this.getMappingValue('delegators', delegator))
-  }
-
-  async getValidatorDelegator(validator: string) {
-    return await this.getMappingValue('validator_delegators', validator)
-  }
-
-  async getValidatorBonded(validator: string) {
-    return u64(await this.getMappingValue('validator_bonded', validator))
+  protected async getMappingValueOrDefault(mapping: string, key: string, defaultValue: string): Promise<string> {
+    const value = await this.getMappingValueOrNull(mapping, key)
+    return value === null ? defaultValue : value
   }
 }

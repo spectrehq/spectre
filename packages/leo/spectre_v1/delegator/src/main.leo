@@ -3,6 +3,10 @@ import spectre_acl_manager_v1.aleo;
 import spectre_stcredits_v1.aleo;
 
 program spectre_delegator_v1.aleo {
+    transition get_address() -> address {
+        return spectre_delegator_v1.aleo as address;
+    }
+
     async transition register(public validator_index: u32, public validator: address) -> Future {
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 

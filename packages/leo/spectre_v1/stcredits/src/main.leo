@@ -313,7 +313,7 @@ program spectre_stcredits_v1.aleo {
 
         let delegator: address = Mapping::get(validator_delegators, validator);
         assert(Mapping::contains(delegators, delegator) || delegator == aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-        // Ensure we have neither bonding nor unboning in the validator.
+        // Ensure we have neither bonding nor unbonding in the validator.
         {
             let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
             assert(bonded.validator == validator);
@@ -435,7 +435,7 @@ program spectre_stcredits_v1.aleo {
     }
 
     /**
-     * This function will be called by the mediator to unbond credits from the validator.
+     * This function will be called by the operator to unbond credits from the validator.
      * It will serve either for the users to withdraw credits or for rebalancing bonding between the validators.
      * The `amount` should be calculated offline.
      */

@@ -8,13 +8,13 @@ program spectre_access_control_v1.aleo {
 
     mapping role_admins: u8 => u8; // role => admin role
 
-    mapping initialized: u8 => u8;
+    mapping initialized: u8 => bool;
 
     const DEFAULT_ADMIN_ROLE: u8 = 0u8;
 
     // The initial admin.
     // Note: it should be set to the address of the deployer before deployment.
-    const INITIAL_ADMIN: address = aleo16zc3p6ned070l0hywf3r0k7jksxgytgejttk0p8auxvvj322yszs6vuxqr;
+    const INITIAL_ADMIN: address = aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
 
     async transition initialize() -> Future {
         assert_eq(self.caller, INITIAL_ADMIN);
@@ -25,7 +25,7 @@ program spectre_access_control_v1.aleo {
     async function finalize_initialize(caller: address) {
         // Initialize only once.
         assert(!Mapping::contains(initialized, 0u8));
-        Mapping::set(initialized, 0u8, 0u8);
+        Mapping::set(initialized, 0u8, true);
 
         // Grant the default admin role to the caller.
         Mapping::set(grants, hash(DEFAULT_ADMIN_ROLE, caller), true);

@@ -13,6 +13,6 @@
     "forceConsistentCasingInFileNames": true,
     "types": ["node"],
   },
-  "include": ["script"],
+  "include": ["script", "environment.d.ts"],
   "exclude": ["node_modules"],
 }

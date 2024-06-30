@@ -1,6 +1,6 @@
 import * as path from "path"
 import * as fs from "fs/promises"
-import config from "./config.json"
+import config from "../config.json"
 import { ROOT_DIR, BUILD_DIR, exec, ProgramJson } from "./util"
 
 async function deployProgram(program: string, cloneNo?: string) {

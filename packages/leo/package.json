@@ -5,11 +5,16 @@
   "type": "module",
   "scripts": {
     "build": "tsx ./script/build.ts",
-    "deploy": "tsx ./script/deploy.ts"
+    "deploy": "tsx ./script/deploy.ts",
+    "operate": "tsx ./script/operate.ts"
   },
   "devDependencies": {
+    "@aleohq/sdk": "^0.6.9",
     "@types/node": "^20.11.5",
+    "commander": "^12.1.0",
+    "dotenv": "^16.4.5",
     "rimraf": "^5.0.7",
+    "spectre": "workspace:*",
     "tsx": "^4.15.7"
   }
 }

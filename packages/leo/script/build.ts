@@ -1,8 +1,10 @@
 import * as fs from "fs/promises"
 import * as path from "path"
 import * as os from "os"
-import config from "./config.json"
+import "dotenv/config"
+import { Account, initializeWasm, initThreadPool } from "@aleohq/sdk"
 import { SPECTRE_DIR, BUILD_DIR, addSuffix, exec, ProgramJson } from "./util"
+import config from "../config.json"
 
 async function copyProgram(program: string, cloneNo?: string) {
   const src = path.join(SPECTRE_DIR, program)
@@ -41,6 +43,13 @@ async function copyProgram(program: string, cloneNo?: string) {
   let srcMain = await fs.readFile(srcMainPath, "utf-8")
   srcMain = srcMain.replaceAll(originalProgram, programJson.program)
   srcMain = srcMain.replaceAll("_v1.aleo", `_v1_${config.programSuffix}.aleo`)
+  if (program === "access_control") {
+    const { stdout } = await exec(`leo account import ${process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY}`)
+    const parts = stdout.trim().split("Address")
+    const adminAddress = parts[parts.length - 1].trim()
+
+    srcMain = srcMain.replaceAll("aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc", adminAddress)
+  }
 
   await fs.writeFile(srcMainPath, srcMain, "utf-8")
 }

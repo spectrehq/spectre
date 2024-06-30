@@ -2,7 +2,7 @@ import * as path from "path"
 import { fileURLToPath } from "url"
 import * as child_process from "child_process"
 import * as util from "util"
-import config from "./config.json"
+import config from "../config.json"
 
 export const exec = util.promisify(child_process.exec)
 
