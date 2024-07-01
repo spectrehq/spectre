@@ -61,9 +61,9 @@ async function compileProgram(program: string, cloneNo?: string) {
   const programJsonPath = path.join(programPath, "program.json")
   const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
   console.log(`Compile program ${programJson.program}`)
-  console.log(`leo build ${programPath}`)
+  console.log(`leo build --non-recursive ${programPath}`)
 
-  const { stdout, stderr } = await exec("leo build", {
+  const { stdout, stderr } = await exec("leo build --non-recursive", {
     cwd: programPath,
   })
   if (stdout) {
@@ -92,4 +92,4 @@ async function main() {
   }
 }
 
-main().then()
+await main()

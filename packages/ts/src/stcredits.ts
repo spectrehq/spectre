@@ -55,12 +55,8 @@ export class StCreditsProgram extends ProgramBase {
     return u64(await this.getMappingValueOrDefault('total_supply', u8Str(0), '0'))
   }
 
-  async getAccount(account: string) {
-    return u64(await this.getMappingValueOrDefault('account', account, '0'))
-  }
-
   async getBalance(account: string) {
-    return this.getAccount(account)
+    return u64(await this.getMappingValueOrDefault('account', account, '0'))
   }
 
   async getApproval(approver: string, spender: string) {

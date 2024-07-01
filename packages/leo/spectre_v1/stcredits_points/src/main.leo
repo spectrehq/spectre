@@ -4,14 +4,14 @@ import spectre_acl_manager_v1.aleo;
 program spectre_stcredits_points_v1.aleo {
     mapping total_supply: u8 => u128; // 0u8 => total_supply
 
-    mapping account: address => u128;
+    mapping account: address => u128; // user => points
 
     struct State {
-        stcredits: u64,
-        height: u32,
+        stcredits: u64, // the total locked stcredits
+        height: u32, // the block height at which the last settlement was made
     }
 
-    mapping states: address => State;
+    mapping states: address => State; // user => state
 
     mapping paused: u8 => bool; // 0u8 => paused
 

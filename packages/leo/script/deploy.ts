@@ -51,4 +51,4 @@ async function main() {
   }
 }
 
-main().then()
+await main()
