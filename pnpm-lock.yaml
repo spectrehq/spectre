@@ -4,6 +4,11 @@ settings:
   autoInstallPeers: true
   excludeLinksFromLockfile: false
 
+patchedDependencies:
+  '@aleohq/sdk@0.6.9':
+    hash: tvboikv3khdddo77j6cj7uvo3u
+    path: patches/@aleohq__sdk@0.6.9.patch
+
 importers:
 
   .:
@@ -43,7 +48,7 @@ importers:
     devDependencies:
       '@aleohq/sdk':
         specifier: ^0.6.9
-        version: 0.6.9
+        version: 0.6.9(patch_hash=tvboikv3khdddo77j6cj7uvo3u)
       '@types/node':
         specifier: ^20.11.5
         version: 20.14.9
@@ -67,7 +72,7 @@ importers:
     dependencies:
       '@aleohq/sdk':
         specifier: ^0.6.9
-        version: 0.6.9
+        version: 0.6.9(patch_hash=tvboikv3khdddo77j6cj7uvo3u)
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -2448,7 +2453,7 @@ packages:
 
 snapshots:
 
-  '@aleohq/sdk@0.6.9':
+  '@aleohq/sdk@0.6.9(patch_hash=tvboikv3khdddo77j6cj7uvo3u)':
     dependencies:
       '@aleohq/wasm': 0.6.9
       comlink: 4.4.1

@@ -32,5 +32,10 @@
     "prettier": "3.2.5",
     "rimraf": "^3.0.2",
     "typescript": "5.4.2"
+  },
+  "pnpm": {
+    "patchedDependencies": {
+      "@aleohq/sdk@0.6.9": "patches/@aleohq__sdk@0.6.9.patch"
+    }
   }
 }
