@@ -12,8 +12,12 @@ export function Header() {
           <Button className="lg:hidden" variant="ghost" size="icon">
             <MenuIcon />
           </Button>
-          <Link href="/" className="font-bold text-xl">
-            Spectre
+          <Link href="/" className="font-bold text-2xl">
+            <span>A</span>
+            <span>leo</span>
+            <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+              Staking
+            </span>
           </Link>
         </div>
         <div className="flex-1">
