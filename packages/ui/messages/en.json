@@ -1,0 +1,14 @@
+{
+  "MainNav": {
+    "home": "Home",
+    "stake": "Stake",
+    "withdrawals": "Withdrawals",
+    "documentation": "Documentation"
+  },
+
+  "ModeToggle": {
+    "light": "Light",
+    "dark": "Dark",
+    "system": "System"
+  }
+}

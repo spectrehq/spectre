@@ -1,5 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
+import { NextIntlClientProvider } from 'next-intl'
+import { getLocale, getMessages } from 'next-intl/server'
 import { Header } from '~/components/header/header'
 import { ThemeProvider } from '~/components/theme-provider'
 import { cn } from '~/lib/utils'
@@ -16,13 +18,19 @@ export const metadata: Metadata = {
     'Spectre liquidity protocol on Aleo: Stake credits, earn rewards, and borrow assets.',
 }
 
-export default function RootLayout({
+export default async function RootLayout({
   children,
 }: {
   children: React.ReactNode
 }) {
+  const locale = await getLocale()
+
+  // Providing all messages to the client
+  // side is the easiest way to get started
+  const messages = await getMessages()
+
   return (
-    <html lang="en" suppressHydrationWarning>
+    <html lang={locale} suppressHydrationWarning>
       <body
         className={cn(
           'min-h-screen bg-background font-sans antialiased',
@@ -30,8 +38,10 @@ export default function RootLayout({
         )}
       >
         <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
-          <Header />
-          {children}
+          <NextIntlClientProvider messages={messages}>
+            <Header />
+            {children}
+          </NextIntlClientProvider>
         </ThemeProvider>
       </body>
     </html>
