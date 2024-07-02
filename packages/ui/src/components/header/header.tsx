@@ -1,6 +1,7 @@
 import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
 import { Button } from '~/components/ui/button'
+import { ModeToggle } from '~/components/mode-toggle'
 import { MainNav } from './main-nav'
 
 export function Header() {
@@ -17,6 +18,9 @@ export function Header() {
         </div>
         <div className="flex-1">
           <MainNav />
+        </div>
+        <div className="flex flex-none items-center gap-4">
+          <ModeToggle />
         </div>
       </div>
     </header>

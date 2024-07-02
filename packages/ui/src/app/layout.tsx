@@ -1,6 +1,7 @@
 import type { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 import { Header } from '~/components/header/header'
+import { ThemeProvider } from '~/components/theme-provider'
 import { cn } from '~/lib/utils'
 import './globals.css'
 
@@ -28,8 +29,10 @@ export default function RootLayout({
           fontSans.variable
         )}
       >
-        <Header />
-        {children}
+        <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
+          <Header />
+          {children}
+        </ThemeProvider>
       </body>
     </html>
   )
