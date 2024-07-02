@@ -2,8 +2,9 @@ import type { Metadata } from 'next'
 import { Inter as FontSans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
-import { Header } from '~/components/header/header'
 import { ThemeProvider } from '~/components/theme-provider'
+import { Footer } from '~/components/footer'
+import { Header } from '~/components/header'
 import { cn } from '~/lib/utils'
 import './globals.css'
 
@@ -41,6 +42,7 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <Header />
             {children}
+            <Footer />
           </NextIntlClientProvider>
         </ThemeProvider>
       </body>
