@@ -1,9 +1,20 @@
-export function parsePlaintext(plaintext: string): unknown {
-  // TODO: call wasm api to parse the plaintext
-  return plaintext
+let aleo: any
+
+export async function importAleo() {
+  if (!aleo) {
+    if (!globalThis.Worker) {
+      (globalThis as any).Worker = class Worker extends EventTarget {
+        postMessage() {}
+        unref() {}
+      }
+    }
+
+    aleo = await import('@aleohq/sdk')
+  }
+  return aleo
 }
 
-export function bhp256HashToField(plaintext: string): string {
-  // TODO: call wasm api to hash the plaintext
-  return plaintext
+export async function bhp256HashToField(plaintext: string): Promise<string> {
+  const aleo = await importAleo()
+  return aleo.Plaintext.fromString(plaintext).hashBhp256().toString()
 }

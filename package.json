@@ -35,7 +35,8 @@
   },
   "pnpm": {
     "patchedDependencies": {
-      "@aleohq/sdk@0.6.9": "patches/@aleohq__sdk@0.6.9.patch"
+      "@aleohq/sdk@0.6.9": "patches/@aleohq__sdk@0.6.9.patch",
+      "@aleohq/wasm@0.6.9": "patches/@aleohq__wasm@0.6.9.patch"
     }
   }
 }

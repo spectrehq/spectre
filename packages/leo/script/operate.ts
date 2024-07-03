@@ -2,7 +2,6 @@ import * as path from "path"
 import * as fs from "fs/promises"
 import { Argument, Command } from "commander"
 import "dotenv/config"
-import { Account } from "@aleohq/sdk"
 import {
   AccessControlProgram,
   ASSET_LISTING_ADMIN_ROLE,
@@ -14,6 +13,7 @@ import {
   StCreditsProgram,
   u32Str,
   u8Str,
+  importAleo
 } from "spectre"
 import { BUILD_DIR, exec, ProgramJson } from "./util"
 import config from "../config.json"
@@ -75,6 +75,7 @@ program
       console.log("Access Control is already initialized")
     }
 
+    const { Account } = await importAleo()
     const stakingAdminAccount = new Account({
       privateKey: STAKING_ADMIN_PRIVATE_KEY,
     })

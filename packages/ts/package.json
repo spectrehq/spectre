@@ -2,19 +2,18 @@
   "name": "spectre",
   "private": true,
   "version": "0.0.1",
-  "main": "./dist/spectre.cjs",
-  "module": "./dist/spectre.mjs",
+  "main": "./dist/index.mjs",
+  "module": "./dist/index.mjs",
   "exports": {
     ".": {
-      "require": "./dist/spectre.cjs",
-      "import": "./dist/spectre.mjs"
+      "require": "./dist/index.mjs",
+      "import": "./dist/index.mjs"
     },
-    "./dist/": {
-      "import": "./dist/",
-      "require": "./dist/"
+    "./operator": {
+      "require": "./dist/operator.mjs",
+      "import": "./dist/operator.mjs"
     }
   },
-  "types": "./dist/index.d.ts",
   "scripts": {
     "dev": "vite --host",
     "build": "rimraf --glob dist/**/* && tsc && vite build && dts-bundle-generator --config ./dts-bundle-generator.config.ts",
@@ -49,6 +48,7 @@
   },
   "dependencies": {
     "@aleohq/sdk": "^0.6.9",
+    "@aleohq/wasm": "0.6.9",
     "assert": "^2.1.0",
     "dotenv": "^16.4.5"
   }

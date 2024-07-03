@@ -1,16 +1,16 @@
 import 'dotenv/config'
-import {
-  Account,
-  AleoKeyProvider,
-  initializeWasm,
-  initThreadPool,
-  NetworkRecordProvider,
-  ProgramManager,
-} from '@aleohq/sdk'
+import type { ProgramManager } from '@aleohq/sdk'
+import { importAleo } from './wasm'
 
 export async function run() {
-  await initializeWasm()
-  await initThreadPool()
+  const aleo = await importAleo()
+
+  if (true) {
+    console.log('Success')
+    return
+  }
+
+  const { Account, AleoKeyProvider, NetworkRecordProvider, ProgramManager } = aleo
 
   const account = new Account({
     privateKey: process.env.PRIVATE_KEY,

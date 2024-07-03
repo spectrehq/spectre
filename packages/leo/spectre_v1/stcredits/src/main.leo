@@ -585,12 +585,8 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
-        // Check cache is finished.
+        // Check cache is finished and valid.
         assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
-
-        // Ensure caching is finished and valid.
-        let cache: CacheState = Mapping::get(cache_state, 0u8);
-        assert_eq(cache.state, CACHE_STATE_VALID);
 
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
@@ -620,12 +616,8 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
-        // Check cache is finished.
+        // Check cache is finished and valid.
         assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
-
-        // Ensure caching is finished and valid.
-        let cache: CacheState = Mapping::get(cache_state, 0u8);
-        assert_eq(cache.state, CACHE_STATE_VALID);
 
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
@@ -649,13 +641,12 @@ program spectre_stcredits_v1.aleo {
 
         let has_withdraw: bool = Mapping::contains(withdraws, user);
         if (!has_withdraw) {
+            let amount: field = liquidity >= credits ? credits : liquidity;
+            Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + amount);
+            Mapping::set(withdraws, user, Withdraw {amount, height: block.height + WITHDRAW_DELAY});
             if (liquidity >= credits) {
-                Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + credits);
-                Mapping::set(withdraws, user, Withdraw {amount: credits, height: block.height + WITHDRAW_DELAY});
                 // Done.
                 return;
-            } else {
-                Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + liquidity);
             }
         }
 

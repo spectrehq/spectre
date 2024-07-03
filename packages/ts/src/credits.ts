@@ -1,5 +1,4 @@
-import { ProgramBase, u64, u64Str } from './types'
-import { parsePlaintext } from './wasm'
+import { ProgramBase, u64, u64Str, parsePlaintext } from './types'
 
 export interface CommitteeState {
   // The boolean flag indicating if the validator is open to new stakers.
@@ -30,7 +29,7 @@ export class CreditsProgram extends ProgramBase {
    */
   async getCommitteeState(validator: string) {
     const state = await this.getMappingValueOrNull('committee', validator)
-    return state === null ? null : (parsePlaintext(state) as CommitteeState)
+    return state === null ? null : (parsePlaintext(state) as unknown as CommitteeState)
   }
 
   /**
@@ -74,7 +73,7 @@ export class CreditsProgram extends ProgramBase {
    */
   async getBonded(staker: string) {
     const bonded = await this.getMappingValueOrNull('bonded', staker)
-    return bonded === null ? null : (parsePlaintext(bonded) as BondState)
+    return bonded === null ? null : (parsePlaintext(bonded) as unknown as BondState)
   }
 
   /**
@@ -83,7 +82,7 @@ export class CreditsProgram extends ProgramBase {
    */
   async getUnbonding(staker: string) {
     const unbonding = await this.getMappingValueOrNull('unbonding', staker)
-    return unbonding === null ? null : (parsePlaintext(unbonding) as UnbondState)
+    return unbonding === null ? null : (parsePlaintext(unbonding) as unknown as UnbondState)
   }
 
   /**

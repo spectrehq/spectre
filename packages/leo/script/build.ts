@@ -2,7 +2,6 @@ import * as fs from "fs/promises"
 import * as path from "path"
 import * as os from "os"
 import "dotenv/config"
-import { Account, initializeWasm, initThreadPool } from "@aleohq/sdk"
 import { SPECTRE_DIR, BUILD_DIR, addSuffix, exec, ProgramJson } from "./util"
 import config from "../config.json"
 

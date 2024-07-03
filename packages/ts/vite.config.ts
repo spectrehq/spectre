@@ -1,5 +1,5 @@
 /// <reference types="vitest" />
-import path from 'path'
+import * as path from 'path'
 import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import packageJson from './package.json'
@@ -16,25 +16,26 @@ const getPackageNameCamelCase = () => {
   }
 }
 
-const fileName = {
-  es: `${getPackageName()}.mjs`,
-  // cjs: `${getPackageName()}.cjs`,
-  // iife: `${getPackageName()}.iife.js`,
-}
-
-const formats = Object.keys(fileName) as Array<keyof typeof fileName>
-
 module.exports = defineConfig({
   base: './',
   build: {
     target: 'esnext',
     outDir: './dist',
     lib: {
-      entry: path.resolve(__dirname, 'src/index.ts'),
+      entry: {
+        index: path.resolve(__dirname, 'src/index.ts'),
+        operator: path.resolve(__dirname, 'src/operator.ts'),
+      },
       name: getPackageNameCamelCase(),
-      formats,
-      fileName: format => fileName[format as keyof typeof fileName],
+      formats: ['es'],
     },
+    rollupOptions: {
+      external: [
+        'node:url',
+        'node:fs',
+        '@aleohq/wasm',
+      ],
+    }
   },
   test: {},
   resolve: {

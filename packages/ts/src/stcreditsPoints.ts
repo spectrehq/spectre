@@ -1,5 +1,4 @@
-import { ProgramBase, u128, u8Str } from './types'
-import { parsePlaintext } from './wasm'
+import { ProgramBase, u128, u8Str, parsePlaintext } from './types'
 
 export interface StCreditsPointsState {
   // The total locked stcredits.
@@ -35,6 +34,6 @@ export class StCreditsPointsProgram extends ProgramBase {
           stcredits: 0n,
           height: 0n,
         } as StCreditsPointsState)
-      : (parsePlaintext(state) as StCreditsPointsState)
+      : (parsePlaintext(state) as unknown as StCreditsPointsState)
   }
 }

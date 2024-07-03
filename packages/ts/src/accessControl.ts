@@ -8,7 +8,7 @@ export class AccessControlProgram extends ProgramBase {
   }
 
   async hasRole(role: number, account: string) {
-    const hash = bhp256HashToField(`{
+    const hash = await bhp256HashToField(`{
       account: ${account},
       role: ${u8Str(role)}
     }`)

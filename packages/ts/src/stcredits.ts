@@ -1,5 +1,5 @@
-import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str } from './types'
-import { bhp256HashToField, parsePlaintext } from './wasm'
+import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from './types'
+import { bhp256HashToField } from './wasm'
 import { ZERO_ADDRESS } from './const'
 
 export interface Approval {
@@ -60,7 +60,7 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getApproval(approver: string, spender: string) {
-    const hash = bhp256HashToField(`{
+    const hash = await bhp256HashToField(`{
       approver: ${approver},
       spender: ${spender}
     }`)
@@ -69,7 +69,7 @@ export class StCreditsProgram extends ProgramBase {
 
   async getConfig() {
     const configStr = await this.getMappingValueOrNull('config', u8Str(0))
-    return configStr === null ? null : (parsePlaintext(configStr) as Config)
+    return configStr === null ? null : (parsePlaintext(configStr) as unknown as Config)
   }
 
   async isInitialized() {
@@ -82,17 +82,17 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getCacheState() {
-    return parsePlaintext(await this.getMappingValue('cache_state', u8Str(0))) as CacheState
+    return parsePlaintext(await this.getMappingValue('cache_state', u8Str(0))) as unknown as CacheState
   }
 
   async getWithdraw(account: string) {
     const withdraw = await this.getMappingValueOrNull('withdraws', account)
-    return withdraw === null ? null : (parsePlaintext(withdraw) as Withdraw)
+    return withdraw === null ? null : (parsePlaintext(withdraw) as unknown as Withdraw)
   }
 
   async getPendingWithdraw(account: string) {
     const pendingWithdraw = await this.getMappingValueOrNull('pending_withdraws', account)
-    return pendingWithdraw === null ? null : (parsePlaintext(pendingWithdraw) as PendingWithdraw)
+    return pendingWithdraw === null ? null : (parsePlaintext(pendingWithdraw) as unknown as PendingWithdraw)
   }
 
   async getPendingQueueUser(index: number) {
@@ -100,7 +100,7 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getPendingQueueStartEnd() {
-    return parsePlaintext(await this.getMappingValue('pending_queue_start_end', u8Str(0))) as QueueStartEnd
+    return parsePlaintext(await this.getMappingValue('pending_queue_start_end', u8Str(0))) as unknown as QueueStartEnd
   }
 
   async getValidatorsCount() {
