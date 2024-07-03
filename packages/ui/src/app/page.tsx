@@ -8,8 +8,8 @@ export default function HomePage() {
         aria-hidden="true"
         className="absolute inset-x-0 top-0 -z-10 h-[1000px] w-full fill-secondary stroke-foreground/5 dark:stroke-foreground/10 [mask-image:linear-gradient(to_bottom_left,white_40%,transparent_50%)]"
       >
-        <rect width="100%" height="100%" fill="url(#:rd:)" stroke-width="0" />
-        <svg x="50%" y="-96" stroke-width="0" className="overflow-visible">
+        <rect width="100%" height="100%" fill="url(#:rd:)" strokeWidth="0" />
+        <svg x="50%" y="-96" strokeWidth="0" className="overflow-visible">
           <title>Hero Background</title>
           <path
             transform="translate(64 160)"
@@ -85,7 +85,7 @@ export default function HomePage() {
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         className="lucide lucide-shield-check stroke-green-600"
@@ -118,7 +118,7 @@ export default function HomePage() {
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                         strokeLinecap="round"
                         strokeLinejoin="round"
                         className="lucide lucide-medal stroke-amber-600"
@@ -155,7 +155,7 @@ export default function HomePage() {
                         viewBox="0 0 24 24"
                         fill="none"
                         stroke="currentColor"
-                        stroke-width="2"
+                        strokeWidth="2"
                         stroke-linecap="round"
                         stroke-linejoin="round"
                         className="lucide lucide-waves stroke-sky-600"
