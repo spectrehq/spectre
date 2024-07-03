@@ -10,5 +10,15 @@
     "light": "Light",
     "dark": "Dark",
     "system": "System"
+  },
+
+  "StakePage": {
+    "title": "Stake",
+    "description": "Stake ALEO and receive stALEO while staking."
+  },
+
+  "Prompts": {
+    "Enter an amount": "Enter an amount",
+    "Insufficient balance": "Insufficient balance"
   }
 }

@@ -4,3 +4,8 @@ export enum WalletType {
   LeoWallet = 'LeoWallet',
   PuzzleWallet = 'PuzzleWallet',
 }
+
+export enum Network {
+  // Mainnet = 'mainnet',
+  Testnet = 'testnet',
+}

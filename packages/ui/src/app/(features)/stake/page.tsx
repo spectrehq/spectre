@@ -1,13 +1,20 @@
+import { useTranslations } from 'next-intl'
+import { StakeWidget } from '~/components/stake-widget'
+
 export default function StakePage() {
+  const t = useTranslations('StakePage')
+
   return (
     <>
       <section>
-        <div className="container pt-60 pb-24">
-          <div>
-            <h1 className="scroll-m-20 text-4xl font-extrabold tracking-tight lg:text-5xl mb-10 text-center">
-              Coming Soon
-            </h1>
+        <div className="container py-16">
+          <div className="text-center mb-8">
+            <h3 className="scroll-m-20 font-semibold text-2xl tracking-tight">
+              {t('title')}
+            </h3>
+            <p className="text-muted-foreground text-sm">{t('description')}</p>
           </div>
+          <StakeWidget />
         </div>
       </section>
     </>
