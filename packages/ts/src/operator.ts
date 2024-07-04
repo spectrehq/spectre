@@ -1,6 +1,7 @@
 import 'dotenv/config'
 import type { ProgramManager } from '@aleohq/sdk'
 import { importAleo } from './wasm'
+import { STCREDITS_PROGRAM } from './const'
 
 export async function run() {
   const aleo = await importAleo()
@@ -32,9 +33,6 @@ export async function run() {
     await delay(Math.min(elapsed > period ? 0 : period - elapsed, 10 * 1000))
   }
 }
-
-const STCREDITS_PROGRAM = process.env.STCREDITS_PROGRAM as string
-// const DELEGATOR_PROGRAM = process.env.DELEGATOR_PROGRAM as string
 
 const PLACEHOLDER_KEY = '0u8'
 

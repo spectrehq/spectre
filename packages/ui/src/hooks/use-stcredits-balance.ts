@@ -9,7 +9,7 @@ export function useStCreditsBalance(address?: AleoAddress | null) {
 
   return useQuery({
     queryKey: ['stCredits', 'balance', address],
-    queryFn: () => stCreditsProgram.getBalance(address!),
+    queryFn: () => stCreditsProgram.getPublicBalance(address!),
     enabled: Boolean(address),
   })
 }

@@ -2,17 +2,12 @@
   "name": "spectre",
   "private": true,
   "version": "0.0.1",
-  "main": "./dist/index.mjs",
-  "module": "./dist/index.mjs",
+  "type": "module",
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
   "exports": {
-    ".": {
-      "require": "./dist/index.mjs",
-      "import": "./dist/index.mjs"
-    },
-    "./operator": {
-      "require": "./dist/operator.mjs",
-      "import": "./dist/operator.mjs"
-    }
+    ".": "./dist/index.js",
+    "./operator": "./dist/operator.js"
   },
   "scripts": {
     "dev": "vite --host",

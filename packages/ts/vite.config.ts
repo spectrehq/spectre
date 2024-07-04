@@ -1,6 +1,5 @@
 /// <reference types="vitest" />
 import * as path from 'path'
-import { defineConfig } from 'vite'
 import { nodePolyfills } from 'vite-plugin-node-polyfills'
 import packageJson from './package.json'
 
@@ -16,7 +15,8 @@ const getPackageNameCamelCase = () => {
   }
 }
 
-module.exports = defineConfig({
+/** @type {import('vite').UserConfig} */
+export default {
   base: './',
   build: {
     target: 'esnext',
@@ -30,7 +30,7 @@ module.exports = defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: ['node:url', 'node:fs', '@aleohq/wasm'],
+      external: ['node:url', 'node:fs', '@aleohq/sdk', '@aleohq/wasm'],
     },
   },
   test: {},
@@ -44,4 +44,4 @@ module.exports = defineConfig({
     format: 'es',
   },
   plugins: [nodePolyfills()],
-})
+}

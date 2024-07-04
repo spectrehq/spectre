@@ -7,7 +7,7 @@ export function useBalance(address?: AleoAddress | null) {
 
   return useQuery({
     queryKey: ['balance', address],
-    queryFn: () => creditsProgram.getBalance(address!),
+    queryFn: () => creditsProgram.getPublicBalance(address!),
     enabled: Boolean(address),
   })
 }
