@@ -1,0 +1,11 @@
+{
+  "programSuffix": "001",
+  "delegatorNum": 3,
+  "programs": {
+    "accessControl": "spectre_access_control_v1",
+    "aclManager": "spectre_acl_manager_v1",
+    "stcredits": "spectre_stcredits_v1",
+    "stcreditsPoints": "spectre_stcredits_points_v1",
+    "delegator": "spectre_delegator_v1"
+  }
+}

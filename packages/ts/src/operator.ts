@@ -5,11 +5,6 @@ import { importAleo } from './wasm'
 export async function run() {
   const aleo = await importAleo()
 
-  if (true) {
-    console.log('Success')
-    return
-  }
-
   const { Account, AleoKeyProvider, NetworkRecordProvider, ProgramManager } = aleo
 
   const account = new Account({

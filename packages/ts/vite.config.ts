@@ -30,12 +30,8 @@ module.exports = defineConfig({
       formats: ['es'],
     },
     rollupOptions: {
-      external: [
-        'node:url',
-        'node:fs',
-        '@aleohq/wasm',
-      ],
-    }
+      external: ['node:url', 'node:fs', '@aleohq/wasm'],
+    },
   },
   test: {},
   resolve: {

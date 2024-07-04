@@ -94,10 +94,10 @@ export class CreditsProgram extends ProgramBase {
   }
 
   /**
-   * Get the microcredits balance of the account.
+   * Get the public microcredits balance of the account.
    * @param account
    */
-  async getBalance(account: string) {
+  async getPublicBalance(account: string) {
     return u64(await this.getMappingValueOrDefault('account', account, '0'))
   }
 }

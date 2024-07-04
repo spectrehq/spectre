@@ -1,6 +1,7 @@
 import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from './types'
-import { bhp256HashToField } from './wasm'
-import { ZERO_ADDRESS } from './const'
+import { bhp256HashToField, programAddress } from './wasm'
+import { STCREDITS_PROGRAM, ZERO_ADDRESS } from './const'
+import { CreditsProgram } from './credits'
 
 export interface Approval {
   approver: string
@@ -51,11 +52,18 @@ export interface QueueStartEnd {
 }
 
 export class StCreditsProgram extends ProgramBase {
+  private credits: CreditsProgram
+
+  constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>) {
+    super(getMappingValueString)
+    this.credits = new CreditsProgram(getMappingValueString)
+  }
+
   async getTotalSupply() {
     return u64(await this.getMappingValueOrDefault('total_supply', u8Str(0), '0'))
   }
 
-  async getBalance(account: string) {
+  async getPublicBalance(account: string) {
     return u64(await this.getMappingValueOrDefault('account', account, '0'))
   }
 
@@ -75,6 +83,11 @@ export class StCreditsProgram extends ProgramBase {
   async isInitialized() {
     const config = await this.getConfig()
     return config !== null && config.initialized
+  }
+
+  async isPaused() {
+    const config = await this.getConfig()
+    return config !== null && config.paused
   }
 
   async getState(key: StateEnum) {
@@ -127,5 +140,49 @@ export class StCreditsProgram extends ProgramBase {
 
   async getValidatorBonded(validator: string) {
     return u64(await this.getMappingValueOrDefault('validator_bonded', validator, '0'))
+  }
+
+  async getTotalBuffered() {
+    return this.credits.getPublicBalance(await programAddress(STCREDITS_PROGRAM))
+  }
+
+  async getTotalBonded() {
+    return this.getState(StateEnum.TOTAL_BONDED_KEY)
+  }
+
+  async getTotalUnbonding() {
+    return this.getState(StateEnum.TOTAL_UNBONDING_KEY)
+  }
+
+  async getTotalWithdraw() {
+    return this.getState(StateEnum.TOTAL_WITHDRAW_KEY)
+  }
+
+  async getTotalPendingWithdraw() {
+    return this.getState(StateEnum.TOTAL_PENDING_WITHDRAW_KEY)
+  }
+
+  getTotalPooled(
+    totalBuffered: bigint,
+    totalBonded: bigint,
+    totalUnbonding: bigint,
+    totalWithdraw: bigint,
+    totalPendingWithdraw: bigint
+  ) {
+    return totalBuffered + totalBonded + totalUnbonding - totalWithdraw - totalPendingWithdraw
+  }
+
+  getStCreditsFromCredits(credits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint) {
+    return (
+      (credits * (totalStCreditsSupply > 0n ? totalStCreditsSupply : 1n)) /
+      (totalPooledCredits > 0n ? totalPooledCredits : 1n)
+    )
+  }
+
+  getCreditsFromStCredits(stCredits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint) {
+    return (
+      (stCredits * (totalPooledCredits > 0n ? totalPooledCredits : 1n)) /
+      (totalStCreditsSupply > 0n ? totalStCreditsSupply : 1n)
+    )
   }
 }
