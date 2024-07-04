@@ -7,7 +7,7 @@ export function usePendingWithdraw(address?: AleoAddress | null) {
     (store) => store.stCreditsProgram
   )
   return useQuery({
-    queryKey: ['stCredits', 'pendingWithdraw'],
+    queryKey: ['stCredits', 'pendingWithdraw', address],
     queryFn: () => stCreditsProgram.getPendingWithdraw(address!),
     enabled: Boolean(address),
   })
