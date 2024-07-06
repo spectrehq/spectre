@@ -11,6 +11,8 @@ export const EMERGENCY_ADMIN_ROLE = 4
 export const RISK_ADMIN_ROLE = 5
 export const ASSET_LISTING_ADMIN_ROLE = 6
 
+export const STCREDITS_CACHE_BATCH_NUM = 10n
+
 function programWithSuffix(program: string) {
   return `${program}_${config.programSuffix}.aleo`
 }

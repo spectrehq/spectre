@@ -52,7 +52,7 @@ export interface QueueStartEnd {
 }
 
 export class StCreditsProgram extends ProgramBase {
-  private credits: CreditsProgram
+  protected credits: CreditsProgram
 
   constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>) {
     super(getMappingValueString)

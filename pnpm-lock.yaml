@@ -9,7 +9,7 @@ patchedDependencies:
     hash: iyvjg3z3yuo3xu256xfhvhla4q
     path: patches/@aleohq__sdk@0.6.9.patch
   '@aleohq/wasm@0.6.9':
-    hash: qwbo2ujnbixu7yzwsj7xyyajd4
+    hash: il2rgvounjk5vwck5un5suowxm
     path: patches/@aleohq__wasm@0.6.9.patch
 
 importers:
@@ -54,7 +54,7 @@ importers:
         version: 0.6.9(patch_hash=iyvjg3z3yuo3xu256xfhvhla4q)
       '@aleohq/wasm':
         specifier: ^0.6.9
-        version: 0.6.9(patch_hash=qwbo2ujnbixu7yzwsj7xyyajd4)
+        version: 0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)
       '@types/node':
         specifier: ^20.11.5
         version: 20.14.9
@@ -81,7 +81,7 @@ importers:
         version: 0.6.9(patch_hash=iyvjg3z3yuo3xu256xfhvhla4q)
       '@aleohq/wasm':
         specifier: 0.6.9
-        version: 0.6.9(patch_hash=qwbo2ujnbixu7yzwsj7xyyajd4)
+        version: 0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)
       assert:
         specifier: ^2.1.0
         version: 2.1.0
@@ -4801,12 +4801,12 @@ snapshots:
 
   '@aleohq/sdk@0.6.9(patch_hash=iyvjg3z3yuo3xu256xfhvhla4q)':
     dependencies:
-      '@aleohq/wasm': 0.6.9(patch_hash=qwbo2ujnbixu7yzwsj7xyyajd4)
+      '@aleohq/wasm': 0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)
       comlink: 4.4.1
       mime: 3.0.0
       sync-request: 6.1.0
 
-  '@aleohq/wasm@0.6.9(patch_hash=qwbo2ujnbixu7yzwsj7xyyajd4)': {}
+  '@aleohq/wasm@0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)': {}
 
   '@alloc/quick-lru@5.2.0': {}
 

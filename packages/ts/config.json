@@ -1,6 +1,5 @@
 {
   "programSuffix": "001",
-  "delegatorNum": 3,
   "programs": {
     "accessControl": "spectre_access_control_v1",
     "aclManager": "spectre_acl_manager_v1",

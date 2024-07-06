@@ -488,7 +488,6 @@ program spectre_stcredits_v1.aleo {
                 Mapping::set(account, treasury, Mapping::get_or_use(account, treasury, 0u64) + stcredits as u64);
                 Mapping::set(total_supply, 0u8, (total_stcredits_supply + stcredits) as u64);
             }
-
         }
 
         // Wait for `credits.aleo/unbond_public` finished.

@@ -24,7 +24,6 @@ export default {
     lib: {
       entry: {
         index: path.resolve(__dirname, 'src/index.ts'),
-        operator: path.resolve(__dirname, 'src/operator.ts'),
       },
       name: getPackageNameCamelCase(),
       formats: ['es'],

@@ -8,11 +8,6 @@ const config = {
       outFile: './dist/index.d.ts',
       noCheck: false,
     },
-    {
-      filePath: './src/operator.ts',
-      outFile: './dist/operator.d.ts',
-      noCheck: false,
-    },
   ],
 }
 
