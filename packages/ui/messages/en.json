@@ -22,6 +22,14 @@
     "description": "Request stALEO withdrawal and claim ALEO."
   },
 
+  "BondPage": {
+    "title": "Bond"
+  },
+
+  "UnbondPage": {
+    "title": "Unbond"
+  },
+
   "Prompts": {
     "Enter an amount": "Enter an amount",
     "Insufficient balance": "Insufficient balance",
