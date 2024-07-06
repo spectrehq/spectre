@@ -1,4 +1,4 @@
-import { BondWidget } from "~/components/bond-widget";
+import { BondWidget } from '~/components/bond-widget'
 
 export default function BondPage() {
   return (

@@ -14,7 +14,7 @@ function isFloatingPointNumericCharacter(character: string) {
 
 function isValidNumericKeyboardEvent(
   event: React.KeyboardEvent,
-  isValid: (key: string) => boolean,
+  isValid: (key: string) => boolean
 ) {
   if (event.key == null) return true
   const isModifierKey = event.ctrlKey || event.altKey || event.metaKey
@@ -75,7 +75,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
     const getStepFactor = <
       Event extends React.KeyboardEvent | React.WheelEvent | WheelEvent,
     >(
-      event: Event,
+      event: Event
     ) => {
       let ratio = 1
       if (event.metaKey || event.ctrlKey) {
@@ -91,7 +91,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
       <input
         className={cn(
           'flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background disabled:cursor-not-allowed file:border-0 file:bg-transparent file:font-medium file:text-sm placeholder:text-muted-foreground disabled:opacity-50 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2',
-          className,
+          className
         )}
         type="number"
         ref={ref}
@@ -99,7 +99,7 @@ const NumberInput = React.forwardRef<HTMLInputElement, NumberInputProps>(
         {...props}
       />
     )
-  },
+  }
 )
 
 NumberInput.displayName = 'NumberInput'

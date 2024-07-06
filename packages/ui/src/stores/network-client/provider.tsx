@@ -31,13 +31,13 @@ export function NetworkClientStoreProvider({
 }
 
 export function useNetworkClientStore<T>(
-  selector: (store: NetworkClientStore) => T,
+  selector: (store: NetworkClientStore) => T
 ): T {
   const networkClientStoreContext = useContext(NetworkClientStoreContext)
 
   if (!networkClientStoreContext) {
     throw new Error(
-      'useNetworkClientStore must be used within NetworkClientStoreProvider',
+      'useNetworkClientStore must be used within NetworkClientStoreProvider'
     )
   }
 
