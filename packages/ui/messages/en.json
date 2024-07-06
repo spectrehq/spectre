@@ -24,6 +24,7 @@
 
   "Prompts": {
     "Enter an amount": "Enter an amount",
-    "Insufficient balance": "Insufficient balance"
+    "Insufficient balance": "Insufficient balance",
+    "Select validator": "Select validator"
   }
 }

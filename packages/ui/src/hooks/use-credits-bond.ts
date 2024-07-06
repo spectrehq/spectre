@@ -12,17 +12,12 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { toast } from 'sonner'
-import { WalletType } from '~/types'
-import { useAccount } from './use-account'
-import { STCREDITS_POINTS_PROGRAM_IDS } from '~/config'
+import { CREDITS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
+import { type AleoAddress, WalletType } from '~/types'
+import { useAccount } from './use-account'
 
-export interface UseStakeParams {
-  amount: number
-  fee: number
-}
-
-export function useStake() {
+export function useCreditsBond() {
   const { address, walletType } = useAccount()
 
   const { requestTransaction } = useWallet()
@@ -31,34 +26,38 @@ export function useStake() {
 
   return useMutation({
     mutationFn: async ({
+      validator,
+      recipient,
       amount,
       fee = 250_000,
     }: {
+      validator: AleoAddress
+      recipient: AleoAddress
       amount: bigint
       fee?: number
     }) => {
       if (!address) return
 
-      const programId = STCREDITS_POINTS_PROGRAM_IDS[network]
+      const programId = CREDITS_PROGRAM_IDS[network]
 
       if (walletType === WalletType.LeoWallet) {
         const tx = Transaction.createTransaction(
           address!,
           WalletAdapterNetwork.TestnetBeta,
           programId,
-          'apply',
-          [`${amount}u64`],
+          'bond_public',
+          [validator, recipient, `${amount}u64`],
           fee,
           false
         )
 
         const id = await requestTransaction?.(tx)
         if (id) {
-          toast.success('Staking successful', {
+          toast.success('Bond successful', {
             description: 'Go to the wallet to check the transaction status',
           })
         } else {
-          toast.error('Failed to stake')
+          toast.error('Failed to bond')
         }
       }
 
@@ -69,9 +68,9 @@ export function useStake() {
           address: address as string,
           type: EventType.Execute,
           programId,
-          functionId: 'apply',
+          functionId: 'bond_public',
           fee: puzzleFee,
-          inputs: [`${amount}u64`],
+          inputs: [validator, recipient, `${amount}u64`],
         }
         const { eventId, error } = await requestCreateEvent(event)
 
@@ -82,7 +81,7 @@ export function useStake() {
             address,
           })
 
-          toast.success('Staking successful', {
+          toast.success('Bond successful', {
             description: 'Go to the wallet to check the transaction status',
           })
         }
