@@ -3,6 +3,8 @@
     "home": "Home",
     "stake": "Stake",
     "withdrawals": "Withdrawals",
+    "bond": "Bond",
+    "unbond": "Unbond",
     "documentation": "Documentation"
   },
 

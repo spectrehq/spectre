@@ -37,6 +37,20 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
+          <Link href="/bond" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              {t('bond')}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem className="relative">
+          <Link href="/unbond" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              {t('unbond')}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem className="relative">
           <Link href="https://docs.spectre.guru" legacyBehavior passHref>
             <NavigationMenuLink
               className={navigationMenuTriggerStyle()}
