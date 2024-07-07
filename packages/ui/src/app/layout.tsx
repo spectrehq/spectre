@@ -8,6 +8,7 @@ import { Footer } from '~/components/footer'
 import { Header } from '~/components/header'
 import { cn } from '~/lib/utils'
 import './globals.css'
+import { Providers } from './providers'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -41,9 +42,11 @@ export default async function RootLayout({
       >
         <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
           <NextIntlClientProvider messages={messages}>
-            <Header />
-            {children}
-            <Footer />
+            <Providers>
+              <Header />
+              {children}
+              <Footer />
+            </Providers>
             <Toaster richColors closeButton />
           </NextIntlClientProvider>
         </ThemeProvider>
