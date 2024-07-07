@@ -1,34 +1,38 @@
 import * as path from "path"
 import * as fs from "fs/promises"
+import "dotenv/config"
 import config from "../config.json"
 import { ROOT_DIR, BUILD_DIR, exec, ProgramJson } from "./util"
+
+const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
 
 async function deployProgram(program: string, cloneNo?: string) {
   program = `${program}${cloneNo ? "_" + cloneNo : ""}`
   const programPath = path.join(BUILD_DIR, program)
 
   await fs.cp(path.join(ROOT_DIR, ".env"), path.join(programPath, ".env"), {
-    force: true,
+    force: true
   })
 
   const programJsonPath = path.join(programPath, "program.json")
   const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
 
   try {
-    const { stdout } = await exec(`leo query program ${programJson.program}`, {
-      cwd: programPath,
+    const { stdout } = await exec(`leo query --endpoint ${ENDPOINT} program ${programJson.program}`, {
+      cwd: programPath
     })
     if (stdout.includes(`program ${programJson.program}`)) {
       console.log(`Program ${programJson.program} has been deployed, so skip it\n`)
       return
     }
-  } catch {}
+  } catch {
+  }
 
   console.log(`Deploy program ${programJson.program}`)
-  console.log(`leo deploy ${programPath}`)
+  console.log(`leo deploy -y --endpoint ${ENDPOINT} ${programPath}`)
 
-  const { stdout, stderr } = await exec("leo deploy", {
-    cwd: programPath,
+  const { stdout, stderr } = await exec(`leo deploy -y --endpoint ${ENDPOINT}`, {
+    cwd: programPath
   })
   if (stdout) {
     console.log(stdout)

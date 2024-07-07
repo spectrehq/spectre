@@ -44,6 +44,7 @@
     "@aleohq/sdk": "^0.6.9",
     "@aleohq/wasm": "0.6.9",
     "assert": "^2.1.0",
+    "chevrotain": "^11.0.3",
     "dotenv": "^16.4.5"
   }
 }

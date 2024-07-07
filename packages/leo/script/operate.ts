@@ -13,7 +13,8 @@ import {
   StCreditsProgram,
   u32Str,
   u8Str,
-  importAleo
+  importAleo,
+  parsePlaintext
 } from "spectre"
 import { BUILD_DIR, exec, ProgramJson } from "./util"
 import config from "../config.json"
@@ -24,9 +25,14 @@ const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY || PRIVATE_KEY
 const STAKING_ADMIN_PRIVATE_KEY = process.env.STAKING_ADMIN_PRIVATE_KEY || ADMIN_PRIVATE_KEY
 const STAKING_OPERATOR_PRIVATE_KEY = process.env.STAKING_OPERATOR_PRIVATE_KEY || STAKING_ADMIN_PRIVATE_KEY
 
+const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
+
 async function execute(programPath: string, func: string, inputs: string[], privateKey: string) {
-  const { stdout, stderr } = await exec(`leo execute --private-key ${privateKey} -b ${func} ${inputs.join(" ")}`, {
-    cwd: programPath,
+  const {
+    stdout,
+    stderr
+  } = await exec(`leo execute -y -b --local --endpoint ${ENDPOINT} --private-key ${privateKey} ${func} ${inputs.join(" ")}`, {
+    cwd: programPath
   })
   if (stdout) {
     console.log(stdout)
@@ -34,23 +40,66 @@ async function execute(programPath: string, func: string, inputs: string[], priv
   if (stderr) {
     console.error(stderr)
   }
+
+  if (stdout) {
+    const re = /Execution\s+(\w+)\s+.*has been broadcast to/
+    const result = re.exec(stdout)
+    if (result?.[1]) {
+      const txId = result[1]
+      const success = await queryTransaction(txId)
+      if (success) {
+        return
+      }
+    }
+  }
+
+  throw new Error("execution failed")
 }
 
 async function run(programPath: string, func: string, inputs: string[]) {
   const { stdout } = await exec(`leo run -q --non-recursive ${func} ${inputs.join(" ")}`, {
-    cwd: programPath,
+    cwd: programPath
   })
   return stdout.trim()
 }
 
-async function query(programPath: string, mapping: string, key: string) {
+async function queryMappingValue(programPath: string, mapping: string, key: string) {
   const programJsonPath = path.join(programPath, "program.json")
   const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
 
-  let { stdout } = await exec(`leo query program -q --mapping-value ${mapping} '${key}' ${programJson.program}`, {
-    cwd: programPath,
+  let { stdout } = await exec(`leo query --endpoint ${ENDPOINT} program -q --mapping-value ${mapping} '${key}' ${programJson.program}`, {
+    cwd: programPath
   })
   return stdout.trim()
+}
+
+async function queryTransaction(txId: string) {
+  while (true) {
+    let result
+    try {
+      await delay(2000)
+      let { stdout, stderr } = await exec(`leo query -q --endpoint ${ENDPOINT} transaction ${txId}`)
+
+      if (stderr.includes("contents unavailable")) {
+        continue
+      }
+
+      result = stdout
+    } catch (err) {
+      if ((err as any).toString().includes("contents unavailable")) {
+        continue
+      }
+      console.error(err)
+      throw err
+    }
+
+    const tx = parsePlaintext(result.trim())
+    return typeof tx === "object" && "execution" in tx
+  }
+}
+
+function delay(ms: number) {
+  return new Promise(resolve => setTimeout(resolve, ms))
 }
 
 function programPath(program: string, cloneNo?: string) {
@@ -66,7 +115,7 @@ program
   .description("initialize Access Control and ACL")
   .action(async () => {
     const accessControl = new AccessControlProgram(async (mapping: string, key: string) => {
-      return await query(programPath("access_control"), mapping, key)
+      return await queryMappingValue(programPath("access_control"), mapping, key)
     })
 
     if (!(await accessControl.isInitialized())) {
@@ -77,17 +126,17 @@ program
 
     const { Account } = await importAleo()
     const stakingAdminAccount = new Account({
-      privateKey: STAKING_ADMIN_PRIVATE_KEY,
+      privateKey: STAKING_ADMIN_PRIVATE_KEY
     })
     const stakingAdminAddress = stakingAdminAccount.address().to_string()
     const stakingOperatorAccount = new Account({
-      privateKey: STAKING_OPERATOR_PRIVATE_KEY,
+      privateKey: STAKING_OPERATOR_PRIVATE_KEY
     })
     const stakingOperatorAddress = stakingOperatorAccount.address().to_string()
 
     for (const [role, account] of [
       [STAKING_ADMIN_ROLE, stakingAdminAddress],
-      [STAKING_OPERATOR_ROLE, stakingOperatorAddress],
+      [STAKING_OPERATOR_ROLE, stakingOperatorAddress]
     ] as [number, string][]) {
       if (!(await accessControl.hasRole(role, account))) {
         await execute(programPath("access_control"), "grant_role", [u8Str(role), account], ADMIN_PRIVATE_KEY)
@@ -102,7 +151,7 @@ program
   .description("initialize the stcredits program")
   .action(async () => {
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await query(programPath("stcredits"), mapping, key)
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
     })
 
     if (!(await stcredits.isInitialized())) {
@@ -115,7 +164,7 @@ program
   .description("list validators who sustain the stcredits program")
   .action(async () => {
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await query(programPath("stcredits"), mapping, key)
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
     })
 
     const delegators = new Map<string, string>()
@@ -157,7 +206,7 @@ program
   .argument("<validator>")
   .action(async (validator: string) => {
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await query(programPath("stcredits"), mapping, key)
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
     })
     if (await stcredits.hasValidator(validator)) {
       console.log(`Validator ${validator} already exists`)
@@ -177,7 +226,7 @@ program
     assert(Number.isInteger(index) && index >= 0, "invalid validator index")
 
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await query(programPath("stcredits"), mapping, key)
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
     })
     if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
       console.log(`Validator ${validator} with index ${index} does not exist`)
@@ -201,7 +250,7 @@ program
     assert(Number.isInteger(delegatorIndex) && delegatorIndex >= 0, "invalid delegator index")
 
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await query(programPath("stcredits"), mapping, key)
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
     })
     if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
       console.log(`Validator ${validator} with index ${index} does not exist`)
@@ -218,7 +267,7 @@ const roles = {
   POOL_ADMIN_ROLE,
   EMERGENCY_ADMIN_ROLE,
   RISK_ADMIN_ROLE,
-  ASSET_LISTING_ADMIN_ROLE,
+  ASSET_LISTING_ADMIN_ROLE
 }
 
 const roleStrings = new Map([
@@ -227,7 +276,7 @@ const roleStrings = new Map([
   [POOL_ADMIN_ROLE, "POOL_ADMIN_ROLE"],
   [EMERGENCY_ADMIN_ROLE, "EMERGENCY_ADMIN_ROLE"],
   [RISK_ADMIN_ROLE, "RISK_ADMIN_ROLE"],
-  [ASSET_LISTING_ADMIN_ROLE, "ASSET_LISTING_ADMIN_ROLE"],
+  [ASSET_LISTING_ADMIN_ROLE, "ASSET_LISTING_ADMIN_ROLE"]
 ])
 
 async function grantOrRevokeRole(action: "grant" | "revoke", role: string, account: string) {
@@ -235,7 +284,7 @@ async function grantOrRevokeRole(action: "grant" | "revoke", role: string, accou
     programPath("access_control"),
     `${action}_role`,
     [u8Str(roles[role as keyof typeof roles]), account],
-    ADMIN_PRIVATE_KEY,
+    ADMIN_PRIVATE_KEY
   )
 }
 
@@ -245,7 +294,7 @@ const ROLES = [
   "POOL_ADMIN_ROLE",
   "EMERGENCY_ADMIN_ROLE",
   "RISK_ADMIN_ROLE",
-  "ASSET_LISTING_ADMIN_ROLE",
+  "ASSET_LISTING_ADMIN_ROLE"
 ]
 
 program

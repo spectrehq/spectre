@@ -1,6 +1,7 @@
 declare global {
   namespace NodeJS {
     interface ProcessEnv {
+      ENDPOINT: string
       NETWORK: string
       PRIVATE_KEY: string
       ADMIN_PRIVATE_KEY?: string

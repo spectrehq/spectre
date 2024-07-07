@@ -248,7 +248,11 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Ensure the program is not initialized.
-        assert(!Mapping::get(config, 0u8).initialized);
+        assert(!Mapping::get_or_use(config, 0u8, Config {
+            initialized: false,
+            treasury: aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc,
+            paused: false,
+        }).initialized);
 
         // Initialize the config.
         Mapping::set(config, 0u8, Config {initialized: true, treasury: admin, paused: true});
