@@ -1,0 +1,14 @@
+diff --git a/dist/index-CuzlNtfj.js b/dist/index-CuzlNtfj.js
+index 20b91e78abef3762437f40a69b72630e7572a03b..7296b9342c9c3b4302728d6501faca60ad5864ec 100644
+--- a/dist/index-CuzlNtfj.js
++++ b/dist/index-CuzlNtfj.js
+@@ -23683,6 +23683,9 @@ const checkForDesktopConnection$1 = async (sessionTopic) => {
+   }
+ };
+ const hasInjectedConnection$1 = () => {
++  if (typeof window === "undefined") {
++    return false;
++  }
+   var _a2;
+   const injectedConnection = !!((_a2 = window == null ? void 0 : window.aleo) == null ? void 0 : _a2.puzzleWalletClient);
+   if (!injectedConnection) {
