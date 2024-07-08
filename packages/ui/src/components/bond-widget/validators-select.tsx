@@ -33,7 +33,15 @@ export interface ValidatorsSelectProps {
 export function ValidatorsSelect({ field }: ValidatorsSelectProps) {
   const { data, isLoading } = useCommittee()
 
-  const validators = useMemo(() => data?.validators ?? [], [data])
+  const validators = useMemo(
+    () =>
+      data?.validators.sort((a, b) => {
+        if (a.staked > b.staked) return -1
+        if (a.staked < b.staked) return 1
+        return 0
+      }) ?? [],
+    [data]
+  )
 
   const [open, setOpen] = useState(false)
 
@@ -64,8 +72,18 @@ export function ValidatorsSelect({ field }: ValidatorsSelectProps) {
       <CommandDialog open={open} onOpenChange={(open) => setOpen(open)}>
         <CommandInput placeholder="Search validator..." />
         <CommandList>
+          <div className="flex pt-3 px-4 pb-1 text-muted text-xs font-semibold">
+            <div className="w-5 mr-2" />
+            <div className="flex-none text-muted-foreground">Validator</div>
+            <div className="flex-1 text-muted-foreground text-end">Staked</div>
+            <div className="flex-none min-w-32 text-muted-foreground text-end">
+              Commission
+            </div>
+          </div>
           {isLoading ? (
-            <CommandLoading>Loading validators...</CommandLoading>
+            <CommandLoading className="min-h-40 flex justify-center items-center">
+              Loading validators...
+            </CommandLoading>
           ) : (
             <CommandEmpty>No validator found.</CommandEmpty>
           )}
@@ -93,13 +111,13 @@ export function ValidatorsSelect({ field }: ValidatorsSelectProps) {
                     />
                     {shortenAddress(validator.address)}
                   </div>
-                  <div className="flex-1 text-center">
+                  <div className="flex-1 text-end">
                     {dn.format([BigInt(validator.staked), 6], {
                       digits: 2,
                       trailingZeros: true,
                     })}
                   </div>
-                  <div className="flex-none">
+                  <div className="flex-none min-w-32 flex justify-end">
                     <Badge
                       variant={
                         validator.commission > 20 ? 'destructive' : 'success'
