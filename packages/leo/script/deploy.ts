@@ -2,9 +2,7 @@ import * as path from "path"
 import * as fs from "fs/promises"
 import "dotenv/config"
 import config from "../config.json"
-import { ROOT_DIR, BUILD_DIR, exec, ProgramJson } from "./util"
-
-const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
+import { ROOT_DIR, BUILD_DIR, exec, ProgramJson, ENDPOINT } from "./util"
 
 async function deployProgram(program: string, cloneNo?: string) {
   program = `${program}${cloneNo ? "_" + cloneNo : ""}`

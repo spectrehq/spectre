@@ -52,7 +52,7 @@ export interface QueueStartEnd {
 }
 
 export class StCreditsProgram extends ProgramBase {
-  protected credits: CreditsProgram
+  public credits: CreditsProgram
 
   constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>) {
     super(getMappingValueString)
@@ -143,7 +143,7 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getTotalBuffered() {
-    return this.credits.getPublicBalance(await programAddress(STCREDITS_PROGRAM))
+    return this.credits.getPublicBalance(await programAddress(STCREDITS_PROGRAM()))
   }
 
   async getTotalBonded() {

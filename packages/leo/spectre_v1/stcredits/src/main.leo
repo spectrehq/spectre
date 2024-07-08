@@ -544,8 +544,8 @@ program spectre_stcredits_v1.aleo {
             }
 
             let index: field = start_end.start;
-            let user: address = Mapping::get(pending_queue, index);
-            let pending: PendingWithdraw = Mapping::get(pending_withdraws, user);
+            let user: address = Mapping::get_or_use(pending_queue, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+            let pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, user, PendingWithdraw { amount: 0field, index: 0field });
             assert(pending.index == index);
             assert(pending.amount > 0field);
 
@@ -664,13 +664,13 @@ program spectre_stcredits_v1.aleo {
             Mapping::set(pending_queue_start_end, 0u8, QueueStartEnd {start: start_end.start, end: start_end.end + 1field});
             Mapping::set(pending_withdraws, user, PendingWithdraw {amount: pending_credits, index: start_end.end});
         } else { // has pending withdraw for user
-            let pending: PendingWithdraw = Mapping::get(pending_withdraws, user);
+            let pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, user, PendingWithdraw { amount: 0field, index: 0field });
             assert(pending.index >= start_end.start && pending.index < start_end.end);
             let last_index: field = start_end.end - 1field;
             if (pending.index != last_index) { // user is not at the end of the queue
                 // Swap the user to the end of the queue.
-                let last_user: address = Mapping::get(pending_queue, last_index);
-                let last_pending: PendingWithdraw = Mapping::get(pending_withdraws, last_user);
+                let last_user: address = Mapping::get_or_use(pending_queue, last_index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+                let last_pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, last_user, PendingWithdraw { amount: 0field, index: 0field });
                 Mapping::set(pending_queue, pending.index, last_user);
                 Mapping::set(pending_queue, last_index, user);
                 Mapping::set(pending_withdraws, last_user, PendingWithdraw {amount: last_pending.amount, index: pending.index});
@@ -721,9 +721,6 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
-        // Get the total number of validators.
-        let count: u32 = Mapping::get(validators_count, 0u8);
-
         // If new cache flow.
         if (start == 0u32) {
             Mapping::set(cache_state, 0u8, CacheState {
@@ -742,25 +739,29 @@ program spectre_stcredits_v1.aleo {
             assert_eq(start, cache.next_index);
         }
 
+        // Get the total number of validators.
+        let count: u32 = Mapping::get(validators_count, 0u8);
+
         // Cache total bonded and unbonding credits.
         for i: u32 in 0u32..CACHE_BATCH_NUM {
             let index: u32 = start + i;
             if index < count {
-                let validator: address = Mapping::get(validators, index);
-                let delegator: address = Mapping::get(validator_delegators, validator);
+                let validator: address = Mapping::get_or_use(validators, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+                let delegator: address = Mapping::get_or_use(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+                if (delegator != aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc) {
+                    let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+                    assert(bonded.validator == validator);
+                    let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
 
-                let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-                assert(bonded.validator == validator);
-                let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-
-                let cache: CacheState = Mapping::get(cache_state, 0u8);
-                Mapping::set(cache_state, 0u8, CacheState {
-                    state: CACHE_STATE_IN_PROGRESS,
-                    height: cache.height,
-                    total_bonded: cache.total_bonded + bonded.microcredits as field,
-                    total_unbonding: cache.total_unbonding + unbonding.microcredits as field,
-                    next_index: cache.next_index,
-                });
+                    let cache: CacheState = Mapping::get(cache_state, 0u8);
+                    Mapping::set(cache_state, 0u8, CacheState {
+                        state: CACHE_STATE_IN_PROGRESS,
+                        height: cache.height,
+                        total_bonded: cache.total_bonded + bonded.microcredits as field,
+                        total_unbonding: cache.total_unbonding + unbonding.microcredits as field,
+                        next_index: cache.next_index,
+                    });
+                }
             }
         }
 

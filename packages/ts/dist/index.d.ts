@@ -9,11 +9,24 @@ export declare const EMERGENCY_ADMIN_ROLE = 4;
 export declare const RISK_ADMIN_ROLE = 5;
 export declare const ASSET_LISTING_ADMIN_ROLE = 6;
 export declare const STCREDITS_CACHE_BATCH_NUM = 10n;
-export declare const ACCESS_CONTROL_PROGRAM: string;
-export declare const ACL_MANAGER_PROGRAM: string;
-export declare const STCREDITS_PROGRAM: string;
-export declare const STCREDITS_POINTS_PROGRAM: string;
-export declare function delegatorProgram(index: number): string;
+export declare const VERSION = "v1";
+export declare const PREFIX = "spectre";
+export declare const ACCESS_CONTROL_PROGRAM: () => string;
+export declare const ACL_MANAGER_PROGRAM: () => string;
+export declare const STCREDITS_PROGRAM: () => string;
+export declare const STCREDITS_POINTS_PROGRAM: () => string;
+export declare function delegatorProgramName(index: number): string;
+export interface Configuration {
+	programSuffix: string;
+	programs: {
+		accessControl: string;
+		aclManager: string;
+		stcredits: string;
+		stcreditsPoints: string;
+		delegator: string;
+	};
+}
+export declare function initialize(cfg: Configuration): void;
 export declare function bool(s: string): boolean;
 export declare function boolStr(b: boolean): string;
 export declare function i8(s: string): bigint;
@@ -167,7 +180,7 @@ export interface QueueStartEnd {
 	end: bigint;
 }
 export declare class StCreditsProgram extends ProgramBase {
-	protected credits: CreditsProgram;
+	credits: CreditsProgram;
 	constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>);
 	getTotalSupply(): Promise<bigint>;
 	getPublicBalance(account: string): Promise<bigint>;

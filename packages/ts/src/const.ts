@@ -1,6 +1,6 @@
-import config from '../config.json'
+import assert from "assert"
 
-export const ZERO_ADDRESS = 'aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc'
+export const ZERO_ADDRESS = "aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc"
 
 export const DEFAULT_ADMIN_ROLE = 0
 
@@ -13,16 +13,37 @@ export const ASSET_LISTING_ADMIN_ROLE = 6
 
 export const STCREDITS_CACHE_BATCH_NUM = 10n
 
-function programWithSuffix(program: string) {
-  return `${program}_${config.programSuffix}.aleo`
+export const VERSION = "v1"
+export const PREFIX = "spectre"
+
+function programName(program: string) {
+  return `${PREFIX}_${program}_${VERSION}_${config!.programSuffix}.aleo`
 }
 
-export const ACCESS_CONTROL_PROGRAM = programWithSuffix(config.programs.accessControl)
-export const ACL_MANAGER_PROGRAM = programWithSuffix(config.programs.aclManager)
-export const STCREDITS_PROGRAM = programWithSuffix(config.programs.stcredits)
-export const STCREDITS_POINTS_PROGRAM = programWithSuffix(config.programs.stcreditsPoints)
+export const ACCESS_CONTROL_PROGRAM = () => programName(config!.programs.accessControl)
+export const ACL_MANAGER_PROGRAM = () => programName(config!.programs.aclManager)
+export const STCREDITS_PROGRAM = () => programName(config!.programs.stcredits)
+export const STCREDITS_POINTS_PROGRAM = () => programName(config!.programs.stcreditsPoints)
 
-export function delegatorProgram(index: number) {
-  const cloneNo = (index + 1).toString().padStart(3, '0')
-  return `${config.programs.delegator}_${config.programSuffix}_${cloneNo}.aleo`
+export function delegatorProgramName(index: number) {
+  const cloneNo = (index + 1).toString().padStart(3, "0")
+  return `${PREFIX}_${config!.programs.delegator}_${VERSION}_${config!.programSuffix}_${cloneNo}.aleo`
+}
+
+interface Configuration {
+  programSuffix: string
+  programs: {
+    accessControl: string
+    aclManager: string
+    stcredits: string
+    stcreditsPoints: string
+    delegator: string
+  }
+}
+
+let config: Configuration | undefined
+
+export function initialize(cfg: Configuration) {
+  assert(!config)
+  config = cfg
 }

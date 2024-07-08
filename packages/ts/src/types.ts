@@ -154,37 +154,41 @@ export type Literal = string | boolean | bigint
  * @param literal
  */
 export function parseLiteral(literal: string): Literal {
-  if (literal.startsWith("aleo1")) {
-    return literal // address
-  } else if (literal === "true" || literal === "false") {
-    return bool(literal)
-  } else if (literal.endsWith("field")) {
-    return field(literal)
-  } else if (literal.endsWith("group")) {
-    return group(literal)
-  } else if (literal.endsWith("i8")) {
-    return i8(literal)
-  } else if (literal.endsWith("i16")) {
-    return i16(literal)
-  } else if (literal.endsWith("i32")) {
-    return i32(literal)
-  } else if (literal.endsWith("i64")) {
-    return i64(literal)
-  } else if (literal.endsWith("i128")) {
-    return i128(literal)
-  } else if (literal.endsWith("u8")) {
-    return u8(literal)
-  } else if (literal.endsWith("u16")) {
-    return u16(literal)
-  } else if (literal.endsWith("u32")) {
-    return u32(literal)
-  } else if (literal.endsWith("u64")) {
-    return u64(literal)
-  } else if (literal.endsWith("u128")) {
-    return u128(literal)
-  } else if (literal.endsWith("scalar")) {
-    return scalar(literal)
-  } else {
+  try {
+    if (literal.startsWith("aleo1")) {
+      return literal // address
+    } else if (literal === "true" || literal === "false") {
+      return bool(literal)
+    } else if (literal.endsWith("field")) {
+      return field(literal)
+    } else if (literal.endsWith("group")) {
+      return group(literal)
+    } else if (literal.endsWith("i8")) {
+      return i8(literal)
+    } else if (literal.endsWith("i16")) {
+      return i16(literal)
+    } else if (literal.endsWith("i32")) {
+      return i32(literal)
+    } else if (literal.endsWith("i64")) {
+      return i64(literal)
+    } else if (literal.endsWith("i128")) {
+      return i128(literal)
+    } else if (literal.endsWith("u8")) {
+      return u8(literal)
+    } else if (literal.endsWith("u16")) {
+      return u16(literal)
+    } else if (literal.endsWith("u32")) {
+      return u32(literal)
+    } else if (literal.endsWith("u64")) {
+      return u64(literal)
+    } else if (literal.endsWith("u128")) {
+      return u128(literal)
+    } else if (literal.endsWith("scalar")) {
+      return scalar(literal)
+    } else {
+      return literal
+    }
+  } catch {
     return literal
   }
 }

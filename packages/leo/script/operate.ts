@@ -1,7 +1,7 @@
 import * as path from "path"
 import * as fs from "fs/promises"
 import { Argument, Command } from "commander"
-import "dotenv/config"
+import assert from "assert"
 import {
   AccessControlProgram,
   ASSET_LISTING_ADMIN_ROLE,
@@ -14,104 +14,26 @@ import {
   u32Str,
   u8Str,
   importAleo,
-  parsePlaintext
+  StateEnum,
+  CacheStateEnum
 } from "spectre"
-import { BUILD_DIR, exec, ProgramJson } from "./util"
+import {
+  ADMIN_PRIVATE_KEY,
+  execute,
+  ProgramJson,
+  programPath,
+  queryMappingValue,
+  run,
+  STAKING_ADMIN_PRIVATE_KEY,
+  STAKING_OPERATOR_PRIVATE_KEY
+} from "./util"
 import config from "../config.json"
-import assert from "assert"
-
-const PRIVATE_KEY = process.env.PRIVATE_KEY
-const ADMIN_PRIVATE_KEY = process.env.ADMIN_PRIVATE_KEY || PRIVATE_KEY
-const STAKING_ADMIN_PRIVATE_KEY = process.env.STAKING_ADMIN_PRIVATE_KEY || ADMIN_PRIVATE_KEY
-const STAKING_OPERATOR_PRIVATE_KEY = process.env.STAKING_OPERATOR_PRIVATE_KEY || STAKING_ADMIN_PRIVATE_KEY
-
-const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
-
-async function execute(programPath: string, func: string, inputs: string[], privateKey: string) {
-  const {
-    stdout,
-    stderr
-  } = await exec(`leo execute -y -b --local --endpoint ${ENDPOINT} --private-key ${privateKey} ${func} ${inputs.join(" ")}`, {
-    cwd: programPath
-  })
-  if (stdout) {
-    console.log(stdout)
-  }
-  if (stderr) {
-    console.error(stderr)
-  }
-
-  if (stdout) {
-    const re = /Execution\s+(\w+)\s+.*has been broadcast to/
-    const result = re.exec(stdout)
-    if (result?.[1]) {
-      const txId = result[1]
-      const success = await queryTransaction(txId)
-      if (success) {
-        return
-      }
-    }
-  }
-
-  throw new Error("execution failed")
-}
-
-async function run(programPath: string, func: string, inputs: string[]) {
-  const { stdout } = await exec(`leo run -q --non-recursive ${func} ${inputs.join(" ")}`, {
-    cwd: programPath
-  })
-  return stdout.trim()
-}
-
-async function queryMappingValue(programPath: string, mapping: string, key: string) {
-  const programJsonPath = path.join(programPath, "program.json")
-  const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
-
-  let { stdout } = await exec(`leo query --endpoint ${ENDPOINT} program -q --mapping-value ${mapping} '${key}' ${programJson.program}`, {
-    cwd: programPath
-  })
-  return stdout.trim()
-}
-
-async function queryTransaction(txId: string) {
-  while (true) {
-    let result
-    try {
-      await delay(2000)
-      let { stdout, stderr } = await exec(`leo query -q --endpoint ${ENDPOINT} transaction ${txId}`)
-
-      if (stderr.includes("contents unavailable")) {
-        continue
-      }
-
-      result = stdout
-    } catch (err) {
-      if ((err as any).toString().includes("contents unavailable")) {
-        continue
-      }
-      console.error(err)
-      throw err
-    }
-
-    const tx = parsePlaintext(result.trim())
-    return typeof tx === "object" && "execution" in tx
-  }
-}
-
-function delay(ms: number) {
-  return new Promise(resolve => setTimeout(resolve, ms))
-}
-
-function programPath(program: string, cloneNo?: string) {
-  program = `${program}${cloneNo ? "_" + cloneNo : ""}`
-  return path.join(BUILD_DIR, program)
-}
 
 const program = new Command()
 program.name("operate").description("CLI to spectre operations").version("0.0.1")
 
 program
-  .command("initialize-acl")
+  .command("acl-initialize")
   .description("initialize Access Control and ACL")
   .action(async () => {
     const accessControl = new AccessControlProgram(async (mapping: string, key: string) => {
@@ -147,7 +69,7 @@ program
   })
 
 program
-  .command("initialize-stcredits")
+  .command("stcredits-initialize")
   .description("initialize the stcredits program")
   .action(async () => {
     const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
@@ -160,6 +82,113 @@ program
   })
 
 program
+  .command("stcredits-unpause")
+  .description("unpause the stcredits program")
+  .action(async () => {
+    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
+    })
+
+    if (await stcredits.isPaused()) {
+      await execute(programPath("stcredits"), "unpause", [], STAKING_ADMIN_PRIVATE_KEY)
+    } else {
+      console.warn("The stcredits program is not paused")
+    }
+  })
+
+program
+  .command("stcredits-pause")
+  .description("pause the stcredits program")
+  .action(async () => {
+    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
+    })
+
+    if (!(await stcredits.isPaused())) {
+      await execute(programPath("stcredits"), "pause", [], STAKING_ADMIN_PRIVATE_KEY)
+    } else {
+      console.warn("The stcredits program is already paused")
+    }
+  })
+
+const stateStrings = new Map([
+  [StateEnum.TOTAL_WITHDRAW_KEY, "TOTAL_WITHDRAW"],
+  [StateEnum.TOTAL_PENDING_WITHDRAW_KEY, "TOTAL_PENDING_WITHDRAW"],
+  [StateEnum.TOTAL_BONDED_KEY, "TOTAL_BONDED"],
+  [StateEnum.TOTAL_UNBONDING_KEY, "TOTAL_UNBONDING"],
+  [StateEnum.PROTOCOL_FEE_KEY, "PROTOCOL_FEE"]
+])
+
+const cacheStateStrings = new Map([
+  [CacheStateEnum.INVALID, "INVALID"],
+  [CacheStateEnum.IN_PROGRESS, "IN_PROGRESS"],
+  [CacheStateEnum.VALID, "VALID"]
+])
+
+program
+  .command("stcredits-state")
+  .description("show state of the stcredits program")
+  .action(async () => {
+    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
+    })
+
+    const config = await stcredits.getConfig()
+    if (!config || !config.initialized) {
+      console.log("stcredits program is not initialized")
+      return
+    }
+    console.log("Config:", config)
+
+    console.log("State:")
+    for (const key of [StateEnum.TOTAL_WITHDRAW_KEY,
+      StateEnum.TOTAL_PENDING_WITHDRAW_KEY,
+      StateEnum.TOTAL_BONDED_KEY,
+      StateEnum.TOTAL_UNBONDING_KEY,
+      StateEnum.PROTOCOL_FEE_KEY]) {
+      const state = await stcredits.getState(key)
+      console.log(`    ${stateStrings.get(key)}: ${state}`)
+    }
+
+    console.log("Cache:")
+    const cacheState = await stcredits.getCacheState()
+    console.log(`    State: ${cacheStateStrings.get(Number(cacheState.state))}`)
+    console.log(`    Height: ${cacheState.height}`)
+    console.log(`    Total bonded: ${cacheState.total_bonded / BigInt(1e6)}`)
+    console.log(`    Total unbonding: ${cacheState.total_unbonding / BigInt(1e6)}`)
+    console.log(`    Next index: ${cacheState.next_index}`)
+  })
+
+program
+  .command("stcredits-pending-withdrawals")
+  .description("list pending withdrawals of the stcredits program")
+  .action(async () => {
+    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
+      return await queryMappingValue(programPath("stcredits"), mapping, key)
+    })
+
+    const startEnd = await stcredits.getPendingQueueStartEnd()
+    console.log(`Pending queue: [${startEnd.start}, ${startEnd.end})`)
+
+    for (let i = startEnd.start; i < startEnd.end; i++) {
+      const user = await stcredits.getPendingQueueUser(Number(i))
+      if (!user) {
+        console.warn(`Failed to get user ${i} from the pending withdraw queue`)
+        continue
+      }
+      process.stdout.write(`    ${i}. ${user} `)
+      const pending = await stcredits.getPendingWithdraw(user)
+      if (!pending) {
+        console.warn(`Failed to get pending withdraw for user ${user}`)
+        continue
+      }
+      assert(pending.index === BigInt(i), `Invalid pending withdraw index for user ${user}`)
+      process.stdout.write(`${pending.amount / BigInt(1e6)}`)
+    }
+    process.stdout.write("\n")
+  })
+
+program
   .command("list-validators")
   .description("list validators who sustain the stcredits program")
   .action(async () => {
@@ -168,11 +197,11 @@ program
     })
 
     const delegators = new Map<string, string>()
-    for (const i of Array(config.delegatorNum).keys()) {
-      const cloneNo = (i + 1).toString().padStart(3, "0")
-      const programJsonPath = path.join(programPath("delegator", cloneNo), "program.json")
+    for (let i = 0; i < config.delegatorNum; i++) {
+      const delegatorPath = programPath("delegator", i + 1)
+      const programJsonPath = path.join(delegatorPath, "program.json")
       const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
-      const parts = (await run(programPath("delegator", cloneNo), "get_address", [])).split(" ")
+      const parts = (await run(delegatorPath, "get_address", [])).split(" ")
       const delegatorAddress = parts[parts.length - 1]
       delegators.set(delegatorAddress, programJson.program)
     }
@@ -194,9 +223,12 @@ program
         const delegatorProgram = delegators.get(delegator)
         console.log(`    Delegator: ${delegator}${delegatorProgram ? ` (${delegatorProgram})` : ""}`)
       }
-      const bonded = await stcredits.getValidatorBonded(validator)
-      console.log(`    Bonded: ${Number(bonded) / 1e6}`)
-      // TODO: get bonded from on-chain
+      const bondedAmount = await stcredits.getValidatorBonded(validator)
+      console.log(`    Bonded (at last cache): ${Number(bondedAmount) / 1e6}`)
+      if (delegator) {
+        const bonded = await stcredits.credits.getBonded(delegator)
+        console.log(`    Bonded (actual): ${bonded ? Number(bonded.microcredits) / 1e6 : 0}`)
+      }
     }
   })
 
@@ -257,8 +289,7 @@ program
       return
     }
 
-    const cloneNo = (delegatorIndex + 1).toString().padStart(3, "0")
-    await execute(programPath("delegator", cloneNo), "register", [u32Str(index), validator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath("delegator", delegatorIndex + 1), "register", [u32Str(index), validator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 const roles = {
