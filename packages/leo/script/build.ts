@@ -2,7 +2,7 @@ import * as fs from "fs/promises"
 import * as path from "path"
 import * as os from "os"
 import "dotenv/config"
-import { SPECTRE_DIR, BUILD_DIR, addSuffix, exec, ProgramJson } from "./util"
+import { SPECTRE_DIR, BUILD_DIR, addSuffix, exec, ProgramJson, ROOT_DIR } from "./util"
 import config from "../config.json"
 
 async function copyProgram(program: string, cloneNo?: string) {
@@ -22,6 +22,10 @@ async function copyProgram(program: string, cloneNo?: string) {
         return !["build", "leo.lock", "outputs"].some((s) => source.includes(s))
       }
     },
+  })
+
+  await fs.cp(path.join(ROOT_DIR, ".env"), path.join(dest, ".env"), {
+    force: true
   })
 
   const programJsonPath = path.join(BUILD_DIR, program, "program.json")
@@ -74,6 +78,8 @@ async function compileProgram(program: string, cloneNo?: string) {
 }
 
 async function main() {
+  await fs.stat(path.join(ROOT_DIR, ".env"))
+
   console.log(`Program suffix: ${config.programSuffix}`)
   console.log(`Total number of delegator programs: ${config.delegatorNum}\n`)
 
