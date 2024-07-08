@@ -15,8 +15,7 @@ export function Footer() {
                 </span>
               </Link>
               <p className="text-sm text-muted-foreground">
-                Spectre liquidity protocol on Aleo: Stake credits, earn rewards,
-                and borrow assets.
+                AleoStaking liquidity protocol: Stake credits and earn rewards.
               </p>
             </div>
           </div>
@@ -24,7 +23,7 @@ export function Footer() {
             <ul className="grid grid-cols-2 gap-8 sm:grid-cols-3">
               <li>
                 <div className="font-display text-sm font-semibold tracking-wider">
-                  Spectre
+                  AleoStaking
                 </div>
                 <ul className="mt-4 text-sm text-muted-foreground">
                   <li className="mt-4">
@@ -105,16 +104,16 @@ export function Footer() {
                       Telegram
                     </Link>
                   </li>
-                  {/* <li className="mt-4">
+                  <li className="mt-4">
                     <Link
                       className="transition hover:text-neutral-950"
-                      href="#"
+                      href="https://x.com/AleoStaking"
                       target="_blank"
                       rel="noreferrer"
                     >
                       Twitter
                     </Link>
-                  </li> */}
+                  </li>
                 </ul>
               </li>
             </ul>
@@ -122,8 +121,8 @@ export function Footer() {
         </div>
         <div className="mt-24 flex flex-col flex-wrap items-center justify-center md:flex-row md:justify-between gap-x-6 gap-y-4 border-t border-secondary py-12">
           <div className="flex gap-x-6 items-center">
-            {/* <Link
-              href="https://x.com"
+            <Link
+              href="https://x.com/AleoStaking"
               target="_blank"
               rel="noreferrer"
             >
@@ -135,7 +134,7 @@ export function Footer() {
               >
                 <path d="M13.3174 10.7749L19.1457 4H17.7646L12.7039 9.88256L8.66193 4H4L10.1122 12.8955L4 20H5.38119L10.7254 13.7878L14.994 20H19.656L13.3171 10.7749H13.3174ZM11.4257 12.9738L10.8064 12.0881L5.87886 5.03974H8.00029L11.9769 10.728L12.5962 11.6137L17.7652 19.0075H15.6438L11.4257 12.9742V12.9738Z" />
               </svg>
-            </Link> */}
+            </Link>
             <Link
               className=""
               href="https://discord.gg/TTjeZkdqzW"

@@ -16,9 +16,9 @@ const fontSans = FontSans({
 })
 
 export const metadata: Metadata = {
-  title: 'Spectre',
+  title: 'AleoStaking',
   description:
-    'Spectre liquidity protocol on Aleo: Stake credits, earn rewards, and borrow assets.',
+    'AleoStaking liquidity protocol: Stake credits and earn rewards.',
 }
 
 export default async function RootLayout({

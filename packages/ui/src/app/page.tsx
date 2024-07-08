@@ -55,8 +55,7 @@ export default function HomePage() {
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-3xl">
               <h1 className="font-display text-5xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl">
-                Spectre liquidity protocol on Aleo: Stake credits, earn rewards,
-                and borrow assets.
+                AleoStaking liquidity protocol: Stake credits and earn rewards.
               </h1>
               <p className="mt-6 text-xl" />
               <div className="pt-12">
@@ -100,9 +99,9 @@ export default function HomePage() {
                     Best-in-class security
                   </p>
                   <p className="mt-4 text-base text-muted-foreground">
-                    Spectre offers best-in-class security with its open-source
-                    codebase, allowing anyone to review and verify its integrity
-                    and robustness.
+                    AleoStaking offers best-in-class security with its
+                    open-source codebase, allowing anyone to review and verify
+                    its integrity and robustness.
                   </p>
                 </article>
               </div>
@@ -137,9 +136,9 @@ export default function HomePage() {
                     Competitive rewards
                   </p>
                   <p className="mt-4 text-base text-muted-foreground">
-                    Spectre ensures competitive rewards by distributing staked
-                    assets across multiple validators, providing users with more
-                    stable and consistent returns.
+                    AleoStaking ensures competitive rewards by distributing
+                    staked assets across multiple validators, providing users
+                    with more stable and consistent returns.
                   </p>
                 </article>
               </div>
@@ -171,10 +170,10 @@ export default function HomePage() {
                     Deepest liquidity
                   </p>
                   <p className="mt-4 text-base text-muted-foreground">
-                    With Spectre, you can stake your ALEO and receive stALEO,
-                    maintaining liquidity and maximizing capital efficiency by
-                    earning staking rewards while participating in other DeFi
-                    activities.
+                    With AleoStaking, you can stake your ALEO and receive
+                    stALEO, maintaining liquidity and maximizing capital
+                    efficiency by earning staking rewards while participating in
+                    other DeFi activities.
                   </p>
                 </article>
               </div>
