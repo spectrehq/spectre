@@ -169,6 +169,24 @@ program
   })
 
 program
+  .command("stcredits-user-state")
+  .argument("<user>")
+  .description("show state of the user")
+  .action(async (user: string) => {
+    console.log(`User: ${user}`)
+    const publicCredits = await credits.getPublicBalance(user)
+    console.log(`Public balance: ${Number(publicCredits) / 1e6} credits`)
+    const publicStcredits = await stcredits.getPublicBalance(user)
+    console.log(`                ${Number(publicStcredits) / 1e6} stcredits`)
+    const withdraw = await stcredits.getWithdraw(user)
+    if (!withdraw) {
+      console.log("Withdraw: None")
+      return
+    }
+    console.log(`Withdraw: ${Number(withdraw.amount) / 1e6} credits, claimable height ${withdraw.height}, ${withdraw.pending ? "pending" : "not pending"}`)
+  })
+
+program
   .command("list-validators")
   .description("list validators who sustain the stcredits program")
   .action(async () => {

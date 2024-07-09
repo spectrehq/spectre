@@ -297,6 +297,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       delegatorBonded.push({ delegator, delegatorProgramName, delegatorProgramPath, validatorIndex, validator, bonded })
     }
 
+    console.log("delegators:", delegatorBonded)
     return delegatorBonded
   }
 
@@ -342,10 +343,16 @@ class StCreditsProgram extends StCreditsProgramBase {
     while (true) {
       const totalBuffered = await this.getTotalBuffered()
       const totalWithdraw = await this.getTotalWithdraw()
-      const amount = totalBuffered - totalWithdraw
+      const totalPendingWithdraw = await this.getTotalPendingWithdraw()
+      if (totalPendingWithdraw <= 0n) {
+        return
+      }
+      let amount = totalBuffered - totalWithdraw
       if (amount <= 0n) {
         return
       }
+
+      amount = totalPendingWithdraw > amount ? amount : totalPendingWithdraw
 
       // TODO: calculate an appropriate height
 

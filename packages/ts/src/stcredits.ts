@@ -83,7 +83,9 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getCacheState() {
-    return parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
+    const cache = parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
+    cache.state = Number(cache.state)
+    return cache
   }
 
   async getWithdraw(account: string) {

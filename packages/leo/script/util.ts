@@ -57,10 +57,12 @@ export const STAKING_OPERATOR_PRIVATE_KEY = process.env.STAKING_OPERATOR_PRIVATE
 export const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
 
 export async function execute(programPath: string, func: string, inputs: string[], privateKey: string) {
+  await delay(500)
+
   const {
     stdout,
     stderr
-  } = await exec(`leo execute -y -b --local --endpoint ${ENDPOINT} --private-key ${privateKey} ${func} ${inputs.join(" ")}`, {
+  } = await exec(`leo execute -y -b --local --non-recursive --endpoint ${ENDPOINT} --private-key ${privateKey} ${func} ${inputs.join(" ")}`, {
     cwd: programPath
   })
   if (stdout) {
@@ -112,6 +114,7 @@ async function queryTransaction(txId: string) {
     let result
     try {
       await delay(2000)
+
       let { stdout, stderr } = await exec(`leo query -q --endpoint ${ENDPOINT} transaction ${txId}`)
 
       if (stderr.includes("contents unavailable")) {
