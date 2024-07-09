@@ -9252,7 +9252,8 @@ class UT extends Ur {
     return Jc(await this.getMappingValue("state", it(e)));
   }
   async getCacheState() {
-    return Ft(await this.getMappingValue("cache_state", it(0)));
+    const e = Ft(await this.getMappingValue("cache_state", it(0)));
+    return e.state = Number(e.state), e;
   }
   async getWithdraw(e) {
     const n = await this.getMappingValueOrNull("withdraws", e);
@@ -9262,7 +9263,7 @@ class UT extends Ur {
     return qi(await this.getMappingValue("pending_resolved", it(0)));
   }
   isWithdrawClaimable(e, n, r, i) {
-    return n.height <= (n.pending ? r : i);
+    return e.height <= (e.pending ? r : i) && e.amount <= n;
   }
   async getValidatorsCount() {
     return qi(await this.getMappingValue("validators_count", it(0)));

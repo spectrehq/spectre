@@ -392,7 +392,7 @@ program spectre_stcredits_v1.aleo {
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
         let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
         let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
-        assert(amount as field <= total_buffered - total_withdraw - total_pending_withdraw);
+        assert(total_buffered >= total_withdraw + total_pending_withdraw);
 
         // Protocol fee.
         {
@@ -580,8 +580,6 @@ program spectre_stcredits_v1.aleo {
     }
 
     async function finalize_supply(f1: Future, user: address, credits: field) {
-        f1.await();
-
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
@@ -590,6 +588,10 @@ program spectre_stcredits_v1.aleo {
 
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
+
+        // Wait for `credits.aleo/transfer_public_as_signer` finished.
+        f1.await();
+
         let total_bonded: field = Mapping::get(state, TOTAL_BONDED_KEY);
         let total_unbonding: field = Mapping::get(state, TOTAL_UNBONDING_KEY);
         let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);

@@ -83,7 +83,9 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getCacheState() {
-    return parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
+    const cache = parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
+    cache.state = Number(cache.state)
+    return cache
   }
 
   async getWithdraw(account: string) {
@@ -95,8 +97,8 @@ export class StCreditsProgram extends ProgramBase {
     return u32(await this.getMappingValue("pending_resolved", u8Str(0)))
   }
 
-  isWithdrawClaimable(account: string, withdraw: Withdraw, pendingWithdrawResolved: bigint, currentHeight: bigint) {
-    return withdraw.height <= (!withdraw.pending ? currentHeight : pendingWithdrawResolved)
+  isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, pendingWithdrawResolved: bigint, currentHeight: bigint) {
+    return (withdraw.height <= (!withdraw.pending ? currentHeight : pendingWithdrawResolved)) && (withdraw.amount <= totalWithdraw)
   }
 
   async getValidatorsCount() {

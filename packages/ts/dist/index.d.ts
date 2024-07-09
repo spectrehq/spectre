@@ -185,7 +185,7 @@ export declare class StCreditsProgram extends ProgramBase {
 	getCacheState(): Promise<CacheState>;
 	getWithdraw(account: string): Promise<Withdraw | null>;
 	getPendingWithdrawResolved(): Promise<bigint>;
-	isWithdrawClaimable(account: string, withdraw: Withdraw, pendingWithdrawResolved: bigint, currentHeight: bigint): boolean;
+	isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, pendingWithdrawResolved: bigint, currentHeight: bigint): boolean;
 	getValidatorsCount(): Promise<bigint>;
 	getValidator(index: number): Promise<string | null>;
 	hasValidator(validator: string): Promise<boolean>;
