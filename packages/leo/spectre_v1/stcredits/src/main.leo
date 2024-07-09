@@ -745,24 +745,24 @@ program spectre_stcredits_v1.aleo {
         // Cache total bonded and unbonding credits.
         for i: u32 in 0u32..CACHE_BATCH_NUM {
             let index: u32 = start + i;
-            if index < count {
-                let validator: address = Mapping::get_or_use(validators, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-                let delegator: address = Mapping::get_or_use(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-                if (delegator != aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc) {
-                    let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-                    assert(bonded.validator == validator);
-                    let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
 
-                    let cache: CacheState = Mapping::get(cache_state, 0u8);
-                    Mapping::set(cache_state, 0u8, CacheState {
-                        state: CACHE_STATE_IN_PROGRESS,
-                        height: cache.height,
-                        total_bonded: cache.total_bonded + bonded.microcredits as field,
-                        total_unbonding: cache.total_unbonding + unbonding.microcredits as field,
-                        next_index: cache.next_index,
-                    });
-                }
-            }
+            let validator: address = Mapping::get_or_use(validators, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+            let delegator: address = Mapping::get_or_use(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
+
+            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+            assert(bonded.validator == validator);
+            let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+
+            let update: bool = index < count && delegator != aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
+
+            let cache: CacheState = Mapping::get(cache_state, 0u8);
+            Mapping::set(cache_state, 0u8, CacheState {
+                state: CACHE_STATE_IN_PROGRESS,
+                height: cache.height,
+                total_bonded: update ? cache.total_bonded + bonded.microcredits as field : cache.total_bonded,
+                total_unbonding: update ? cache.total_unbonding + unbonding.microcredits as field : cache.total_unbonding,
+                next_index: cache.next_index,
+            });
         }
 
         // Update cache state.
