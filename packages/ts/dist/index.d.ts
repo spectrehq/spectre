@@ -169,15 +169,8 @@ export interface CacheState {
 }
 export interface Withdraw {
 	amount: bigint;
+	pending: boolean;
 	height: bigint;
-}
-export interface PendingWithdraw {
-	amount: bigint;
-	index: bigint;
-}
-export interface QueueStartEnd {
-	start: bigint;
-	end: bigint;
 }
 export declare class StCreditsProgram extends ProgramBase {
 	credits: CreditsProgram;
@@ -191,9 +184,8 @@ export declare class StCreditsProgram extends ProgramBase {
 	getState(key: StateEnum): Promise<bigint>;
 	getCacheState(): Promise<CacheState>;
 	getWithdraw(account: string): Promise<Withdraw | null>;
-	getPendingWithdraw(account: string): Promise<PendingWithdraw | null>;
-	getPendingQueueUser(index: number): Promise<string | null>;
-	getPendingQueueStartEnd(): Promise<QueueStartEnd>;
+	getPendingWithdrawResolved(): Promise<bigint>;
+	isWithdrawClaimable(account: string, withdraw: Withdraw, pendingWithdrawResolved: bigint, currentHeight: bigint): boolean;
 	getValidatorsCount(): Promise<bigint>;
 	getValidator(index: number): Promise<string | null>;
 	hasValidator(validator: string): Promise<boolean>;

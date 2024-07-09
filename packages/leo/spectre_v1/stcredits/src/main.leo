@@ -173,8 +173,6 @@ program spectre_stcredits_v1.aleo {
 
     const CACHE_BATCH_NUM: u32 = 10u32;
 
-    const RESOLVE_WITHDRAWAL_BATCH_NUM: u32 = 2u32;
-
     struct Config {
         initialized: bool,
         treasury: address,
@@ -207,26 +205,13 @@ program spectre_stcredits_v1.aleo {
 
     struct Withdraw {
         amount: field, // credits
-        height: u32, // block height at which the withdraw can be claimed
-    }
-
-    struct PendingWithdraw {
-        amount: field, // credits
-        index: field, // index in queue
-    }
-
-    struct QueueStartEnd {
-        start: field,
-        end: field,
+        pending: bool, // whether the withdraw is pending
+        height: u32, // block height at which the withdraw can be claimed or the pending withdraw **may** be claimed
     }
 
     mapping withdraws: address => Withdraw; // user => withdraw
 
-    mapping pending_withdraws: address => PendingWithdraw; // user => pending withdraw
-
-    mapping pending_queue: field => address; // index => user
-
-    mapping pending_queue_start_end: u8 => QueueStartEnd; // 0u8 => (start, end)
+    mapping pending_resolved: u8 => u32; // 0u8 => block height of the last resolved
 
     mapping validators_count: u8 => u32; // 0u8 => count of validators
 
@@ -264,8 +249,8 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(state, PROTOCOL_FEE_KEY, 0field); // 0%
         // Initialize the cache state.
         Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
-        // Initialize the pending queue.
-        Mapping::set(pending_queue_start_end, 0u8, QueueStartEnd {start: 0field, end: 0field});
+        // Initialize the pending resolved.
+        Mapping::set(pending_resolved, 0u8, 0u32);
         // Initialize the validators count.
         Mapping::set(validators_count, 0u8, 0u32);
     }
@@ -444,7 +429,7 @@ program spectre_stcredits_v1.aleo {
      * The `amount` should be calculated offline.
      */
     async transition unbond(public validator_index: u32, public validator: address, delegator: address, public amount: u64) -> Future {
-        // Check the caller is the mediator.
+        // Check the caller is the operator.
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
         let f2: Future = credits.aleo/unbond_public(delegator, amount);
@@ -537,38 +522,50 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
-        for i: u32 in 0u32..RESOLVE_WITHDRAWAL_BATCH_NUM {
-            let start_end: QueueStartEnd = Mapping::get(pending_queue_start_end, 0u8);
-            if (start_end.end - start_end.start <= 0field) {
-                return;
-            }
+        let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
+        let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
+        let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
 
-            let index: field = start_end.start;
-            let user: address = Mapping::get_or_use(pending_queue, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-            let pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, user, PendingWithdraw { amount: 0field, index: 0field });
-            assert(pending.index == index);
-            assert(pending.amount > 0field);
+        assert(total_buffered >= total_withdraw + total_pending_withdraw);
 
-            let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
-            let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-            let liquidity: field = total_buffered - total_withdraw;
-            if (liquidity < pending.amount) {
-                return;
-            }
+        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + total_pending_withdraw);
+        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, 0field);
 
-            // Pop the pending withdraw from the queue.
-            Mapping::set(pending_queue_start_end, 0u8, QueueStartEnd {start: start_end.start + 1field, end: start_end.end});
-            Mapping::remove(pending_queue, index);
-            Mapping::remove(pending_withdraws, user);
+        // Set the pending resolved height with the current block height.
+        Mapping::set(pending_resolved, 0u8, block.height);
+    }
 
-            // Merge the pending withdraw to the withdraw if exists.
-            let withdraw: Withdraw = Mapping::get_or_use(withdraws, user, Withdraw {amount: 0field, height: 0u32});
-            Mapping::set(withdraws, user, Withdraw {amount: withdraw.amount + pending.amount, height: block.height + WITHDRAW_DELAY});
+    /**
+     * This function can be called by the operator to resolve the pending withdrawals.
+     */
+    async transition resolve_withdrawal_force(public credits: u64, public height: u32) -> Future {
+        // Check the caller is the operator.
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
-            // Update the total withdraw and total pending withdraw.
-            Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY) - pending.amount);
-            Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + pending.amount);
-        }
+        return finalize_resolve_withdrawal_force(f, credits as field, height);
+    }
+
+    async function finalize_resolve_withdrawal_force(f: Future, credits: field, height: u32) {
+        f.await();
+
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
+        let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
+        let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
+        let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+
+        assert(total_buffered >= total_withdraw + credits);
+
+        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + credits);
+        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, total_pending_withdraw - credits);
+
+        // Check: last resolve height <= resolved height <= current height.
+        let resolved_height: u32 = height > 0u32 ? height : block.height;
+        assert(resolved_height >= Mapping::get(pending_resolved, 0u8) && resolved_height <= block.height);
+
+        // Set the pending resolved height with the specified height.
+        Mapping::set(pending_resolved, 0u8, resolved_height);
     }
 
     /**
@@ -636,50 +633,24 @@ program spectre_stcredits_v1.aleo {
         // Calculate credits to withdraw.
         let credits: field = getCreditsFromStCredits(stcredits, total_pooled, total_stcredits_supply);
 
-        // Burn stcredits
+        // Burn stcredits.
         Mapping::set(account, user, Mapping::get_or_use(account, user, 0u64) - stcredits as u64);
         Mapping::set(total_supply, 0u8, (total_stcredits_supply - stcredits) as u64);
 
-        let liquidity: field = total_buffered - total_withdraw;
+        // Update total withdraw and total pending withdraw.
+        let liquidity: field = total_buffered > total_withdraw + total_pending_withdraw ? total_buffered - total_withdraw - total_pending_withdraw : 0field;
+        let withdraw_credits: field = liquidity >= credits ? credits : liquidity;
+        let pending_credits: field = credits - withdraw_credits;
+        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + withdraw_credits);
+        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, total_pending_withdraw + pending_credits);
 
-        let has_withdraw: bool = Mapping::contains(withdraws, user);
-        if (!has_withdraw) {
-            let amount: field = liquidity >= credits ? credits : liquidity;
-            Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + amount);
-            Mapping::set(withdraws, user, Withdraw {amount, height: block.height + WITHDRAW_DELAY});
-            if (liquidity >= credits) {
-                // Done.
-                return;
-            }
-        }
-
-        // Calculate credits of pending withdraw.
-        let pending_credits: field = !has_withdraw ? credits - liquidity : credits;
-
-        let start_end: QueueStartEnd = Mapping::get(pending_queue_start_end, 0u8);
-
-        if (!Mapping::contains(pending_withdraws, user)) { // no pending withdraw for user
-            // Push to the end of the queue.
-            Mapping::set(pending_queue, start_end.end, user);
-            Mapping::set(pending_queue_start_end, 0u8, QueueStartEnd {start: start_end.start, end: start_end.end + 1field});
-            Mapping::set(pending_withdraws, user, PendingWithdraw {amount: pending_credits, index: start_end.end});
-        } else { // has pending withdraw for user
-            let pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, user, PendingWithdraw { amount: 0field, index: 0field });
-            assert(pending.index >= start_end.start && pending.index < start_end.end);
-            let last_index: field = start_end.end - 1field;
-            if (pending.index != last_index) { // user is not at the end of the queue
-                // Swap the user to the end of the queue.
-                let last_user: address = Mapping::get_or_use(pending_queue, last_index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-                let last_pending: PendingWithdraw = Mapping::get_or_use(pending_withdraws, last_user, PendingWithdraw { amount: 0field, index: 0field });
-                Mapping::set(pending_queue, pending.index, last_user);
-                Mapping::set(pending_queue, last_index, user);
-                Mapping::set(pending_withdraws, last_user, PendingWithdraw {amount: last_pending.amount, index: pending.index});
-            }
-            // Add amount to existing pending withdraw.
-            Mapping::set(pending_withdraws, user, PendingWithdraw {amount: pending.amount + pending_credits, index: last_index});
-        }
-
-        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY) + pending_credits);
+        // Update user withdraw.
+        let withdraw: Withdraw = Mapping::get_or_use(withdraws, user, Withdraw {amount: 0field, pending: false, height: 0u32});
+        Mapping::set(withdraws, user, Withdraw {
+            amount: withdraw.amount + credits,
+            pending: withdraw.pending || pending_credits > 0field,
+            height: block.height + WITHDRAW_DELAY,
+        });
     }
 
     /**
@@ -697,8 +668,10 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
+        let resolved_height: u32 = Mapping::get(pending_resolved, 0u8);
+
         let withdraw: Withdraw = Mapping::get(withdraws, user);
-        assert(withdraw.height <= block.height);
+        assert(withdraw.height <= (!withdraw.pending ? block.height : resolved_height));
         assert_eq(withdraw.amount, amount);
 
         Mapping::remove(withdraws, user);

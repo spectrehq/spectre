@@ -150,6 +150,9 @@ program
       console.log(`    ${stateStrings.get(key)}: ${state}`)
     }
 
+    const pendingWithdrawResolved = await stcredits.getPendingWithdrawResolved()
+    console.log(`    PENDING_WITHDRAW_RESOLVED: ${pendingWithdrawResolved}`)
+
     console.log("Cache:")
     const cacheState = await stcredits.getCacheState()
     console.log(`    State: ${cacheStateStrings.get(Number(cacheState.state))}`)
@@ -157,35 +160,6 @@ program
     console.log(`    Total bonded: ${cacheState.total_bonded / BigInt(1e6)}`)
     console.log(`    Total unbonding: ${cacheState.total_unbonding / BigInt(1e6)}`)
     console.log(`    Next index: ${cacheState.next_index}`)
-  })
-
-program
-  .command("stcredits-pending-withdrawals")
-  .description("list pending withdrawals of the stcredits program")
-  .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
-    const startEnd = await stcredits.getPendingQueueStartEnd()
-    console.log(`Pending queue: [${startEnd.start}, ${startEnd.end})`)
-
-    for (let i = startEnd.start; i < startEnd.end; i++) {
-      const user = await stcredits.getPendingQueueUser(Number(i))
-      if (!user) {
-        console.warn(`Failed to get user ${i} from the pending withdraw queue`)
-        continue
-      }
-      process.stdout.write(`    ${i}. ${user} `)
-      const pending = await stcredits.getPendingWithdraw(user)
-      if (!pending) {
-        console.warn(`Failed to get pending withdraw for user ${user}`)
-        continue
-      }
-      assert(pending.index === BigInt(i), `Invalid pending withdraw index for user ${user}`)
-      process.stdout.write(`${pending.amount / BigInt(1e6)}`)
-    }
-    process.stdout.write("\n")
   })
 
 program

@@ -323,36 +323,22 @@ class StCreditsProgram extends StCreditsProgramBase {
 
   async resolveWithdraw() {
     while (true) {
-      const startEnd = await this.getPendingQueueStartEnd()
-      if (startEnd.end <= startEnd.start) {
-        console.log("no pending withdraw queue")
-        return
-      }
-
-      const firstPendingUser = await this.getPendingQueueUser(Number(startEnd.start))
-      if (!firstPendingUser) {
-        console.warn("first pending user not found")
-        return
-      }
-      const firstPending = await this.getPendingWithdraw(firstPendingUser)
-      if (!firstPending) {
-        console.warn("first pending withdraw not found")
-        return
-      }
-
       const totalBuffered = await this.getTotalBuffered()
       const totalWithdraw = await this.getTotalWithdraw()
-      if (totalBuffered - totalWithdraw < firstPending.amount) {
+      const amount = totalBuffered - totalWithdraw
+      if (amount <= 0n) {
         return
       }
+
+      // TODO: calculate an appropriate height
 
       await this.execute(
         programPath("stcredits"),
         {
           programName: STCREDITS_PROGRAM(),
-          functionName: "resolve_withdrawal",
+          functionName: "resolve_withdrawal_force",
           privateFee: false,
-          inputs: []
+          inputs: [u64Str(amount), u32Str(0)]
         })
     }
   }

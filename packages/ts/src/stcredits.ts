@@ -38,17 +38,8 @@ export interface CacheState {
 
 export interface Withdraw {
   amount: bigint
+  pending: boolean
   height: bigint
-}
-
-export interface PendingWithdraw {
-  amount: bigint
-  index: bigint
-}
-
-export interface QueueStartEnd {
-  start: bigint
-  end: bigint
 }
 
 export class StCreditsProgram extends ProgramBase {
@@ -103,17 +94,12 @@ export class StCreditsProgram extends ProgramBase {
     return withdraw === null ? null : (parsePlaintext(withdraw) as unknown as Withdraw)
   }
 
-  async getPendingWithdraw(account: string) {
-    const pendingWithdraw = await this.getMappingValueOrNull('pending_withdraws', account)
-    return pendingWithdraw === null ? null : (parsePlaintext(pendingWithdraw) as unknown as PendingWithdraw)
+  async getPendingWithdrawResolved() {
+    return u32(await this.getMappingValue('pending_resolved', u8Str(0)))
   }
 
-  async getPendingQueueUser(index: number) {
-    return await this.getMappingValueOrNull('pending_queue', fieldStr(index))
-  }
-
-  async getPendingQueueStartEnd() {
-    return parsePlaintext(await this.getMappingValue('pending_queue_start_end', u8Str(0))) as unknown as QueueStartEnd
+  isWithdrawClaimable(account: string, withdraw: Withdraw, pendingWithdrawResolved: bigint, currentHeight: bigint) {
+    return withdraw.height <= (!withdraw.pending ? currentHeight : pendingWithdrawResolved)
   }
 
   async getValidatorsCount() {
