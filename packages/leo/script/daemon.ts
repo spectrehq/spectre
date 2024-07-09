@@ -10,10 +10,17 @@ import {
   u32Str,
   u64Str,
   BondState,
-  initialize
+  initialize, CreditsProgram
 } from "spectre"
 import config from "../config.json"
-import { delay, ENDPOINT, execute, programPath, STAKING_OPERATOR_PRIVATE_KEY } from "./util"
+import {
+  delay,
+  ENDPOINT,
+  execute,
+  programPath,
+  queryMappingValue,
+  STAKING_OPERATOR_PRIVATE_KEY
+} from "./util"
 
 export async function run() {
   initialize(config)
@@ -51,7 +58,8 @@ export async function run() {
   // const period = 5 * 60 * 1000 // 5min
   const period = 5000
   // eslint-disable-next-line no-constant-condition
-  while (true) {
+  for (let i = 0; ; i++) {
+    console.log(`******************** ${i} ********************`)
     const startAt = Date.now()
 
     await operate(programManager)
@@ -76,20 +84,29 @@ async function operate(programManager: ProgramManager) {
   }
 
   await stcreditsProgram.claimUnbond()
+  await delay(2000)
   await stcreditsProgram.resolveWithdraw()
+  await delay(2000)
   await stcreditsProgram.cache()
+  await delay(2000)
   // unbond can only be called after cache is finished successfully
   await stcreditsProgram.unbond()
+  await delay(2000)
   await stcreditsProgram.cache()
+  await delay(2000)
   // bond can only be called after cache is finished successfully
   await stcreditsProgram.bond()
+  await delay(2000)
 }
 
 class StCreditsProgram extends StCreditsProgramBase {
   constructor(private programManager: ProgramManager) {
     super(
       async (mapping, key) =>
-        (await programManager.networkClient.getProgramMappingValue(STCREDITS_PROGRAM(), mapping, key)) as string
+        (await programManager.networkClient.getProgramMappingValue(STCREDITS_PROGRAM(), mapping, key)) as string,
+      new CreditsProgram(async (mapping: string, key: string) => {
+        return await queryMappingValue("credits", mapping, key)
+      })
     )
   }
 

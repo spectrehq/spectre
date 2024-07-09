@@ -92,7 +92,12 @@ export async function run(programPath: string, func: string, inputs: string[]) {
   return stdout.trim()
 }
 
-export async function queryMappingValue(programPath: string, mapping: string, key: string) {
+export async function queryMappingValue(program: string, mapping: string, key: string) {
+  let { stdout } = await exec(`leo query --endpoint ${ENDPOINT} program -q --mapping-value ${mapping} '${key}' ${program}`)
+  return stdout.trim()
+}
+
+export async function queryMappingValueFromPath(programPath: string, mapping: string, key: string) {
   const programJsonPath = path.join(programPath, "program.json")
   const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
 

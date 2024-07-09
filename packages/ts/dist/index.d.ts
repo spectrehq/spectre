@@ -174,7 +174,7 @@ export interface Withdraw {
 }
 export declare class StCreditsProgram extends ProgramBase {
 	credits: CreditsProgram;
-	constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>);
+	constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>, credits: CreditsProgram);
 	getTotalSupply(): Promise<bigint>;
 	getPublicBalance(account: string): Promise<bigint>;
 	getApproval(approver: string, spender: string): Promise<bigint>;

@@ -2754,17 +2754,17 @@ function Ni() {
   }), F.strict.strict = F.strict, jr.exports;
 }
 var Ql = Ni();
-const Vn = /* @__PURE__ */ eu(Ql), ef = "aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc", tf = 0, fT = 1, hT = 2, dT = 3, pT = 4, gT = 5, yT = 6, mT = 10n, $s = "v1", Us = "spectre";
+const Vn = /* @__PURE__ */ eu(Ql), ef = "aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc", tf = 0, lT = 1, fT = 2, hT = 3, dT = 4, pT = 5, gT = 6, yT = 10n, $s = "v1", Us = "spectre";
 function Ar(t) {
   return `${Us}_${t}_${$s}_${mt.programSuffix}.aleo`;
 }
-const ET = () => Ar(mt.programs.accessControl), TT = () => Ar(mt.programs.aclManager), nf = () => Ar(mt.programs.stcredits), AT = () => Ar(mt.programs.stcreditsPoints);
-function vT(t) {
+const mT = () => Ar(mt.programs.accessControl), ET = () => Ar(mt.programs.aclManager), nf = () => Ar(mt.programs.stcredits), TT = () => Ar(mt.programs.stcreditsPoints);
+function AT(t) {
   const e = (t + 1).toString().padStart(3, "0");
   return `${Us}_${mt.programs.delegator}_${$s}_${mt.programSuffix}_${e}.aleo`;
 }
 let mt;
-function ST(t) {
+function vT(t) {
   Vn(!mt), mt = t;
 }
 const xn = globalThis || void 0 || self;
@@ -8989,7 +8989,7 @@ function pr(t) {
     return !1;
   throw new Error("invalid boolean string");
 }
-function bT(t) {
+function IT(t) {
   return t ? "true" : "false";
 }
 function Be(t, e) {
@@ -8998,31 +8998,31 @@ function Be(t, e) {
 function JE(t) {
   return BigInt(Be(t, "i8"));
 }
-function RT(t) {
+function bT(t) {
   return `${t}i8`;
 }
 function ZE(t) {
   return BigInt(Be(t, "i16"));
 }
-function NT(t) {
+function RT(t) {
   return `${t}i16`;
 }
 function QE(t) {
   return BigInt(Be(t, "i32"));
 }
-function _T(t) {
+function NT(t) {
   return `${t}i32`;
 }
 function eT(t) {
   return BigInt(Be(t, "i64"));
 }
-function PT(t) {
+function _T(t) {
   return `${t}i64`;
 }
 function tT(t) {
   return BigInt(Be(t, "i128"));
 }
-function wT(t) {
+function PT(t) {
   return `${t}i128`;
 }
 function Xc(t) {
@@ -9034,7 +9034,7 @@ function it(t) {
 function nT(t) {
   return BigInt(Be(t, "u16"));
 }
-function CT(t) {
+function wT(t) {
   return `${t}u16`;
 }
 function qi(t) {
@@ -9052,25 +9052,25 @@ function yi(t) {
 function Gi(t) {
   return BigInt(Be(t, "u128"));
 }
-function LT(t) {
+function CT(t) {
   return `${t}u128`;
 }
 function Jc(t) {
   return BigInt(Be(t, "field"));
 }
-function xT(t) {
+function LT(t) {
   return `${t}field`;
 }
 function iT(t) {
   return BigInt(Be(t, "group"));
 }
-function kT(t) {
+function xT(t) {
   return `${t}group`;
 }
 function oT(t) {
   return BigInt(Be(t, "scalar"));
 }
-function MT(t) {
+function kT(t) {
   return `${t}scalar`;
 }
 class Ur {
@@ -9127,7 +9127,7 @@ async function Qc(t) {
 async function sT(t) {
   return (await Zc()).ProgramID.fromString(t).toAddress();
 }
-class cT extends Ur {
+class FT extends Ur {
   /**
    * Get the state of the committee for an **active** validator.
    * @param validator
@@ -9218,11 +9218,10 @@ class $T extends Ur {
     return typeof n == "number" ? n === r : this.hasRole(r, n);
   }
 }
-var uT = /* @__PURE__ */ ((t) => (t[t.TOTAL_WITHDRAW_KEY = 0] = "TOTAL_WITHDRAW_KEY", t[t.TOTAL_PENDING_WITHDRAW_KEY = 1] = "TOTAL_PENDING_WITHDRAW_KEY", t[t.TOTAL_BONDED_KEY = 2] = "TOTAL_BONDED_KEY", t[t.TOTAL_UNBONDING_KEY = 3] = "TOTAL_UNBONDING_KEY", t[t.PROTOCOL_FEE_KEY = 4] = "PROTOCOL_FEE_KEY", t))(uT || {}), lT = /* @__PURE__ */ ((t) => (t[t.INVALID = 0] = "INVALID", t[t.IN_PROGRESS = 1] = "IN_PROGRESS", t[t.VALID = 2] = "VALID", t))(lT || {});
+var cT = /* @__PURE__ */ ((t) => (t[t.TOTAL_WITHDRAW_KEY = 0] = "TOTAL_WITHDRAW_KEY", t[t.TOTAL_PENDING_WITHDRAW_KEY = 1] = "TOTAL_PENDING_WITHDRAW_KEY", t[t.TOTAL_BONDED_KEY = 2] = "TOTAL_BONDED_KEY", t[t.TOTAL_UNBONDING_KEY = 3] = "TOTAL_UNBONDING_KEY", t[t.PROTOCOL_FEE_KEY = 4] = "PROTOCOL_FEE_KEY", t))(cT || {}), uT = /* @__PURE__ */ ((t) => (t[t.INVALID = 0] = "INVALID", t[t.IN_PROGRESS = 1] = "IN_PROGRESS", t[t.VALID = 2] = "VALID", t))(uT || {});
 class UT extends Ur {
-  credits;
-  constructor(e) {
-    super(e), this.credits = new cT(e);
+  constructor(e, n) {
+    super(e), this.credits = n;
   }
   async getTotalSupply() {
     return yt(await this.getMappingValueOrDefault("total_supply", it(0), "0"));
@@ -9348,57 +9347,57 @@ class jT extends Ur {
   }
 }
 export {
-  ET as ACCESS_CONTROL_PROGRAM,
-  TT as ACL_MANAGER_PROGRAM,
-  yT as ASSET_LISTING_ADMIN_ROLE,
+  mT as ACCESS_CONTROL_PROGRAM,
+  ET as ACL_MANAGER_PROGRAM,
+  gT as ASSET_LISTING_ADMIN_ROLE,
   $T as AccessControlProgram,
-  lT as CacheStateEnum,
-  cT as CreditsProgram,
+  uT as CacheStateEnum,
+  FT as CreditsProgram,
   tf as DEFAULT_ADMIN_ROLE,
-  pT as EMERGENCY_ADMIN_ROLE,
-  dT as POOL_ADMIN_ROLE,
+  dT as EMERGENCY_ADMIN_ROLE,
+  hT as POOL_ADMIN_ROLE,
   Us as PREFIX,
   Ur as ProgramBase,
-  gT as RISK_ADMIN_ROLE,
-  fT as STAKING_ADMIN_ROLE,
-  hT as STAKING_OPERATOR_ROLE,
-  mT as STCREDITS_CACHE_BATCH_NUM,
-  AT as STCREDITS_POINTS_PROGRAM,
+  pT as RISK_ADMIN_ROLE,
+  lT as STAKING_ADMIN_ROLE,
+  fT as STAKING_OPERATOR_ROLE,
+  yT as STCREDITS_CACHE_BATCH_NUM,
+  TT as STCREDITS_POINTS_PROGRAM,
   nf as STCREDITS_PROGRAM,
   jT as StCreditsPointsProgram,
   UT as StCreditsProgram,
-  uT as StateEnum,
+  cT as StateEnum,
   $s as VERSION,
   ef as ZERO_ADDRESS,
   Qc as bhp256HashToField,
   pr as bool,
-  bT as boolStr,
-  vT as delegatorProgramName,
+  IT as boolStr,
+  AT as delegatorProgramName,
   Jc as field,
-  xT as fieldStr,
+  LT as fieldStr,
   iT as group,
-  kT as groupStr,
+  xT as groupStr,
   tT as i128,
-  wT as i128Str,
+  PT as i128Str,
   ZE as i16,
-  NT as i16Str,
+  RT as i16Str,
   QE as i32,
-  _T as i32Str,
+  NT as i32Str,
   eT as i64,
-  PT as i64Str,
+  _T as i64Str,
   JE as i8,
-  RT as i8Str,
+  bT as i8Str,
   Zc as importAleo,
-  ST as initialize,
+  vT as initialize,
   aT as parseLiteral,
   Ft as parsePlaintext,
   sT as programAddress,
   oT as scalar,
-  MT as scalarStr,
+  kT as scalarStr,
   Gi as u128,
-  LT as u128Str,
+  CT as u128Str,
   nT as u16,
-  CT as u16Str,
+  wT as u16Str,
   qi as u32,
   rT as u32Str,
   yt as u64,

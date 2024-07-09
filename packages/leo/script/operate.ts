@@ -15,7 +15,9 @@ import {
   u8Str,
   importAleo,
   StateEnum,
-  CacheStateEnum
+  CacheStateEnum,
+  initialize,
+  CreditsProgram
 } from "spectre"
 import {
   ADMIN_PRIVATE_KEY,
@@ -23,11 +25,21 @@ import {
   ProgramJson,
   programPath,
   queryMappingValue,
+  queryMappingValueFromPath,
   run,
   STAKING_ADMIN_PRIVATE_KEY,
   STAKING_OPERATOR_PRIVATE_KEY
 } from "./util"
 import config from "../config.json"
+
+initialize(config)
+
+const credits = new CreditsProgram(async (mapping: string, key: string) => {
+  return await queryMappingValue("credits", mapping, key)
+})
+const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
+  return await queryMappingValueFromPath(programPath("stcredits"), mapping, key)
+}, credits)
 
 const program = new Command()
 program.name("operate").description("CLI to spectre operations").version("0.0.1")
@@ -37,7 +49,7 @@ program
   .description("initialize Access Control and ACL")
   .action(async () => {
     const accessControl = new AccessControlProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("access_control"), mapping, key)
+      return await queryMappingValueFromPath(programPath("access_control"), mapping, key)
     })
 
     if (!(await accessControl.isInitialized())) {
@@ -72,10 +84,6 @@ program
   .command("stcredits-initialize")
   .description("initialize the stcredits program")
   .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
     if (!(await stcredits.isInitialized())) {
       await execute(programPath("stcredits"), "initialize", [], STAKING_ADMIN_PRIVATE_KEY)
     }
@@ -85,10 +93,6 @@ program
   .command("stcredits-unpause")
   .description("unpause the stcredits program")
   .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
     if (await stcredits.isPaused()) {
       await execute(programPath("stcredits"), "unpause", [], STAKING_ADMIN_PRIVATE_KEY)
     } else {
@@ -100,10 +104,6 @@ program
   .command("stcredits-pause")
   .description("pause the stcredits program")
   .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
     if (!(await stcredits.isPaused())) {
       await execute(programPath("stcredits"), "pause", [], STAKING_ADMIN_PRIVATE_KEY)
     } else {
@@ -112,11 +112,11 @@ program
   })
 
 const stateStrings = new Map([
-  [StateEnum.TOTAL_WITHDRAW_KEY, "TOTAL_WITHDRAW"],
-  [StateEnum.TOTAL_PENDING_WITHDRAW_KEY, "TOTAL_PENDING_WITHDRAW"],
-  [StateEnum.TOTAL_BONDED_KEY, "TOTAL_BONDED"],
-  [StateEnum.TOTAL_UNBONDING_KEY, "TOTAL_UNBONDING"],
-  [StateEnum.PROTOCOL_FEE_KEY, "PROTOCOL_FEE"]
+  [StateEnum.TOTAL_WITHDRAW_KEY, "Total withdraw"],
+  [StateEnum.TOTAL_PENDING_WITHDRAW_KEY, "Total pending withdraw"],
+  [StateEnum.TOTAL_BONDED_KEY, "Total bonded"],
+  [StateEnum.TOTAL_UNBONDING_KEY, "Total unbonding"],
+  [StateEnum.PROTOCOL_FEE_KEY, "Protocol fee"]
 ])
 
 const cacheStateStrings = new Map([
@@ -129,10 +129,6 @@ program
   .command("stcredits-state")
   .description("show state of the stcredits program")
   .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
     const config = await stcredits.getConfig()
     if (!config || !config.initialized) {
       console.log("stcredits program is not initialized")
@@ -141,24 +137,34 @@ program
     console.log("Config:", config)
 
     console.log("State:")
+
+    const totalSupply = await stcredits.getTotalSupply()
+    console.log(`    Total supply: ${Number(totalSupply) / 1e6} stcredits`)
+
+    const totalBuffered = await stcredits.getTotalBuffered()
+    console.log(`    Total buffered: ${Number(totalBuffered) / 1e6} credits`)
+
     for (const key of [StateEnum.TOTAL_WITHDRAW_KEY,
       StateEnum.TOTAL_PENDING_WITHDRAW_KEY,
       StateEnum.TOTAL_BONDED_KEY,
-      StateEnum.TOTAL_UNBONDING_KEY,
-      StateEnum.PROTOCOL_FEE_KEY]) {
+      StateEnum.TOTAL_UNBONDING_KEY
+    ]) {
       const state = await stcredits.getState(key)
-      console.log(`    ${stateStrings.get(key)}: ${state}`)
+      console.log(`    ${stateStrings.get(key)}: ${Number(state) / 1e6} credits`)
     }
 
+    const protocolFee = await stcredits.getState(StateEnum.PROTOCOL_FEE_KEY)
+    console.log(`    Protocol fee rate: ${protocolFee}%`)
+
     const pendingWithdrawResolved = await stcredits.getPendingWithdrawResolved()
-    console.log(`    PENDING_WITHDRAW_RESOLVED: ${pendingWithdrawResolved}`)
+    console.log(`    Pending withdraw resolved at: ${pendingWithdrawResolved}`)
 
     console.log("Cache:")
     const cacheState = await stcredits.getCacheState()
     console.log(`    State: ${cacheStateStrings.get(Number(cacheState.state))}`)
     console.log(`    Height: ${cacheState.height}`)
-    console.log(`    Total bonded: ${cacheState.total_bonded / BigInt(1e6)}`)
-    console.log(`    Total unbonding: ${cacheState.total_unbonding / BigInt(1e6)}`)
+    console.log(`    Total bonded: ${Number(cacheState.total_bonded) / 1e6}`)
+    console.log(`    Total unbonding: ${Number(cacheState.total_unbonding) / 1e6}`)
     console.log(`    Next index: ${cacheState.next_index}`)
   })
 
@@ -166,10 +172,6 @@ program
   .command("list-validators")
   .description("list validators who sustain the stcredits program")
   .action(async () => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
-
     const delegators = new Map<string, string>()
     for (let i = 0; i < config.delegatorNum; i++) {
       const delegatorPath = programPath("delegator", i + 1)
@@ -211,9 +213,6 @@ program
   .description("add validator for the stcredits program")
   .argument("<validator>")
   .action(async (validator: string) => {
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
     if (await stcredits.hasValidator(validator)) {
       console.log(`Validator ${validator} already exists`)
       return
@@ -231,9 +230,6 @@ program
     const index = Number(validatorIndex)
     assert(Number.isInteger(index) && index >= 0, "invalid validator index")
 
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
     if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
       console.log(`Validator ${validator} with index ${index} does not exist`)
       return
@@ -255,9 +251,6 @@ program
     delegatorIndex = Number(delegatorIndex)
     assert(Number.isInteger(delegatorIndex) && delegatorIndex >= 0, "invalid delegator index")
 
-    const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-      return await queryMappingValue(programPath("stcredits"), mapping, key)
-    })
     if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
       console.log(`Validator ${validator} with index ${index} does not exist`)
       return

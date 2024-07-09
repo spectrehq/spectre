@@ -1,7 +1,7 @@
-import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from './types'
-import { bhp256HashToField, programAddress } from './wasm'
-import { STCREDITS_PROGRAM, ZERO_ADDRESS } from './const'
-import { CreditsProgram } from './credits'
+import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from "./types"
+import { bhp256HashToField, programAddress } from "./wasm"
+import { STCREDITS_PROGRAM, ZERO_ADDRESS } from "./const"
+import { CreditsProgram } from "./credits"
 
 export interface Approval {
   approver: string
@@ -43,19 +43,16 @@ export interface Withdraw {
 }
 
 export class StCreditsProgram extends ProgramBase {
-  public credits: CreditsProgram
-
-  constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>) {
+  constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>, public credits: CreditsProgram) {
     super(getMappingValueString)
-    this.credits = new CreditsProgram(getMappingValueString)
   }
 
   async getTotalSupply() {
-    return u64(await this.getMappingValueOrDefault('total_supply', u8Str(0), '0'))
+    return u64(await this.getMappingValueOrDefault("total_supply", u8Str(0), "0"))
   }
 
   async getPublicBalance(account: string) {
-    return u64(await this.getMappingValueOrDefault('account', account, '0'))
+    return u64(await this.getMappingValueOrDefault("account", account, "0"))
   }
 
   async getApproval(approver: string, spender: string) {
@@ -63,11 +60,11 @@ export class StCreditsProgram extends ProgramBase {
       approver: ${approver},
       spender: ${spender}
     }`)
-    return u64(await this.getMappingValueOrDefault('approvals', hash, '0'))
+    return u64(await this.getMappingValueOrDefault("approvals", hash, "0"))
   }
 
   async getConfig() {
-    const configStr = await this.getMappingValueOrNull('config', u8Str(0))
+    const configStr = await this.getMappingValueOrNull("config", u8Str(0))
     return configStr === null ? null : (parsePlaintext(configStr) as unknown as Config)
   }
 
@@ -82,20 +79,20 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getState(key: StateEnum) {
-    return field(await this.getMappingValue('state', u8Str(key)))
+    return field(await this.getMappingValue("state", u8Str(key)))
   }
 
   async getCacheState() {
-    return parsePlaintext(await this.getMappingValue('cache_state', u8Str(0))) as unknown as CacheState
+    return parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
   }
 
   async getWithdraw(account: string) {
-    const withdraw = await this.getMappingValueOrNull('withdraws', account)
+    const withdraw = await this.getMappingValueOrNull("withdraws", account)
     return withdraw === null ? null : (parsePlaintext(withdraw) as unknown as Withdraw)
   }
 
   async getPendingWithdrawResolved() {
-    return u32(await this.getMappingValue('pending_resolved', u8Str(0)))
+    return u32(await this.getMappingValue("pending_resolved", u8Str(0)))
   }
 
   isWithdrawClaimable(account: string, withdraw: Withdraw, pendingWithdrawResolved: bigint, currentHeight: bigint) {
@@ -103,29 +100,29 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getValidatorsCount() {
-    return u32(await this.getMappingValue('validators_count', u8Str(0)))
+    return u32(await this.getMappingValue("validators_count", u8Str(0)))
   }
 
   async getValidator(index: number) {
-    return await this.getMappingValueOrNull('validators', u32Str(index))
+    return await this.getMappingValueOrNull("validators", u32Str(index))
   }
 
   async hasValidator(validator: string) {
-    const delegator = await this.getMappingValueOrNull('validator_delegators', validator)
+    const delegator = await this.getMappingValueOrNull("validator_delegators", validator)
     return delegator !== null
   }
 
   async hasDelegator(delegator: string) {
-    return bool(await this.getMappingValueOrDefault('delegators', delegator, 'false'))
+    return bool(await this.getMappingValueOrDefault("delegators", delegator, "false"))
   }
 
   async getValidatorDelegator(validator: string) {
-    const delegator = await this.getMappingValue('validator_delegators', validator)
+    const delegator = await this.getMappingValue("validator_delegators", validator)
     return delegator === ZERO_ADDRESS ? null : delegator
   }
 
   async getValidatorBonded(validator: string) {
-    return u64(await this.getMappingValueOrDefault('validator_bonded', validator, '0'))
+    return u64(await this.getMappingValueOrDefault("validator_bonded", validator, "0"))
   }
 
   async getTotalBuffered() {
