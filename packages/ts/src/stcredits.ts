@@ -22,14 +22,14 @@ export enum StateEnum {
   PROTOCOL_FEE_KEY = 4,
 }
 
-export enum CacheStateEnum {
+export enum CacheStatus {
   INVALID = 0,
   IN_PROGRESS = 1,
   VALID = 2,
 }
 
 export interface CacheState {
-  state: CacheStateEnum
+  status: CacheStatus
   height: bigint
   total_bonded: bigint
   total_unbonding: bigint
@@ -84,7 +84,7 @@ export class StCreditsProgram extends ProgramBase {
 
   async getCacheState() {
     const cache = parsePlaintext(await this.getMappingValue("cache_state", u8Str(0))) as unknown as CacheState
-    cache.state = Number(cache.state)
+    cache.status = Number(cache.status)
     return cache
   }
 

@@ -155,13 +155,13 @@ export declare enum StateEnum {
 	TOTAL_UNBONDING_KEY = 3,
 	PROTOCOL_FEE_KEY = 4
 }
-export declare enum CacheStateEnum {
+export declare enum CacheStatus {
 	INVALID = 0,
 	IN_PROGRESS = 1,
 	VALID = 2
 }
 export interface CacheState {
-	state: CacheStateEnum;
+	status: CacheStatus;
 	height: bigint;
 	total_bonded: bigint;
 	total_unbonding: bigint;

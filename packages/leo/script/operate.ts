@@ -15,7 +15,7 @@ import {
   u8Str,
   importAleo,
   StateEnum,
-  CacheStateEnum,
+  CacheStatus,
   initialize,
   CreditsProgram
 } from "spectre"
@@ -119,10 +119,10 @@ const stateStrings = new Map([
   [StateEnum.PROTOCOL_FEE_KEY, "Protocol fee"]
 ])
 
-const cacheStateStrings = new Map([
-  [CacheStateEnum.INVALID, "INVALID"],
-  [CacheStateEnum.IN_PROGRESS, "IN_PROGRESS"],
-  [CacheStateEnum.VALID, "VALID"]
+const cacheStatusStrings = new Map([
+  [CacheStatus.INVALID, "INVALID"],
+  [CacheStatus.IN_PROGRESS, "IN_PROGRESS"],
+  [CacheStatus.VALID, "VALID"]
 ])
 
 program
@@ -161,7 +161,7 @@ program
 
     console.log("Cache:")
     const cacheState = await stcredits.getCacheState()
-    console.log(`    State: ${cacheStateStrings.get(Number(cacheState.state))}`)
+    console.log(`    Status: ${cacheStatusStrings.get(Number(cacheState.status))}`)
     console.log(`    Height: ${cacheState.height}`)
     console.log(`    Total bonded: ${Number(cacheState.total_bonded) / 1e6}`)
     console.log(`    Total unbonding: ${Number(cacheState.total_unbonding) / 1e6}`)

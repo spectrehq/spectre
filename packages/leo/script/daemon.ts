@@ -5,7 +5,7 @@ import {
   delegatorProgramName as getDelegatorProgramName,
   STCREDITS_CACHE_BATCH_NUM,
   STCREDITS_PROGRAM,
-  CacheStateEnum,
+  CacheStatus,
   StCreditsProgram as StCreditsProgramBase,
   u32Str,
   u64Str,
@@ -177,7 +177,7 @@ class StCreditsProgram extends StCreditsProgramBase {
     }
 
     let cache = await this.getCacheState()
-    if (cache.state !== CacheStateEnum.VALID) {
+    if (cache.status !== CacheStatus.VALID) {
       console.warn("bond can only be called when cache is valid")
       return
     }
@@ -238,7 +238,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       }
 
       let cache = await this.getCacheState()
-      if (cache.state !== CacheStateEnum.VALID) {
+      if (cache.status !== CacheStatus.VALID) {
         console.warn("unbond can only be called when cache is valid")
         return
       }
@@ -369,7 +369,7 @@ class StCreditsProgram extends StCreditsProgramBase {
 
   async cache(restart: boolean = false) {
     let cache = await this.getCacheState()
-    if (cache.state === CacheStateEnum.VALID && !restart) {
+    if (cache.status === CacheStatus.VALID && !restart) {
       console.log("cache is already valid")
       return
     }
@@ -380,13 +380,13 @@ class StCreditsProgram extends StCreditsProgramBase {
       return
     }
 
-    let start = cache.state === CacheStateEnum.IN_PROGRESS && !restart ? cache.next_index : 0n
+    let start = cache.status === CacheStatus.IN_PROGRESS && !restart ? cache.next_index : 0n
     for (; start < count; start += STCREDITS_CACHE_BATCH_NUM) {
       await this.execute(
         programPath("stcredits"),
         {
           programName: STCREDITS_PROGRAM(),
-          functionName: "cache_total_bonded_unbonding",
+          functionName: "cache",
           privateFee: false,
           inputs: [u32Str(start)]
         })

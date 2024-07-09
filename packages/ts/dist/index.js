@@ -9253,7 +9253,7 @@ class UT extends Ur {
   }
   async getCacheState() {
     const e = Ft(await this.getMappingValue("cache_state", it(0)));
-    return e.state = Number(e.state), e;
+    return e.status = Number(e.status), e;
   }
   async getWithdraw(e) {
     const n = await this.getMappingValueOrNull("withdraws", e);
@@ -9352,7 +9352,7 @@ export {
   ET as ACL_MANAGER_PROGRAM,
   gT as ASSET_LISTING_ADMIN_ROLE,
   $T as AccessControlProgram,
-  uT as CacheStateEnum,
+  uT as CacheStatus,
   FT as CreditsProgram,
   tf as DEFAULT_ADMIN_ROLE,
   dT as EMERGENCY_ADMIN_ROLE,

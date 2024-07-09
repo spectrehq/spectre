@@ -173,6 +173,8 @@ program spectre_stcredits_v1.aleo {
 
     const CACHE_BATCH_NUM: u32 = 10u32;
 
+    const ZERO_ADDRESS: address = aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
+
     struct Config {
         initialized: bool,
         treasury: address,
@@ -189,12 +191,12 @@ program spectre_stcredits_v1.aleo {
 
     mapping state: u8 => field; // index key => value
 
-    const CACHE_STATE_INVALID: u8 = 0u8;
-    const CACHE_STATE_IN_PROGRESS: u8 = 1u8;
-    const CACHE_STATE_VALID: u8 = 2u8;
+    const CACHE_STATUS_INVALID: u8 = 0u8;
+    const CACHE_STATUS_IN_PROGRESS: u8 = 1u8;
+    const CACHE_STATUS_VALID: u8 = 2u8;
 
     struct CacheState {
-        state: u8,
+        status: u8,
         height: u32, // the start height or finished height
         total_bonded: field,
         total_unbonding: field,
@@ -248,7 +250,7 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(state, TOTAL_UNBONDING_KEY, 0field);
         Mapping::set(state, PROTOCOL_FEE_KEY, 0field); // 0%
         // Initialize the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
         // Initialize the pending resolved.
         Mapping::set(pending_resolved, 0u8, 0u32);
         // Initialize the validators count.
@@ -265,7 +267,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         let validator_state: committee_state = Mapping::get_or_use(
             credits.aleo/committee, validator,
@@ -295,7 +297,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -344,7 +346,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -381,8 +383,8 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Check cache is finished and then invalidate it.
-        assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -444,8 +446,8 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Check cache is finished and then invalidate it.
-        assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -504,7 +506,7 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {state: CACHE_STATE_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
         // Ensure the validator is in the set.
         assert_eq(Mapping::get(validators, validator_index), validator);
@@ -584,7 +586,7 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Check cache is finished and valid.
-        assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
+        assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
 
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
@@ -619,7 +621,7 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Check cache is finished and valid.
-        assert_eq(Mapping::get(cache_state, 0u8).state, CACHE_STATE_VALID);
+        assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
 
         // Total buffered equals to credits balance of this program.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
@@ -684,6 +686,160 @@ program spectre_stcredits_v1.aleo {
      * This function should be called several times to cache the total bonded/unbonding state.
      * The number of calls should be equal to: `ceil(validators_count / CACHE_BATCH_NUM)`.
      */
+    async transition cache(public start: u32) -> Future {
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
+
+        return finalize_cache(f, start);
+    }
+
+    async function finalize_cache(f: Future, start: u32) {
+        f.await();
+
+        // Check whether paused.
+        assert(!Mapping::get(config, 0u8).paused);
+
+        // Is new cache flow.
+        let is_start: bool = start == 0u32;
+
+        let cache: CacheState = Mapping::get(cache_state, 0u8);
+        let status: u8 = is_start ? CACHE_STATUS_IN_PROGRESS : cache.status;
+        let height: u32 = is_start ? block.height : cache.height;
+        let total_bonded: field = is_start ? 0field : cache.total_bonded;
+        let total_unbonding: field = is_start ? 0field : cache.total_unbonding;
+        let next_index: u32 = is_start ? 0u32 : cache.next_index;
+
+        // Check cache progress.
+        assert_eq(status, CACHE_STATUS_IN_PROGRESS);
+        assert_eq(start, next_index);
+
+        // Get the total number of validators.
+        let count: u32 = Mapping::get(validators_count, 0u8);
+
+        let index: u32 = start + 0u32;
+        let validator: address = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        let delegator: address = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 1u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 2u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 3u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 4u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 5u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 6u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 7u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 8u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        index = start + 9u32;
+        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
+        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
+        assert(bonded.validator == validator);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
+        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        total_bonded = total_bonded + bonded.microcredits as field;
+        total_unbonding = total_unbonding + unbonding.microcredits as field;
+
+        // New next index.
+        next_index = start + CACHE_BATCH_NUM;
+
+        // Whether caching is finished.
+        let finished: bool = next_index >= count;
+
+        // Update cache state.
+        Mapping::set(cache_state, 0u8, CacheState {
+            status: !finished ? CACHE_STATUS_IN_PROGRESS : CACHE_STATUS_VALID,
+            height: !finished ? height : block.height,
+            total_bonded,
+            total_unbonding,
+            next_index: !finished ? next_index : 0u32, // new next_index
+        });
+
+        if (finished) {
+            Mapping::set(state, TOTAL_BONDED_KEY, total_bonded);
+            Mapping::set(state, TOTAL_UNBONDING_KEY, total_unbonding);
+        }
+    }
+
+    /**
+     * This function should be called several times to cache the total bonded/unbonding state.
+     * The number of calls should be equal to: `ceil(validators_count / CACHE_BATCH_NUM)`.
+     */
     async transition cache_total_bonded_unbonding(public start: u32) -> Future {
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
 
@@ -699,7 +855,7 @@ program spectre_stcredits_v1.aleo {
         // If new cache flow.
         if (start == 0u32) {
             Mapping::set(cache_state, 0u8, CacheState {
-                state: CACHE_STATE_IN_PROGRESS,
+                status: CACHE_STATUS_IN_PROGRESS,
                 height: block.height,
                 total_bonded: 0field,
                 total_unbonding: 0field,
@@ -710,7 +866,7 @@ program spectre_stcredits_v1.aleo {
         // Check cache progress.
         {
             let cache: CacheState = Mapping::get(cache_state, 0u8);
-            assert_eq(cache.state, CACHE_STATE_IN_PROGRESS);
+            assert_eq(cache.status, CACHE_STATUS_IN_PROGRESS);
             assert_eq(start, cache.next_index);
         }
 
@@ -732,7 +888,7 @@ program spectre_stcredits_v1.aleo {
 
             let cache: CacheState = Mapping::get(cache_state, 0u8);
             Mapping::set(cache_state, 0u8, CacheState {
-                state: CACHE_STATE_IN_PROGRESS,
+                status: CACHE_STATUS_IN_PROGRESS,
                 height: cache.height,
                 total_bonded: update ? cache.total_bonded + bonded.microcredits as field : cache.total_bonded,
                 total_unbonding: update ? cache.total_unbonding + unbonding.microcredits as field : cache.total_unbonding,
@@ -746,7 +902,7 @@ program spectre_stcredits_v1.aleo {
 
             let cache: CacheState = Mapping::get(cache_state, 0u8);
             Mapping::set(cache_state, 0u8, CacheState {
-                state: next_index < count ? CACHE_STATE_IN_PROGRESS : CACHE_STATE_VALID,
+                status: next_index < count ? CACHE_STATUS_IN_PROGRESS : CACHE_STATUS_VALID,
                 height: next_index < count ? cache.height : block.height,
                 total_bonded: cache.total_bonded,
                 total_unbonding: cache.total_unbonding,
