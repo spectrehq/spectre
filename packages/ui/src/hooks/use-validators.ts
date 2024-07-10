@@ -1,5 +1,5 @@
 import { useQuery } from '@tanstack/react-query'
-import { AleoAddress } from '~/types'
+import type { AleoAddress } from '~/types'
 
 export interface UseValidatorsFromAleo123Response {
   count: number

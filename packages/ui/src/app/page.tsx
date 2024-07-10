@@ -85,8 +85,8 @@ export default function HomePage() {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         className="lucide lucide-shield-check stroke-green-600"
                       >
                         <title>Shield Check</title>
@@ -155,8 +155,8 @@ export default function HomePage() {
                         fill="none"
                         stroke="currentColor"
                         strokeWidth="2"
-                        stroke-linecap="round"
-                        stroke-linejoin="round"
+                        strokeLinecap="round"
+                        strokeLinejoin="round"
                         className="lucide lucide-waves stroke-sky-600"
                       >
                         <title>Waves</title>

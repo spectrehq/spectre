@@ -1,10 +1,9 @@
 'use client'
 
-import { useEffect } from 'react'
-import { Area, AreaChart, CartesianGrid, XAxis } from 'recharts'
 import * as dn from 'dnum'
+import { Area, AreaChart } from 'recharts'
 import {
-  ChartConfig,
+  type ChartConfig,
   ChartContainer,
   ChartTooltip,
   ChartTooltipContent,
@@ -42,10 +41,8 @@ export function TrendChart({ data = [] }: TrendChartProps) {
           content={
             <ChartTooltipContent
               indicator="dot"
-              labelFormatter={(value, [payload]) => {
-                console.log(value, payload.payload.date)
+              labelFormatter={(_, [payload]) => {
                 const date = new Date(payload.payload.date)
-
                 return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
               }}
             />
