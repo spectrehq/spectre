@@ -11,7 +11,8 @@ import {
   u64Str,
   BondState,
   initialize,
-  CreditsProgram, Delegator
+  CreditsProgram,
+  Delegator
 } from "spectre"
 import config from "../config.json"
 import {
@@ -63,7 +64,11 @@ export async function run() {
     console.log(`******************** ${i} ********************`)
     const startAt = Date.now()
 
-    await operate(programManager)
+    try {
+      await operate(programManager)
+    } catch (err) {
+      console.error(err)
+    }
 
     const elapsed = Date.now() - startAt
     await delay(Math.min(elapsed > period ? 0 : period - elapsed, 10 * 1000))

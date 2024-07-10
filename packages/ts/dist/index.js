@@ -9273,11 +9273,11 @@ class UT extends Ur {
     return n === null ? null : Rt(n);
   }
   async getDelegatorIndex(e) {
-    const n = await this.getMappingValue("delegator_pos", e);
+    const n = await this.getMappingValueOrNull("delegator_pos", e);
     return n === null ? null : mn(n);
   }
   async getValidatorIndex(e) {
-    const n = await this.getMappingValue("validator_pos", e);
+    const n = await this.getMappingValueOrNull("validator_pos", e);
     return n === null ? null : mn(n);
   }
   async hasDelegator(e) {

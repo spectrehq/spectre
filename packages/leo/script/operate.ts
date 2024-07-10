@@ -11,7 +11,6 @@ import {
   STAKING_ADMIN_ROLE,
   STAKING_OPERATOR_ROLE,
   StCreditsProgram,
-  u32Str,
   u8Str,
   importAleo,
   StateEnum,

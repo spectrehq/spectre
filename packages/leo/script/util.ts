@@ -57,7 +57,7 @@ export const STAKING_OPERATOR_PRIVATE_KEY = process.env.STAKING_OPERATOR_PRIVATE
 export const ENDPOINT = process.env.ENDPOINT || "https://api.explorer.aleo.org/v1"
 
 export async function execute(programPath: string, func: string, inputs: string[], privateKey: string) {
-  await delay(500)
+  await delay(200)
 
   const {
     stdout,
