@@ -200,7 +200,7 @@ program spectre_stcredits_v1.aleo {
         height: u32, // the start height or finished height
         total_bonded: field,
         total_unbonding: field,
-        next_index: u32, // the index of the next validator for caching
+        next_index: u32, // the index of the next delegator for caching
     }
 
     mapping cache_state: u8 => CacheState; // 0u8 => cache state
@@ -215,15 +215,19 @@ program spectre_stcredits_v1.aleo {
 
     mapping pending_resolved: u8 => u32; // 0u8 => block height of the last resolved
 
-    mapping validators_count: u8 => u32; // 0u8 => count of validators
+    struct Delegator {
+        delegator: address,
+        validator: address,
+        bonded: u64,
+    }
 
-    mapping validators: u32 => address; // index => validator
+    mapping delegators_count: u8 => u32; // 0u8 => count of delegators
 
-    mapping delegators: address => bool; // delegator => true
+    mapping delegators: u32 => Delegator; // index => delegator
 
-    mapping validator_delegators: address => address; // selected legitimate validators and their delegators we assign to
+    mapping delegator_pos: address => u32; // delegator => index
 
-    mapping validator_bonded: address => u64; // validator => bonded credits
+    mapping validator_pos: address => u32; // validator => index
 
     async transition initialize() -> Future {
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
@@ -237,7 +241,7 @@ program spectre_stcredits_v1.aleo {
         // Ensure the program is not initialized.
         assert(!Mapping::get_or_use(config, 0u8, Config {
             initialized: false,
-            treasury: aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc,
+            treasury: ZERO_ADDRESS,
             paused: false,
         }).initialized);
 
@@ -253,22 +257,30 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
         // Initialize the pending resolved.
         Mapping::set(pending_resolved, 0u8, 0u32);
-        // Initialize the validators count.
-        Mapping::set(validators_count, 0u8, 0u32);
+        // Initialize the delegators count.
+        Mapping::set(delegators_count, 0u8, 0u32);
     }
 
-    async transition add_validator(public validator: address) -> Future {
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+    /**
+     * This function will be called by the delegator program to register itself as one delegator of the validator.
+     */
+    async transition register_delegator(public delegator: address, public validator: address) -> Future {
+        // Ensure the delegator is the caller.
+        assert_eq(delegator, self.caller);
 
-        return finalize_add_validator(f, validator);
+        // Check `self.signer` to ensure the delegator is called by the signer.
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.signer);
+
+        return finalize_register_delegator(f, delegator, validator);
     }
 
-    async function finalize_add_validator(f: Future, validator: address) {
+    async function finalize_register_delegator(f: Future, delegator: address, validator: address) {
         f.await();
 
         // Invalidate the cache state.
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
+        // Check validator.
         let validator_state: committee_state = Mapping::get_or_use(
             credits.aleo/committee, validator,
             // If the validator is not in the committee, the default state is open with zero commission.
@@ -276,93 +288,66 @@ program spectre_stcredits_v1.aleo {
         );
         assert(validator_state.is_open);
 
-        // Ensure the validator is not in the set.
-        assert(!Mapping::contains(validator_delegators, validator));
+        // Ensure the delegator has neither bonding nor unbonding.
+        assert(!Mapping::contains(credits.aleo/bonded, delegator));
+        assert(!Mapping::contains(credits.aleo/unbonding, delegator));
 
-        // Add the validator to the validators set,
-        // and use the zero address as the delegator.
-        let count: u32 = Mapping::get(validators_count, 0u8);
-        Mapping::set(validators_count, 0u8, count + 1u32);
-        Mapping::set(validators, count, validator);
-        Mapping::set(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-    }
+        // Ensure the delegator/validator pair is not in the set.
+        // One delegator/validator pair can only be registered once.
+        assert(!Mapping::contains(delegator_pos, delegator));
+        assert(!Mapping::contains(validator_pos, validator));
 
-    async transition remove_validator(public validator_index: u32, public validator: address) -> Future {
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
-
-        return finalize_remove_validator(f, validator_index, validator);
-    }
-
-    async function finalize_remove_validator(f: Future, validator_index: u32, validator: address) {
-        f.await();
-
-        // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
-
-        // Ensure the validator is in the set.
-        assert_eq(Mapping::get(validators, validator_index), validator);
-
-        let delegator: address = Mapping::get(validator_delegators, validator);
-        assert(Mapping::contains(delegators, delegator) || delegator == aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-        // Ensure we have neither bonding nor unbonding in the validator.
-        {
-            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-            assert(bonded.validator == validator);
-            let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-            assert(bonded.microcredits == 0u64 && unbonding.microcredits == 0u64);
-        }
-
-        let count: u32 = Mapping::get(validators_count, 0u8);
-        assert(count >= 1u32);
-
-        // If the removed validator is not the last one,
-        // swap it with the last validator.
-        if (validator_index != count - 1u32) {
-            let last_validator: address = Mapping::get(validators, count - 1u32);
-            Mapping::set(validators, validator_index, last_validator);
-        }
-
-        // Remove the validator.
-        Mapping::set(validators_count, 0u8, count - 1u32);
-        Mapping::remove(validators, count - 1u32);
-        Mapping::remove(validator_delegators, validator);
-        Mapping::remove(delegators, delegator);
+        // Add the delegator/validator pair.
+        let count: u32 = Mapping::get(delegators_count, 0u8);
+        Mapping::set(delegators_count, 0u8, count + 1u32);
+        Mapping::set(delegators, count, Delegator {delegator, validator, bonded: 0u64});
+        Mapping::set(delegator_pos, delegator, count);
+        Mapping::set(validator_pos, validator, count);
     }
 
     /**
-     * This function will be called by the delegator program to register itself as one delegator of the validator.
+     * This function will be called by the operator to unregister the delegator.
      */
-    async transition register_delegator(public validator_index: u32, public validator: address, public delegator: address) -> Future {
-        // Ensure the delegator is the caller.
-        assert_eq(delegator, self.caller);
+    async transition unregister_delegator(public delegator: address) -> Future {
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 
-        // Check `self.signer` to ensure the delegator is called by the signer.
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.signer);
-
-        return finalize_register_delegator(f, validator_index, validator, delegator);
+        return finalize_unregister_delegator(f, delegator);
     }
 
-    async function finalize_register_delegator(f: Future, validator_index: u32, validator: address, delegator: address) {
+    async function finalize_unregister_delegator(f: Future, delegator: address) {
         f.await();
 
         // Invalidate the cache state.
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
-        // Ensure the validator is in the set.
-        assert_eq(Mapping::get(validators, validator_index), validator);
-        // Ensure the delegator has not been set.
-        assert_eq(Mapping::get(validator_delegators, validator), aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-        // Ensure one delegator can only be registered once.
-        assert(!Mapping::contains(delegators, delegator));
+        let index: u32 = Mapping::get(delegator_pos, delegator);
+        let validator: address = Mapping::get(delegators, index).validator;
 
-        Mapping::set(validator_delegators, validator, delegator);
-        Mapping::set(delegators, delegator, true);
+        // Ensure the delegator has neither bonding nor unbonding.
+        assert(!Mapping::contains(credits.aleo/bonded, delegator));
+        assert(!Mapping::contains(credits.aleo/unbonding, delegator));
+
+        let count: u32 = Mapping::get(delegators_count, 0u8);
+        assert(count >= 1u32);
+
+        // If the removed delegator is not the last one,
+        // swap it with the last delegator.
+        if (index != count - 1u32) {
+            let last_delegator: Delegator = Mapping::get(delegators, count - 1u32);
+            Mapping::set(delegators, index, last_delegator);
+        }
+
+        // Remove the delegator.
+        Mapping::set(delegators_count, 0u8, count - 1u32);
+        Mapping::remove(delegators, count - 1u32);
+        Mapping::remove(delegator_pos, delegator);
+        Mapping::remove(validator_pos, validator);
     }
 
     /**
      * This function will be called by the delegator program to bond credits to the validator.
      */
-    async transition bond(public validator_index: u32, public validator: address, public delegator: address, public amount: u64) -> Future {
+    async transition bond(public delegator: address, public validator: address, public amount: u64) -> Future {
         // Ensure the delegator is the caller.
         assert_eq(delegator, self.caller);
 
@@ -372,12 +357,11 @@ program spectre_stcredits_v1.aleo {
         // Transfer `amount` credits to the `delegator` program.
         let f2: Future = credits.aleo/transfer_public(delegator, amount);
 
-        return finalize_bond(f1, f2, validator_index, validator, self.caller, amount);
+        return finalize_bond(f1, f2, delegator, validator, amount);
     }
 
-    async function finalize_bond(f1: Future, f2: Future, validator_index: u32, validator: address, delegator: address, amount: u64) {
+    async function finalize_bond(f1: Future, f2: Future, delegator: address, validator: address, amount: u64) {
         f1.await();
-        f2.await();
 
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
@@ -386,22 +370,29 @@ program spectre_stcredits_v1.aleo {
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
-        // Ensure the validator is in the set.
-        assert_eq(Mapping::get(validators, validator_index), validator);
-        assert_eq(Mapping::get(validator_delegators, validator), delegator);
-
         // Only allow bond `amount` credits when the actual liquidity is sufficient.
         let total_buffered: field = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64) as field;
         let total_withdraw: field = Mapping::get(state, TOTAL_WITHDRAW_KEY);
         let total_pending_withdraw: field = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
-        assert(total_buffered >= total_withdraw + total_pending_withdraw);
+        assert(total_buffered >= total_withdraw + total_pending_withdraw + amount as field);
+
+        // Transfer `amount` credits to the `delegator` program.
+        f2.await();
+
+        let index: u32 = Mapping::get(delegator_pos, delegator);
+        let del: Delegator = Mapping::get(delegators, index);
+        assert_eq(del.validator, validator);
+        let last_bonded: u64 = del.bonded;
+
+        // Get the current bonded.
+        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator: ZERO_ADDRESS, microcredits: 0u64});
+
+        // Record the updated bonded credits.
+        Mapping::set(delegators, index, Delegator {delegator, validator, bonded: bonded.microcredits + amount});
 
         // Protocol fee.
         {
-            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-            assert(bonded.validator == validator);
-            let last_bonded: u64 = Mapping::get_or_use(validator_bonded, validator, 0u64);
-
+            // Reward = current bonded - last bonded
             let reward: u64 = bonded.microcredits - last_bonded;
             let protocol_fee: field = reward as field * Mapping::get(state, PROTOCOL_FEE_KEY) / 100field;
 
@@ -419,27 +410,25 @@ program spectre_stcredits_v1.aleo {
                 Mapping::set(account, treasury, Mapping::get_or_use(account, treasury, 0u64) + stcredits as u64);
                 Mapping::set(total_supply, 0u8, (total_stcredits_supply + stcredits) as u64);
             }
-
-            // Record the updated bonded credits.
-            Mapping::set(validator_bonded, validator, bonded.microcredits + amount);
         }
     }
 
     /**
-     * This function will be called by the operator to unbond credits from the validator.
+     * This function will be called by the operator to unbond credits from the delegator/validator.
      * It will serve either for the users to withdraw credits or for rebalancing bonding between the validators.
      * The `amount` should be calculated offline.
      */
-    async transition unbond(public validator_index: u32, public validator: address, delegator: address, public amount: u64) -> Future {
+    async transition unbond(delegator: address, public amount: u64) -> Future {
         // Check the caller is the operator.
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
+        // Unbond `amount` credits of the delegator from the validator.
         let f2: Future = credits.aleo/unbond_public(delegator, amount);
 
-        return finalize_unbond(f1, f2, validator_index, validator, delegator, amount);
+        return finalize_unbond(f1, f2, delegator, amount);
     }
 
-    async function finalize_unbond(f1: Future, f2: Future, validator_index: u32, validator: address, delegator: address, amount: u64) {
+    async function finalize_unbond(f1: Future, f2: Future, delegator: address, amount: u64) {
         f1.await();
 
         // Check whether paused.
@@ -449,16 +438,19 @@ program spectre_stcredits_v1.aleo {
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
-        // Ensure the validator is in the set.
-        assert_eq(Mapping::get(validators, validator_index), validator);
-        assert_eq(Mapping::get(validator_delegators, validator), delegator);
+        let index: u32 = Mapping::get(delegator_pos, delegator);
+        let del: Delegator = Mapping::get(delegators, index);
+        let validator: address = del.validator;
+        let last_bonded: u64 = del.bonded;
+
+        // Get the current bonded.
+        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator: ZERO_ADDRESS, microcredits: 0u64});
+
+        // Record the updated bonded credits.
+        Mapping::set(delegators, index, Delegator {delegator, validator, bonded: bonded.microcredits - amount});
 
         // Protocol fee.
         {
-            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-            assert(bonded.validator == validator);
-            let last_bonded: u64 = Mapping::get_or_use(validator_bonded, validator, 0u64);
-
             let reward: u64 = bonded.microcredits - last_bonded;
             let protocol_fee: field = reward as field * Mapping::get(state, PROTOCOL_FEE_KEY) / 100field;
 
@@ -481,25 +473,21 @@ program spectre_stcredits_v1.aleo {
             }
         }
 
-        // Wait for `credits.aleo/unbond_public` finished.
+        // Unbond `amount` credits of the delegator from the validator.
         f2.await();
-
-        // Record the updated bonded credits.
-        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        Mapping::set(validator_bonded, validator, bonded.microcredits);
     }
 
     /**
-     * This function can be called by anyone to claim unbonded credits from the validator.
+     * This function can be called by anyone to claim unbonded credits from the delegator/validator.
      * It will fail if the unbonding does not exist or the unbonding height is not reached.
      */
-    async transition claim_unbond(public validator_index: u32, public validator: address, delegator: address) -> Future {
+    async transition claim_unbond(delegator: address) -> Future {
         let f: Future = credits.aleo/claim_unbond_public(delegator);
 
-        return finalize_claim_unbond(f, validator_index, validator, delegator);
+        return finalize_claim_unbond(f, delegator);
     }
 
-    async function finalize_claim_unbond(f: Future, validator_index: u32, validator: address, delegator: address) {
+    async function finalize_claim_unbond(f: Future, delegator: address) {
         f.await();
 
         // Check whether paused.
@@ -508,9 +496,8 @@ program spectre_stcredits_v1.aleo {
         // Invalidate the cache state.
         Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0field, total_unbonding: 0field, next_index: 0u32});
 
-        // Ensure the validator is in the set.
-        assert_eq(Mapping::get(validators, validator_index), validator);
-        assert_eq(Mapping::get(validator_delegators, validator), delegator);
+        // Ensure the delegator is in the set.
+        assert(Mapping::contains(delegator_pos, delegator));
     }
 
     /**
@@ -684,7 +671,8 @@ program spectre_stcredits_v1.aleo {
 
     /**
      * This function should be called several times to cache the total bonded/unbonding state.
-     * The number of calls should be equal to: `ceil(validators_count / CACHE_BATCH_NUM)`.
+     * The number of calls should be equal to: `ceil(delegators_count / CACHE_BATCH_NUM)`.
+     * `CACHE_BATCH_NUM` may be 1/2/... and the corresponding function is cache_1/cache_2/...
      */
     async transition cache(public start: u32) -> Future {
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
@@ -712,111 +700,89 @@ program spectre_stcredits_v1.aleo {
         assert_eq(status, CACHE_STATUS_IN_PROGRESS);
         assert_eq(start, next_index);
 
-        // Get the total number of validators.
-        let count: u32 = Mapping::get(validators_count, 0u8);
+        // Get the total number of delegators.
+        let count: u32 = Mapping::get(delegators_count, 0u8);
+
+        // Cache total bonded and unbonding credits.
+
+        let default_delegator: Delegator = Delegator {delegator: ZERO_ADDRESS, validator: ZERO_ADDRESS, bonded: 0u64};
+        let default_bonded: bond_state = bond_state {validator: ZERO_ADDRESS, microcredits: 0u64};
+        let default_unbonding: unbond_state = unbond_state {microcredits: 0u64, height: 0u32};
+
+        assert(!Mapping::contains(credits.aleo/bonded, ZERO_ADDRESS) && !Mapping::contains(credits.aleo/unbonding, ZERO_ADDRESS));
 
         let index: u32 = start + 0u32;
-        let validator: address = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        let delegator: address = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        let delegator: address = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 1u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 2u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 3u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 4u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 5u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 6u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 7u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 8u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         index = start + 9u32;
-        validator = Mapping::get_or_use(validators, index, ZERO_ADDRESS);
-        delegator = Mapping::get_or_use(validator_delegators, validator, ZERO_ADDRESS);
-        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-        assert(bonded.validator == validator);
-        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-        assert(delegator != ZERO_ADDRESS || (bonded.microcredits == 0u64 && unbonding.microcredits == 0u64));
+        delegator = Mapping::get_or_use(delegators, index, default_delegator).delegator;
+        bonded = Mapping::get_or_use(credits.aleo/bonded, delegator, default_bonded);
+        unbonding = Mapping::get_or_use(credits.aleo/unbonding, delegator, default_unbonding);
         total_bonded = total_bonded + bonded.microcredits as field;
         total_unbonding = total_unbonding + unbonding.microcredits as field;
 
         // New next index.
-        next_index = start + CACHE_BATCH_NUM;
+        next_index = start + 10u32;
 
         // Whether caching is finished.
         let finished: bool = next_index >= count;
@@ -833,87 +799,6 @@ program spectre_stcredits_v1.aleo {
         if (finished) {
             Mapping::set(state, TOTAL_BONDED_KEY, total_bonded);
             Mapping::set(state, TOTAL_UNBONDING_KEY, total_unbonding);
-        }
-    }
-
-    /**
-     * This function should be called several times to cache the total bonded/unbonding state.
-     * The number of calls should be equal to: `ceil(validators_count / CACHE_BATCH_NUM)`.
-     */
-    async transition cache_total_bonded_unbonding(public start: u32) -> Future {
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
-
-        return finalize_cache_total_bonded_unbonding(f, start);
-    }
-
-    async function finalize_cache_total_bonded_unbonding(f: Future, start: u32) {
-        f.await();
-
-        // Check whether paused.
-        assert(!Mapping::get(config, 0u8).paused);
-
-        // If new cache flow.
-        if (start == 0u32) {
-            Mapping::set(cache_state, 0u8, CacheState {
-                status: CACHE_STATUS_IN_PROGRESS,
-                height: block.height,
-                total_bonded: 0field,
-                total_unbonding: 0field,
-                next_index: 0u32,
-            });
-        }
-
-        // Check cache progress.
-        {
-            let cache: CacheState = Mapping::get(cache_state, 0u8);
-            assert_eq(cache.status, CACHE_STATUS_IN_PROGRESS);
-            assert_eq(start, cache.next_index);
-        }
-
-        // Get the total number of validators.
-        let count: u32 = Mapping::get(validators_count, 0u8);
-
-        // Cache total bonded and unbonding credits.
-        for i: u32 in 0u32..CACHE_BATCH_NUM {
-            let index: u32 = start + i;
-
-            let validator: address = Mapping::get_or_use(validators, index, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-            let delegator: address = Mapping::get_or_use(validator_delegators, validator, aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc);
-
-            let bonded: bond_state = Mapping::get_or_use(credits.aleo/bonded, delegator, bond_state {validator, microcredits: 0u64});
-            assert(bonded.validator == validator);
-            let unbonding: unbond_state = Mapping::get_or_use(credits.aleo/unbonding, delegator, unbond_state {microcredits: 0u64, height: 0u32});
-
-            let update: bool = index < count && delegator != aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
-
-            let cache: CacheState = Mapping::get(cache_state, 0u8);
-            Mapping::set(cache_state, 0u8, CacheState {
-                status: CACHE_STATUS_IN_PROGRESS,
-                height: cache.height,
-                total_bonded: update ? cache.total_bonded + bonded.microcredits as field : cache.total_bonded,
-                total_unbonding: update ? cache.total_unbonding + unbonding.microcredits as field : cache.total_unbonding,
-                next_index: cache.next_index,
-            });
-        }
-
-        // Update cache state.
-        {
-            let next_index: u32 = start + CACHE_BATCH_NUM;
-
-            let cache: CacheState = Mapping::get(cache_state, 0u8);
-            Mapping::set(cache_state, 0u8, CacheState {
-                status: next_index < count ? CACHE_STATUS_IN_PROGRESS : CACHE_STATUS_VALID,
-                height: next_index < count ? cache.height : block.height,
-                total_bonded: cache.total_bonded,
-                total_unbonding: cache.total_unbonding,
-                next_index: next_index < count ? next_index : 0u32, // new next_index
-            });
-
-            // If caching is finished.
-            if (next_index >= count) {
-                Mapping::set(state, TOTAL_BONDED_KEY, cache.total_bonded);
-                Mapping::set(state, TOTAL_UNBONDING_KEY, cache.total_unbonding);
-            }
         }
     }
 

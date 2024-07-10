@@ -186,95 +186,85 @@ program
     console.log(`Withdraw: ${Number(withdraw.amount) / 1e6} credits, claimable height ${withdraw.height}, ${withdraw.pending ? "pending" : "not pending"}`)
   })
 
+async function getDelegatorAddressAndProgramName(index: number) {
+  const delegatorPath = programPath("delegator", index + 1)
+  const programJsonPath = path.join(delegatorPath, "program.json")
+  const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
+  const parts = (await run(delegatorPath, "get_address", [])).split(" ")
+  const address = parts[parts.length - 1]
+  return {
+    address,
+    program: programJson.program
+  }
+}
+
 program
-  .command("list-validators")
-  .description("list validators who sustain the stcredits program")
+  .command("list-delegator")
+  .description("list delegators who sustain the stcredits program")
   .action(async () => {
     const delegators = new Map<string, string>()
     for (let i = 0; i < config.delegatorNum; i++) {
-      const delegatorPath = programPath("delegator", i + 1)
-      const programJsonPath = path.join(delegatorPath, "program.json")
-      const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
-      const parts = (await run(delegatorPath, "get_address", [])).split(" ")
-      const delegatorAddress = parts[parts.length - 1]
-      delegators.set(delegatorAddress, programJson.program)
+      const { address, program } = await getDelegatorAddressAndProgramName(i)
+      delegators.set(address, program)
     }
 
-    console.log("Validators:")
+    console.log("Delegators:")
 
-    const count = await stcredits.getValidatorsCount()
+    const count = await stcredits.getDelegatorsCount()
     for (let i = 0; i < count; i++) {
-      const validator = await stcredits.getValidator(i)
-      if (!validator) {
-        console.error(`Failed to get validator ${i}`)
+      const delegator = await stcredits.getDelegator(i)
+      if (!delegator) {
+        console.error(`Failed to get delegator ${i}`)
         continue
       }
-      console.log(`${i}. ${validator}`)
-      const delegator = await stcredits.getValidatorDelegator(validator)
-      if (!delegator) {
-        console.log("    Delegator: None")
-      } else {
-        const delegatorProgram = delegators.get(delegator)
-        console.log(`    Delegator: ${delegator}${delegatorProgram ? ` (${delegatorProgram})` : ""}`)
-      }
-      const bondedAmount = await stcredits.getValidatorBonded(validator)
-      console.log(`    Bonded (at last cache): ${Number(bondedAmount) / 1e6}`)
-      if (delegator) {
-        const bonded = await stcredits.credits.getBonded(delegator)
-        console.log(`    Bonded (actual): ${bonded ? Number(bonded.microcredits) / 1e6 : 0}`)
-      }
+      const delegatorProgram = delegators.get(delegator.delegator)
+      console.log(`${i}. ${delegator.delegator}${delegatorProgram ? ` (${delegatorProgram})` : ""}`)
+      console.log(`    Validator: ${delegator.validator}`)
+      console.log(`    Bonded (at last cache): ${Number(delegator.bonded) / 1e6}`)
+      const bonded = await stcredits.credits.getBonded(delegator.delegator)
+      console.log(`    Bonded (actual): ${bonded ? Number(bonded.microcredits) / 1e6 : 0}`)
     }
   })
 
 program
-  .command("add-validator")
-  .description("add validator for the stcredits program")
-  .argument("<validator>")
-  .action(async (validator: string) => {
-    if (await stcredits.hasValidator(validator)) {
-      console.log(`Validator ${validator} already exists`)
+  .command("unregister-delegator")
+  .description("unregister delegator (must have neither bonding nor unbonding) from the stcredits program")
+  .argument("<delegator-index>", "delegator program index (delegator number = index + 1)")
+  .action(async (delegatorIndex: any) => {
+    delegatorIndex = Number(delegatorIndex)
+    assert(Number.isInteger(delegatorIndex) && delegatorIndex >= 0, "invalid delegator index")
+
+    const { address: delegator } = await getDelegatorAddressAndProgramName(delegatorIndex)
+
+    if (!(await stcredits.hasDelegator(delegator))) {
+      console.log(`Delegator ${delegator} has not been registered`)
       return
     }
 
-    await execute(programPath("stcredits"), "add_validator", [validator], STAKING_ADMIN_PRIVATE_KEY)
-  })
-
-program
-  .command("remove-validator")
-  .description("remove validator (must have neither bonding nor unbonding) from the stcredits program")
-  .argument("<validator-index>")
-  .argument("<validator>")
-  .action(async (validatorIndex: string, validator: string) => {
-    const index = Number(validatorIndex)
-    assert(Number.isInteger(index) && index >= 0, "invalid validator index")
-
-    if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
-      console.log(`Validator ${validator} with index ${index} does not exist`)
-      return
-    }
-
-    await execute(programPath("stcredits"), "remove_validator", [u32Str(index), validator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath("stcredits"), "unregister_delegator", [delegator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 program
   .command("register-delegator")
   .description("register delegator program for specified validator for the stcredits program")
-  .argument("<validator-index>")
-  .argument("<validator>")
   .argument("<delegator-index>", "delegator program index (delegator number = index + 1)")
-  .action(async (validatorIndex: string, validator: string, delegatorIndex: any) => {
-    const index = Number(validatorIndex)
-    assert(Number.isInteger(index) && index >= 0, "invalid validator index")
-
+  .argument("<validator>")
+  .action(async (delegatorIndex: any, validator: string) => {
     delegatorIndex = Number(delegatorIndex)
     assert(Number.isInteger(delegatorIndex) && delegatorIndex >= 0, "invalid delegator index")
 
-    if (!(await stcredits.hasValidator(validator)) || validator !== (await stcredits.getValidator(index))) {
-      console.log(`Validator ${validator} with index ${index} does not exist`)
+    const { address: delegator } = await getDelegatorAddressAndProgramName(delegatorIndex)
+
+    if (await stcredits.hasValidator(validator)) {
+      console.log(`Validator ${validator} already exists`)
+      return
+    }
+    if (await stcredits.hasDelegator(delegator)) {
+      console.log(`Delegator ${delegator} has already been registered`)
       return
     }
 
-    await execute(programPath("delegator", delegatorIndex + 1), "register", [u32Str(index), validator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath("delegator", delegatorIndex + 1), "register", [validator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 const roles = {
