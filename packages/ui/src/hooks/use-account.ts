@@ -1,7 +1,7 @@
 import { useWallet as useLeoWallet } from '@demox-labs/aleo-wallet-adapter-react'
-import { useAccount as usePuzzleAccount, useConnect } from '@puzzlehq/sdk'
+import { useConnect, useAccount as usePuzzleAccount } from '@puzzlehq/sdk'
 import { useMemo } from 'react'
-import { WalletType, type AleoAddress } from '~/types'
+import { type AleoAddress, WalletType } from '~/types'
 
 export function useAccount() {
   const { publicKey, connected: isLeoConnected } = useLeoWallet()

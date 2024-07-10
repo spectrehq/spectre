@@ -11,9 +11,9 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { toast } from 'sonner'
-import { WalletType } from '~/types'
 import { STCREDITS_POINTS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
+import { WalletType } from '~/types'
 import { useAccount } from './use-account'
 
 export function useClaim() {
@@ -31,7 +31,7 @@ export function useClaim() {
 
       if (walletType === WalletType.LeoWallet) {
         const tx = Transaction.createTransaction(
-          address!,
+          address,
           WalletAdapterNetwork.TestnetBeta,
           programId,
           'claim',
