@@ -144,16 +144,16 @@ export interface Approval {
 	spender: string;
 }
 export interface Config {
-	initialized: boolean;
-	treasury: string;
 	paused: boolean;
+	treasury: string;
+	protocol_fee: bigint;
 }
-export declare enum StateEnum {
-	TOTAL_WITHDRAW_KEY = 0,
-	TOTAL_PENDING_WITHDRAW_KEY = 1,
-	TOTAL_BONDED_KEY = 2,
-	TOTAL_UNBONDING_KEY = 3,
-	PROTOCOL_FEE_KEY = 4
+export interface State {
+	withdraw: bigint;
+	pending_withdraw: bigint;
+	bonded: bigint;
+	unbonding: bigint;
+	resolved_height: bigint;
 }
 export declare enum CacheStatus {
 	INVALID = 0,
@@ -186,11 +186,10 @@ export declare class StCreditsProgram extends ProgramBase {
 	getConfig(): Promise<Config | null>;
 	isInitialized(): Promise<boolean>;
 	isPaused(): Promise<boolean>;
-	getState(key: StateEnum): Promise<bigint>;
+	getState(): Promise<State>;
 	getCacheState(): Promise<CacheState>;
 	getWithdraw(account: string): Promise<Withdraw | null>;
-	getPendingWithdrawResolved(): Promise<bigint>;
-	isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, pendingWithdrawResolved: bigint, currentHeight: bigint): boolean;
+	isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, resolvedHeight: bigint, currentHeight: bigint): boolean;
 	getDelegatorsCount(): Promise<bigint>;
 	getDelegator(index: number | bigint): Promise<Delegator | null>;
 	getDelegatorIndex(delegator: string): Promise<bigint | null>;
@@ -199,10 +198,6 @@ export declare class StCreditsProgram extends ProgramBase {
 	hasValidator(validator: string): Promise<boolean>;
 	getDelegatorByValidator(validator: string): Promise<Delegator | null>;
 	getTotalBuffered(): Promise<bigint>;
-	getTotalBonded(): Promise<bigint>;
-	getTotalUnbonding(): Promise<bigint>;
-	getTotalWithdraw(): Promise<bigint>;
-	getTotalPendingWithdraw(): Promise<bigint>;
 	getTotalPooled(totalBuffered: bigint, totalBonded: bigint, totalUnbonding: bigint, totalWithdraw: bigint, totalPendingWithdraw: bigint): bigint;
 	getStCreditsFromCredits(credits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint): bigint;
 	getCreditsFromStCredits(stCredits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint): bigint;

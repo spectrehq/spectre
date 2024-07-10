@@ -80,7 +80,7 @@ async function operate(programManager: ProgramManager) {
 
   const cfg = await stcreditsProgram.getConfig()
 
-  if (!cfg || !cfg.initialized) {
+  if (!cfg) {
     console.log("stcredits program is not initialized")
     return
   }
@@ -117,9 +117,10 @@ class StCreditsProgram extends StCreditsProgramBase {
   }
 
   async bond() {
+    const state = await this.getState()
     const totalBuffered = await this.getTotalBuffered()
-    const totalWithdraw = await this.getTotalWithdraw()
-    const totalPendingWithdraw = await this.getTotalPendingWithdraw()
+    const totalWithdraw = state.withdraw
+    const totalPendingWithdraw = state.pending_withdraw
     const amount = totalBuffered - totalWithdraw - totalPendingWithdraw
 
     if (amount < BigInt(1e6)) {
@@ -200,10 +201,11 @@ class StCreditsProgram extends StCreditsProgramBase {
   }
 
   async unbond() {
+    const state = await this.getState()
     const totalBuffered = await this.getTotalBuffered()
-    const totalWithdraw = await this.getTotalWithdraw()
-    const totalPendingWithdraw = await this.getTotalPendingWithdraw()
-    const totalUnbonding = await this.getTotalUnbonding() // TODO: get from credits.aleo
+    const totalWithdraw = state.withdraw
+    const totalPendingWithdraw = state.pending_withdraw
+    const totalUnbonding = state.unbonding // TODO: get from credits.aleo
     let amount = totalWithdraw + totalPendingWithdraw + totalUnbonding - totalBuffered
 
     if (amount <= 0n) {
@@ -349,9 +351,10 @@ class StCreditsProgram extends StCreditsProgramBase {
 
   async resolveWithdraw() {
     while (true) {
+      const state = await this.getState()
       const totalBuffered = await this.getTotalBuffered()
-      const totalWithdraw = await this.getTotalWithdraw()
-      const totalPendingWithdraw = await this.getTotalPendingWithdraw()
+      const totalWithdraw = state.withdraw
+      const totalPendingWithdraw = state.pending_withdraw
       if (totalPendingWithdraw <= 0n) {
         return
       }

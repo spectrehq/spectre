@@ -13,7 +13,6 @@ import {
   StCreditsProgram,
   u8Str,
   importAleo,
-  StateEnum,
   CacheStatus,
   initialize,
   CreditsProgram
@@ -110,14 +109,6 @@ program
     }
   })
 
-const stateStrings = new Map([
-  [StateEnum.TOTAL_WITHDRAW_KEY, "Total withdraw"],
-  [StateEnum.TOTAL_PENDING_WITHDRAW_KEY, "Total pending withdraw"],
-  [StateEnum.TOTAL_BONDED_KEY, "Total bonded"],
-  [StateEnum.TOTAL_UNBONDING_KEY, "Total unbonding"],
-  [StateEnum.PROTOCOL_FEE_KEY, "Protocol fee"]
-])
-
 const cacheStatusStrings = new Map([
   [CacheStatus.INVALID, "INVALID"],
   [CacheStatus.IN_PROGRESS, "IN_PROGRESS"],
@@ -129,7 +120,7 @@ program
   .description("show state of the stcredits program")
   .action(async () => {
     const config = await stcredits.getConfig()
-    if (!config || !config.initialized) {
+    if (!config) {
       console.log("stcredits program is not initialized")
       return
     }
@@ -143,20 +134,12 @@ program
     const totalBuffered = await stcredits.getTotalBuffered()
     console.log(`    Total buffered: ${Number(totalBuffered) / 1e6} credits`)
 
-    for (const key of [StateEnum.TOTAL_WITHDRAW_KEY,
-      StateEnum.TOTAL_PENDING_WITHDRAW_KEY,
-      StateEnum.TOTAL_BONDED_KEY,
-      StateEnum.TOTAL_UNBONDING_KEY
-    ]) {
-      const state = await stcredits.getState(key)
-      console.log(`    ${stateStrings.get(key)}: ${Number(state) / 1e6} credits`)
-    }
-
-    const protocolFee = await stcredits.getState(StateEnum.PROTOCOL_FEE_KEY)
-    console.log(`    Protocol fee rate: ${protocolFee}%`)
-
-    const pendingWithdrawResolved = await stcredits.getPendingWithdrawResolved()
-    console.log(`    Pending withdraw resolved at: ${pendingWithdrawResolved}`)
+    const state = await stcredits.getState()
+    console.log(`    Total withdraw: ${Number(state.withdraw) / 1e6} credits`)
+    console.log(`    Total pending withdraw: ${Number(state.pending_withdraw) / 1e6} credits`)
+    console.log(`    Total bonded: ${Number(state.bonded) / 1e6} credits`)
+    console.log(`    Total unbonding: ${Number(state.unbonding) / 1e6} credits`)
+    console.log(`    Pending withdraw resolved height: ${state.resolved_height}`)
 
     console.log("Cache:")
     const cacheState = await stcredits.getCacheState()

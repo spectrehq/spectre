@@ -6,12 +6,12 @@ program spectre_stcredits_points_v1.aleo {
 
     mapping account: address => u128; // user => points
 
-    struct State {
+    struct UserState {
         stcredits: u64, // the total locked stcredits
         height: u32, // the block height at which the last settlement was made
     }
 
-    mapping states: address => State; // user => state
+    mapping states: address => UserState; // user => state
 
     mapping paused: u8 => bool; // 0u8 => paused
 
@@ -26,7 +26,7 @@ program spectre_stcredits_points_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(paused, 0u8));
 
-        let state: State = Mapping::get(states, user);
+        let state: UserState = Mapping::get(states, user);
         // Calculate points: stcredits balance * blocks.
         // The more stcredits you have and the longer you hold them, the more points you get.
         let points: u128 = state.stcredits as u128 * (block.height - state.height) as u128;
@@ -36,7 +36,7 @@ program spectre_stcredits_points_v1.aleo {
         }
 
         // Update the stcredits balance and the block height.
-        Mapping::set(states, user, State {stcredits: state.stcredits, height: block.height});
+        Mapping::set(states, user, UserState {stcredits: state.stcredits, height: block.height});
     }
 
     /**
@@ -56,7 +56,7 @@ program spectre_stcredits_points_v1.aleo {
         assert(!Mapping::get(paused, 0u8));
 
         // Settle points.
-        let state: State = Mapping::get_or_use(states, user, State {stcredits: 0u64, height: 0u32});
+        let state: UserState = Mapping::get_or_use(states, user, UserState {stcredits: 0u64, height: 0u32});
         let points: u128 = state.stcredits as u128 * (block.height - state.height) as u128;
         if (points > 0u128) {
             Mapping::set(account, user, Mapping::get_or_use(account, user, 0u128) + points);
@@ -65,7 +65,7 @@ program spectre_stcredits_points_v1.aleo {
 
 
         // Update the stcredits balance and the block height.
-        Mapping::set(states, user, State {stcredits: state.stcredits + stcredits, height: block.height});
+        Mapping::set(states, user, UserState {stcredits: state.stcredits + stcredits, height: block.height});
     }
 
     /**
@@ -85,7 +85,7 @@ program spectre_stcredits_points_v1.aleo {
         assert(!Mapping::get(paused, 0u8));
 
         // Settle points.
-        let state: State = Mapping::get(states, user);
+        let state: UserState = Mapping::get(states, user);
         let points: u128 = state.stcredits as u128 * (block.height - state.height) as u128;
         if (points > 0u128) {
             Mapping::set(account, user, Mapping::get_or_use(account, user, 0u128) + points);
@@ -93,7 +93,7 @@ program spectre_stcredits_points_v1.aleo {
         }
 
         // Update the stcredits balance and the block height.
-        state = State {stcredits: state.stcredits - stcredits, height: block.height};
+        state = UserState {stcredits: state.stcredits - stcredits, height: block.height};
         if (state.stcredits > 0u64) {
             Mapping::set(states, user, state);
         } else {

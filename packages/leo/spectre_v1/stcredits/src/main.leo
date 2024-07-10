@@ -176,20 +176,22 @@ program spectre_stcredits_v1.aleo {
     const ZERO_ADDRESS: address = aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
 
     struct Config {
-        initialized: bool,
-        treasury: address,
         paused: bool,
+        treasury: address,
+        protocol_fee: u8,
     }
 
     mapping config: u8 => Config; // 0u8 => config
 
-    const TOTAL_WITHDRAW_KEY: u8 = 0u8; // total withdrawal in credits
-    const TOTAL_PENDING_WITHDRAW_KEY: u8 = 1u8; // total pending withdrawal in credits
-    const TOTAL_BONDED_KEY: u8 = 2u8; // total bonded credits (it may have some lag)
-    const TOTAL_UNBONDING_KEY: u8 = 3u8; // total unbonding credits (it may have some lag)
-    const PROTOCOL_FEE_KEY: u8 = 4u8; // protocol fee in percents.
+    struct State {
+        withdraw: u64, // total withdrawal in credits
+        pending_withdraw: u64, // total pending withdrawal in credits
+        bonded: u64, // total bonded credits (it may have some lag)
+        unbonding: u64, // total unbonding credits (it may have some lag)
+        resolved_height: u32, // block height of the last resolved
+    }
 
-    mapping state: u8 => u64; // index key => value
+    mapping state: u8 => State; // 0u8 => state
 
     const CACHE_STATUS_INVALID: u8 = 0u8;
     const CACHE_STATUS_IN_PROGRESS: u8 = 1u8;
@@ -198,8 +200,8 @@ program spectre_stcredits_v1.aleo {
     struct CacheState {
         status: u8,
         height: u32, // the start height or finished height
-        total_bonded: u64,
-        total_unbonding: u64,
+        bonded: u64,
+        unbonding: u64,
         next_index: u32, // the index of the next delegator for caching
     }
 
@@ -212,8 +214,6 @@ program spectre_stcredits_v1.aleo {
     }
 
     mapping withdraws: address => Withdraw; // user => withdraw
-
-    mapping pending_resolved: u8 => u32; // 0u8 => block height of the last resolved
 
     struct Delegator {
         delegator: address,
@@ -239,24 +239,30 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Ensure the program is not initialized.
-        assert(!Mapping::get_or_use(config, 0u8, Config {
-            initialized: false,
-            treasury: ZERO_ADDRESS,
-            paused: false,
-        }).initialized);
+        assert(!Mapping::contains(config, 0u8));
 
         // Initialize the config.
-        Mapping::set(config, 0u8, Config {initialized: true, treasury: admin, paused: true});
+        Mapping::set(config, 0u8, Config {
+            paused: true,
+            treasury: admin,
+            protocol_fee: 0u8, // 0%
+        });
         // Initialize the state.
-        Mapping::set(state, TOTAL_WITHDRAW_KEY, 0u64);
-        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, 0u64);
-        Mapping::set(state, TOTAL_BONDED_KEY, 0u64);
-        Mapping::set(state, TOTAL_UNBONDING_KEY, 0u64);
-        Mapping::set(state, PROTOCOL_FEE_KEY, 0u64); // 0%
+        Mapping::set(state, 0u8, State {
+            withdraw: 0u64,
+            pending_withdraw: 0u64,
+            bonded: 0u64,
+            unbonding: 0u64,
+            resolved_height: 0u32,
+        });
         // Initialize the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
-        // Initialize the pending resolved.
-        Mapping::set(pending_resolved, 0u8, 0u32);
+        Mapping::set(cache_state, 0u8, CacheState {
+            status: CACHE_STATUS_INVALID,
+            height: 0u32,
+            bonded: 0u64,
+            unbonding: 0u64,
+            next_index: 0u32,
+        });
         // Initialize the delegators count.
         Mapping::set(delegators_count, 0u8, 0u32);
     }
@@ -278,7 +284,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, bonded: 0u64, unbonding: 0u64, next_index: 0u32});
 
         // Check validator.
         let validator_state: committee_state = Mapping::get_or_use(
@@ -318,7 +324,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, bonded: 0u64, unbonding: 0u64, next_index: 0u32});
 
         let index: u32 = Mapping::get(delegator_pos, delegator);
         let validator: address = Mapping::get(delegators, index).validator;
@@ -364,16 +370,19 @@ program spectre_stcredits_v1.aleo {
         f1.await();
 
         // Check whether paused.
-        assert(!Mapping::get(config, 0u8).paused);
+        let cfg: Config = Mapping::get(config, 0u8);
+        assert(!cfg.paused);
 
         // Check cache is finished and then invalidate it.
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, bonded: 0u64, unbonding: 0u64, next_index: 0u32});
+
+        let state_: State = Mapping::get(state, 0u8);
 
         // Only allow bond `amount` credits when the actual liquidity is sufficient.
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
-        let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_withdraw: u64 = state_.withdraw;
+        let total_pending_withdraw: u64 = state_.pending_withdraw;
         assert(total_buffered >= total_withdraw + total_pending_withdraw + amount);
 
         // Transfer `amount` credits to the `delegator` program.
@@ -394,19 +403,19 @@ program spectre_stcredits_v1.aleo {
         {
             // Reward = current bonded - last bonded
             let reward: u64 = bonded.microcredits - last_bonded;
-            let protocol_fee: u64 = reward * Mapping::get(state, PROTOCOL_FEE_KEY) / 100u64;
+            let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {
-                let total_bonded: u64 = Mapping::get(state, TOTAL_BONDED_KEY);
-                let total_unbonding: u64 = Mapping::get(state, TOTAL_UNBONDING_KEY);
+                let total_bonded: u64 = state_.bonded;
+                let total_unbonding: u64 = state_.unbonding;
 
-                let total_pooled: u64 = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
+                let total_pooled: u64 = total_buffered + total_bonded + total_unbonding - total_withdraw - total_pending_withdraw;
 
                 let total_stcredits_supply: u64 = Mapping::get_or_use(total_supply, 0u8, 0u64);
 
-                // Mint stcredits
+                // Mint stcredits to the treasury.
                 let stcredits: u64 = getStCreditsFromCredits(protocol_fee, total_pooled, total_stcredits_supply);
-                let treasury: address = Mapping::get(config, 0u8).treasury;
+                let treasury: address = cfg.treasury;
                 Mapping::set(account, treasury, Mapping::get_or_use(account, treasury, 0u64) + stcredits);
                 Mapping::set(total_supply, 0u8, total_stcredits_supply + stcredits);
             }
@@ -432,11 +441,14 @@ program spectre_stcredits_v1.aleo {
         f1.await();
 
         // Check whether paused.
-        assert(!Mapping::get(config, 0u8).paused);
+        let cfg: Config = Mapping::get(config, 0u8);
+        assert(!cfg.paused);
 
         // Check cache is finished and then invalidate it.
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, bonded: 0u64, unbonding: 0u64, next_index: 0u32});
+
+        let state_: State = Mapping::get(state, 0u8);
 
         let index: u32 = Mapping::get(delegator_pos, delegator);
         let del: Delegator = Mapping::get(delegators, index);
@@ -452,22 +464,22 @@ program spectre_stcredits_v1.aleo {
         // Protocol fee.
         {
             let reward: u64 = bonded.microcredits - last_bonded;
-            let protocol_fee: u64 = reward * Mapping::get(state, PROTOCOL_FEE_KEY) / 100u64;
+            let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {
                 let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
-                let total_bonded: u64 = Mapping::get(state, TOTAL_BONDED_KEY);
-                let total_unbonding: u64 = Mapping::get(state, TOTAL_UNBONDING_KEY);
-                let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-                let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+                let total_bonded: u64 = state_.bonded;
+                let total_unbonding: u64 = state_.unbonding;
+                let total_withdraw: u64 = state_.withdraw;
+                let total_pending_withdraw: u64 = state_.pending_withdraw;
 
-                let total_pooled: u64 = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
+                let total_pooled: u64 = total_buffered + total_bonded + total_unbonding - total_withdraw - total_pending_withdraw;
 
                 let total_stcredits_supply: u64 = Mapping::get_or_use(total_supply, 0u8, 0u64);
 
-                // Mint stcredits
+                // Mint stcredits to the treasury.
                 let stcredits: u64 = getStCreditsFromCredits(protocol_fee, total_pooled, total_stcredits_supply);
-                let treasury: address = Mapping::get(config, 0u8).treasury;
+                let treasury: address = cfg.treasury;
                 Mapping::set(account, treasury, Mapping::get_or_use(account, treasury, 0u64) + stcredits);
                 Mapping::set(total_supply, 0u8, total_stcredits_supply + stcredits);
             }
@@ -494,7 +506,7 @@ program spectre_stcredits_v1.aleo {
         assert(!Mapping::get(config, 0u8).paused);
 
         // Invalidate the cache state.
-        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, total_bonded: 0u64, total_unbonding: 0u64, next_index: 0u32});
+        Mapping::set(cache_state, 0u8, CacheState {status: CACHE_STATUS_INVALID, height: 0u32, bonded: 0u64, unbonding: 0u64, next_index: 0u32});
 
         // Ensure the delegator is in the set.
         assert(Mapping::contains(delegator_pos, delegator));
@@ -511,21 +523,27 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
+        let state_: State = Mapping::get(state, 0u8);
+
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
-        let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_withdraw: u64 = state_.withdraw;
+        let total_pending_withdraw: u64 = state_.pending_withdraw;
 
         assert(total_buffered >= total_withdraw + total_pending_withdraw);
 
-        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + total_pending_withdraw);
-        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, 0u64);
-
-        // Set the pending resolved height with the current block height.
-        Mapping::set(pending_resolved, 0u8, block.height);
+        Mapping::set(state, 0u8, State {
+            withdraw: total_withdraw + total_pending_withdraw,
+            pending_withdraw: 0u64,
+            bonded: state_.bonded,
+            unbonding: state_.unbonding,
+            // Set the pending resolved height with the current block height.
+            resolved_height: block.height,
+        });
     }
 
     /**
      * This function can be called by the operator to resolve the pending withdrawals.
+     * If `height` is zero, the current block height will be used.
      */
     async transition resolve_withdrawal_force(public credits: u64, public height: u32) -> Future {
         // Check the caller is the operator.
@@ -540,21 +558,26 @@ program spectre_stcredits_v1.aleo {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
+        let state_: State = Mapping::get(state, 0u8);
+
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
-        let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_withdraw: u64 = state_.withdraw;
+        let total_pending_withdraw: u64 = state_.pending_withdraw;
 
         assert(total_buffered >= total_withdraw + credits);
 
-        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + credits);
-        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, total_pending_withdraw - credits);
-
         // Check: last resolve height <= resolved height <= current height.
         let resolved_height: u32 = height > 0u32 ? height : block.height;
-        assert(resolved_height >= Mapping::get(pending_resolved, 0u8) && resolved_height <= block.height);
+        assert(resolved_height >= state_.resolved_height && resolved_height <= block.height);
 
-        // Set the pending resolved height with the specified height.
-        Mapping::set(pending_resolved, 0u8, resolved_height);
+        Mapping::set(state, 0u8, State {
+            withdraw: total_withdraw + credits,
+            pending_withdraw: total_pending_withdraw - credits,
+            bonded: state_.bonded,
+            unbonding: state_.unbonding,
+            // Set the pending resolved height with the specified height.
+            resolved_height,
+        });
     }
 
     /**
@@ -563,8 +586,10 @@ program spectre_stcredits_v1.aleo {
     async transition supply(public credits: u64) -> Future {
         assert(credits > 0u64);
 
+        // Transfer credits to this program from the signer.
         let f1: Future = credits.aleo/transfer_public_as_signer(spectre_stcredits_v1.aleo as address, credits);
 
+        // The supplier must be the signer.
         return finalize_supply(f1, self.signer, credits);
     }
 
@@ -575,20 +600,21 @@ program spectre_stcredits_v1.aleo {
         // Check cache is finished and valid.
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
 
+        let state_: State = Mapping::get(state, 0u8);
+
         // Total buffered equals to credits balance of this program.
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_bonded: u64 = state_.bonded;
+        let total_unbonding: u64 = state_.unbonding;
+        let total_withdraw: u64 = state_.withdraw;
+        let total_pending_withdraw: u64 = state_.pending_withdraw;
 
-        // Wait for `credits.aleo/transfer_public_as_signer` finished.
-        f1.await();
-
-        let total_bonded: u64 = Mapping::get(state, TOTAL_BONDED_KEY);
-        let total_unbonding: u64 = Mapping::get(state, TOTAL_UNBONDING_KEY);
-        let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
-
-        let total_pooled: u64 = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
+        let total_pooled: u64 = total_buffered + total_bonded + total_unbonding - total_withdraw - total_pending_withdraw;
 
         let total_stcredits_supply: u64 = Mapping::get_or_use(total_supply, 0u8, 0u64);
+
+        // Transfer credits to this program from the user.
+        f1.await();
 
         // Mint stcredits
         let stcredits: u64 = getStCreditsFromCredits(credits, total_pooled, total_stcredits_supply);
@@ -600,7 +626,7 @@ program spectre_stcredits_v1.aleo {
      * Withdraw credits by user, to burn stcredits.
      */
     async transition withdraw(public stcredits: u64) -> Future {
-        return finalize_withdraw(self.signer, stcredits);
+        return finalize_withdraw(self.caller, stcredits);
     }
 
     async function finalize_withdraw(user: address, stcredits: u64) {
@@ -610,14 +636,16 @@ program spectre_stcredits_v1.aleo {
         // Check cache is finished and valid.
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
 
+        let state_: State = Mapping::get(state, 0u8);
+
         // Total buffered equals to credits balance of this program.
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
-        let total_bonded: u64 = Mapping::get(state, TOTAL_BONDED_KEY);
-        let total_unbonding: u64 = Mapping::get(state, TOTAL_UNBONDING_KEY);
-        let total_withdraw: u64 = Mapping::get(state, TOTAL_WITHDRAW_KEY);
-        let total_pending_withdraw: u64 = Mapping::get(state, TOTAL_PENDING_WITHDRAW_KEY);
+        let total_bonded: u64 = state_.bonded;
+        let total_unbonding: u64 = state_.unbonding;
+        let total_withdraw: u64 = state_.withdraw;
+        let total_pending_withdraw: u64 = state_.pending_withdraw;
 
-        let total_pooled: u64 = total_bonded + total_buffered + total_unbonding - total_withdraw - total_pending_withdraw;
+        let total_pooled: u64 = total_buffered + total_bonded + total_unbonding - total_withdraw - total_pending_withdraw;
 
         let total_stcredits_supply: u64 = Mapping::get_or_use(total_supply, 0u8, 0u64);
 
@@ -629,11 +657,16 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(total_supply, 0u8, total_stcredits_supply - stcredits);
 
         // Update total withdraw and total pending withdraw.
-        let liquidity: u64 = total_buffered > total_withdraw + total_pending_withdraw ? total_buffered - total_withdraw - total_pending_withdraw : 0u64;
+        let liquidity: u64 = total_buffered > (total_withdraw + total_pending_withdraw) ? total_buffered - (total_withdraw + total_pending_withdraw) : 0u64;
         let withdraw_credits: u64 = liquidity >= credits ? credits : liquidity;
         let pending_credits: u64 = credits - withdraw_credits;
-        Mapping::set(state, TOTAL_WITHDRAW_KEY, total_withdraw + withdraw_credits);
-        Mapping::set(state, TOTAL_PENDING_WITHDRAW_KEY, total_pending_withdraw + pending_credits);
+        Mapping::set(state, 0u8, State {
+            withdraw: total_withdraw + withdraw_credits,
+            pending_withdraw: total_pending_withdraw + pending_credits,
+            bonded: total_bonded,
+            unbonding: total_unbonding,
+            resolved_height: state_.resolved_height,
+        });
 
         // Update user withdraw.
         let withdraw: Withdraw = Mapping::get_or_use(withdraws, user, Withdraw {amount: 0u64, pending: false, height: 0u32});
@@ -648,25 +681,35 @@ program spectre_stcredits_v1.aleo {
      * Claim credits by user.
      */
     async transition claim(public amount: u64) -> Future {
+        // Transfer `amount` credits to the user.
         let f: Future = credits.aleo/transfer_public(self.caller, amount);
 
         return finalize_claim(f, self.caller, amount);
     }
 
     async function finalize_claim(f: Future, user: address, amount: u64) {
-        f.await();
-
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
-        let resolved_height: u32 = Mapping::get(pending_resolved, 0u8);
+        let state_: State = Mapping::get(state, 0u8);
+
+        let resolved_height: u32 = state_.resolved_height;
 
         let withdraw: Withdraw = Mapping::get(withdraws, user);
         assert(withdraw.height <= (!withdraw.pending ? block.height : resolved_height));
         assert_eq(withdraw.amount, amount);
 
         Mapping::remove(withdraws, user);
-        Mapping::set(state, TOTAL_WITHDRAW_KEY, Mapping::get(state, TOTAL_WITHDRAW_KEY) - amount);
+        Mapping::set(state, 0u8, State {
+            withdraw: state_.withdraw - amount, // may fail if overflow
+            pending_withdraw: state_.pending_withdraw,
+            bonded: state_.bonded,
+            unbonding: state_.unbonding,
+            resolved_height,
+        });
+
+        // Transfer `amount` credits to the user.
+        f.await();
     }
 
     /**
@@ -675,7 +718,7 @@ program spectre_stcredits_v1.aleo {
      * `CACHE_BATCH_NUM` may be 1/2/... and the corresponding function is cache_1/cache_2/...
      */
     async transition cache(public start: u32) -> Future {
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
         return finalize_cache(f, start);
     }
@@ -692,8 +735,8 @@ program spectre_stcredits_v1.aleo {
         let cache: CacheState = Mapping::get(cache_state, 0u8);
         let status: u8 = is_start ? CACHE_STATUS_IN_PROGRESS : cache.status;
         let height: u32 = is_start ? block.height : cache.height;
-        let total_bonded: u64 = is_start ? 0u64 : cache.total_bonded;
-        let total_unbonding: u64 = is_start ? 0u64 : cache.total_unbonding;
+        let total_bonded: u64 = is_start ? 0u64 : cache.bonded;
+        let total_unbonding: u64 = is_start ? 0u64 : cache.unbonding;
         let next_index: u32 = is_start ? 0u32 : cache.next_index;
 
         // Check cache progress.
@@ -791,14 +834,20 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(cache_state, 0u8, CacheState {
             status: !finished ? CACHE_STATUS_IN_PROGRESS : CACHE_STATUS_VALID,
             height: !finished ? height : block.height,
-            total_bonded,
-            total_unbonding,
+            bonded: total_bonded,
+            unbonding: total_unbonding,
             next_index: !finished ? next_index : 0u32, // new next_index
         });
 
         if (finished) {
-            Mapping::set(state, TOTAL_BONDED_KEY, total_bonded);
-            Mapping::set(state, TOTAL_UNBONDING_KEY, total_unbonding);
+            let state_: State = Mapping::get(state, 0u8);
+            Mapping::set(state, 0u8, State {
+                withdraw: state_.withdraw,
+                pending_withdraw: state_.pending_withdraw,
+                bonded: total_bonded,
+                unbonding: total_unbonding,
+                resolved_height: state_.resolved_height,
+            });
         }
     }
 
@@ -811,18 +860,20 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { initialized: c.initialized, treasury, paused: c.paused });
+        Mapping::set(config, 0u8, Config { paused: c.paused, treasury, protocol_fee: c.protocol_fee });
     }
 
-    async transition set_protocol_fee(public fee: u64) -> Future {
-        assert(fee >= 0u64 && fee <= 100u64);
+    async transition set_protocol_fee(public fee: u8) -> Future {
+        assert(fee >= 0u8 && fee <= 100u8);
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
         return finalize_set_protocol_fee(f, fee);
     }
 
-    async function finalize_set_protocol_fee(f: Future, fee: u64) {
+    async function finalize_set_protocol_fee(f: Future, fee: u8) {
         f.await();
-        Mapping::set(state, PROTOCOL_FEE_KEY, fee);
+
+        let c: Config = Mapping::get(config, 0u8);
+        Mapping::set(config, 0u8, Config { paused: c.paused, treasury: c.treasury, protocol_fee: fee });
     }
 
     async transition pause() -> Future {
@@ -835,7 +886,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { initialized: c.initialized, treasury: c.treasury, paused: true });
+        Mapping::set(config, 0u8, Config { paused: true, treasury: c.treasury, protocol_fee: c.protocol_fee });
     }
 
     async transition unpause() -> Future {
@@ -848,7 +899,7 @@ program spectre_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { initialized: c.initialized, treasury: c.treasury, paused: false });
+        Mapping::set(config, 0u8, Config { paused: false, treasury: c.treasury, protocol_fee: c.protocol_fee });
     }
 
     async transition rescue_tokens(public receiver: address, public amount: u64) -> Future {

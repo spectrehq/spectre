@@ -9,17 +9,17 @@ export interface Approval {
 }
 
 export interface Config {
-  initialized: boolean
-  treasury: string
   paused: boolean
+  treasury: string
+  protocol_fee: bigint
 }
 
-export enum StateEnum {
-  TOTAL_WITHDRAW_KEY = 0,
-  TOTAL_PENDING_WITHDRAW_KEY = 1,
-  TOTAL_BONDED_KEY = 2,
-  TOTAL_UNBONDING_KEY = 3,
-  PROTOCOL_FEE_KEY = 4,
+export interface State {
+  withdraw: bigint
+  pending_withdraw: bigint
+  bonded: bigint
+  unbonding: bigint
+  resolved_height: bigint
 }
 
 export enum CacheStatus {
@@ -76,7 +76,7 @@ export class StCreditsProgram extends ProgramBase {
 
   async isInitialized() {
     const config = await this.getConfig()
-    return config !== null && config.initialized
+    return config !== null
   }
 
   async isPaused() {
@@ -84,8 +84,8 @@ export class StCreditsProgram extends ProgramBase {
     return config !== null && config.paused
   }
 
-  async getState(key: StateEnum) {
-    return u64(await this.getMappingValue("state", u8Str(key)))
+  async getState() {
+    return parsePlaintext(await this.getMappingValue("state", u8Str(0))) as unknown as State
   }
 
   async getCacheState() {
@@ -99,12 +99,8 @@ export class StCreditsProgram extends ProgramBase {
     return withdraw === null ? null : (parsePlaintext(withdraw) as unknown as Withdraw)
   }
 
-  async getPendingWithdrawResolved() {
-    return u32(await this.getMappingValue("pending_resolved", u8Str(0)))
-  }
-
-  isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, pendingWithdrawResolved: bigint, currentHeight: bigint) {
-    return (withdraw.height <= (!withdraw.pending ? currentHeight : pendingWithdrawResolved)) && (withdraw.amount <= totalWithdraw)
+  isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, resolvedHeight: bigint, currentHeight: bigint) {
+    return (withdraw.height <= (!withdraw.pending ? currentHeight : resolvedHeight)) && (withdraw.amount <= totalWithdraw)
   }
 
   async getDelegatorsCount() {
@@ -141,22 +137,6 @@ export class StCreditsProgram extends ProgramBase {
 
   async getTotalBuffered() {
     return this.credits.getPublicBalance(await programAddress(STCREDITS_PROGRAM()))
-  }
-
-  async getTotalBonded() {
-    return this.getState(StateEnum.TOTAL_BONDED_KEY)
-  }
-
-  async getTotalUnbonding() {
-    return this.getState(StateEnum.TOTAL_UNBONDING_KEY)
-  }
-
-  async getTotalWithdraw() {
-    return this.getState(StateEnum.TOTAL_WITHDRAW_KEY)
-  }
-
-  async getTotalPendingWithdraw() {
-    return this.getState(StateEnum.TOTAL_PENDING_WITHDRAW_KEY)
   }
 
   getTotalPooled(
