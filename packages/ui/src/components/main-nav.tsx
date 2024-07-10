@@ -16,13 +16,6 @@ export function MainNav() {
     <NavigationMenu className="hidden lg:block">
       <NavigationMenuList>
         <NavigationMenuItem className="relative">
-          <Link href="/" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              {t('home')}
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="relative">
           <Link href="/stake" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               {t('stake')}
@@ -37,16 +30,9 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
-          <Link href="/bond" legacyBehavior passHref>
+          <Link href="/validators" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              {t('bond')}
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="relative">
-          <Link href="/unbond" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              {t('unbond')}
+              {t('validators')}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

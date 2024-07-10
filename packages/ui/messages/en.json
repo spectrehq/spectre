@@ -1,10 +1,8 @@
 {
   "MainNav": {
-    "home": "Home",
+    "validators": "Validators",
     "stake": "Stake",
     "withdrawals": "Withdrawals",
-    "bond": "Bond",
-    "unbond": "Unbond",
     "documentation": "Documentation"
   },
 
@@ -22,6 +20,10 @@
   "WithdrawalsPage": {
     "title": "Withdrawals",
     "description": "Request stALEO withdrawal and claim ALEO."
+  },
+
+  "ValidatorsPage": {
+    "title": "Validators"
   },
 
   "BondPage": {
