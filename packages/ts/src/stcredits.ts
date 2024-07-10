@@ -42,6 +42,12 @@ export interface Withdraw {
   height: bigint
 }
 
+export interface Delegator {
+  delegator: string
+  validator: string
+  bonded: bigint
+}
+
 export class StCreditsProgram extends ProgramBase {
   constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>, public credits: CreditsProgram) {
     super(getMappingValueString)
@@ -101,30 +107,36 @@ export class StCreditsProgram extends ProgramBase {
     return (withdraw.height <= (!withdraw.pending ? currentHeight : pendingWithdrawResolved)) && (withdraw.amount <= totalWithdraw)
   }
 
-  async getValidatorsCount() {
-    return u32(await this.getMappingValue("validators_count", u8Str(0)))
+  async getDelegatorsCount() {
+    return u32(await this.getMappingValue("delegators_count", u8Str(0)))
   }
 
-  async getValidator(index: number) {
-    return await this.getMappingValueOrNull("validators", u32Str(index))
+  async getDelegator(index: number | bigint) {
+    const delegator = await this.getMappingValueOrNull("delegators", u32Str(index))
+    return delegator === null ? null : (parsePlaintext(delegator) as unknown as Delegator)
   }
 
-  async hasValidator(validator: string) {
-    const delegator = await this.getMappingValueOrNull("validator_delegators", validator)
-    return delegator !== null
+  async getDelegatorIndex(delegator: string) {
+    const index = await this.getMappingValueOrNull("delegator_pos", delegator)
+    return index === null ? null : u32(index)
+  }
+
+  async getValidatorIndex(validator: string) {
+    const index = await this.getMappingValueOrNull("validator_pos", validator)
+    return index === null ? null : u32(index)
   }
 
   async hasDelegator(delegator: string) {
-    return bool(await this.getMappingValueOrDefault("delegators", delegator, "false"))
+    return await this.getDelegatorIndex(delegator) !== null
   }
 
-  async getValidatorDelegator(validator: string) {
-    const delegator = await this.getMappingValue("validator_delegators", validator)
-    return delegator === ZERO_ADDRESS ? null : delegator
+  async hasValidator(validator: string) {
+    return await this.getValidatorIndex(validator) !== null
   }
 
-  async getValidatorBonded(validator: string) {
-    return u64(await this.getMappingValueOrDefault("validator_bonded", validator, "0"))
+  async getDelegatorByValidator(validator: string) {
+    const index = await this.getValidatorIndex(validator)
+    return index === null ? null : await this.getDelegator(index)
   }
 
   async getTotalBuffered() {

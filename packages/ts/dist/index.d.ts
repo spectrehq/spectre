@@ -172,6 +172,11 @@ export interface Withdraw {
 	pending: boolean;
 	height: bigint;
 }
+export interface Delegator {
+	delegator: string;
+	validator: string;
+	bonded: bigint;
+}
 export declare class StCreditsProgram extends ProgramBase {
 	credits: CreditsProgram;
 	constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>, credits: CreditsProgram);
@@ -186,12 +191,13 @@ export declare class StCreditsProgram extends ProgramBase {
 	getWithdraw(account: string): Promise<Withdraw | null>;
 	getPendingWithdrawResolved(): Promise<bigint>;
 	isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, pendingWithdrawResolved: bigint, currentHeight: bigint): boolean;
-	getValidatorsCount(): Promise<bigint>;
-	getValidator(index: number): Promise<string | null>;
-	hasValidator(validator: string): Promise<boolean>;
+	getDelegatorsCount(): Promise<bigint>;
+	getDelegator(index: number | bigint): Promise<Delegator | null>;
+	getDelegatorIndex(delegator: string): Promise<bigint | null>;
+	getValidatorIndex(validator: string): Promise<bigint | null>;
 	hasDelegator(delegator: string): Promise<boolean>;
-	getValidatorDelegator(validator: string): Promise<string | null>;
-	getValidatorBonded(validator: string): Promise<bigint>;
+	hasValidator(validator: string): Promise<boolean>;
+	getDelegatorByValidator(validator: string): Promise<Delegator | null>;
 	getTotalBuffered(): Promise<bigint>;
 	getTotalBonded(): Promise<bigint>;
 	getTotalUnbonding(): Promise<bigint>;

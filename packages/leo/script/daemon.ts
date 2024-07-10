@@ -10,7 +10,8 @@ import {
   u32Str,
   u64Str,
   BondState,
-  initialize, CreditsProgram
+  initialize,
+  CreditsProgram, Delegator
 } from "spectre"
 import config from "../config.json"
 import {
@@ -126,9 +127,10 @@ class StCreditsProgram extends StCreditsProgramBase {
     let minBonded = BigInt(Number.MAX_SAFE_INTEGER)
     let selected:
       | {
+      delegator: string
       delegatorProgram: string
       delegatorProgramPath: string
-      validatorIndex: bigint
+      index: bigint
       validator: string
     }
       | undefined
@@ -136,7 +138,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       delegator,
       delegatorProgramName,
       delegatorProgramPath,
-      validatorIndex,
+      index,
       validator,
       bonded
     } of delegatorBonded) {
@@ -147,9 +149,10 @@ class StCreditsProgram extends StCreditsProgramBase {
         }
         minBonded = 0n
         selected = {
+          delegator,
           delegatorProgram: delegatorProgramName,
           delegatorProgramPath,
-          validatorIndex,
+          index,
           validator
         }
         break
@@ -163,16 +166,17 @@ class StCreditsProgram extends StCreditsProgramBase {
       if (bonded.microcredits < minBonded) {
         minBonded = bonded.microcredits
         selected = {
+          delegator,
           delegatorProgram: delegatorProgramName,
           delegatorProgramPath,
-          validatorIndex,
+          index,
           validator
         }
       }
     }
 
     if (!selected) {
-      console.warn("no selected validator")
+      console.warn("no selected delegator")
       return
     }
 
@@ -186,7 +190,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       programName: selected.delegatorProgram,
       functionName: "bond",
       privateFee: false,
-      inputs: [u32Str(selected.validatorIndex), selected.validator, u64Str(amount)]
+      inputs: [selected.validator, u64Str(amount)]
     })
   }
 
@@ -208,11 +212,11 @@ class StCreditsProgram extends StCreditsProgramBase {
       let selected:
         | {
         delegator: string
-        validatorIndex: bigint
+        index: bigint
         validator: string
       }
         | undefined
-      for (let { delegator, delegatorProgramName, validatorIndex, validator, bonded } of delegatorBonded) {
+      for (let { delegator, delegatorProgramName, index, validator, bonded } of delegatorBonded) {
         if (!bonded) {
           continue
         }
@@ -226,14 +230,14 @@ class StCreditsProgram extends StCreditsProgramBase {
           maxBonded = bonded.microcredits
           selected = {
             delegator,
-            validatorIndex,
+            index,
             validator
           }
         }
       }
 
       if (!selected || maxBonded <= 0n) {
-        console.warn("no selected validator")
+        console.warn("no selected delegator")
         return
       }
 
@@ -250,7 +254,7 @@ class StCreditsProgram extends StCreditsProgramBase {
           programName: STCREDITS_PROGRAM(),
           functionName: "unbond",
           privateFee: false,
-          inputs: [u32Str(selected.validatorIndex), selected.validator, selected.delegator, u64Str(unbondAmount)]
+          inputs: [selected.delegator, u64Str(unbondAmount)]
         })
 
       amount -= unbondAmount
@@ -258,43 +262,45 @@ class StCreditsProgram extends StCreditsProgramBase {
   }
 
   private async getDelegatorBonded() {
-    const delegatorValidators = new Map<string, [bigint, string]>()
+    const delegators = new Map<string, [bigint, Delegator]>()
 
-    const count = await this.getValidatorsCount()
+    const count = await this.getDelegatorsCount()
     for (let i = 0n; i < count; i++) {
-      const validator = await this.getValidator(Number(i))
-      if (!validator) {
-        console.warn(`validator ${i} not found`)
-        continue
-      }
-      const delegator = await this.getValidatorDelegator(validator)
+      const delegator = await this.getDelegator(i)
       if (!delegator) {
-        console.warn(`validator ${i} ${validator} has no delegator`)
+        console.warn(`delegator ${i} not found`)
         continue
       }
-      delegatorValidators.set(delegator, [i, validator])
+      delegators.set(delegator.delegator, [i, delegator])
     }
 
     const delegatorBonded = new Array<{
       delegator: string
       delegatorProgramName: string
       delegatorProgramPath: string
-      validatorIndex: bigint
+      index: bigint
       validator: string
       bonded: BondState | null
     }>()
     for (let i = 0; i < config.delegatorNum; i++) {
       const delegatorProgramPath = programPath("delegator", i + 1)
       const delegatorProgramName = getDelegatorProgramName(i)
-      const delegator = await programAddress(delegatorProgramName)
-      const val = delegatorValidators.get(delegator)
-      if (!val) {
-        console.warn(`validator for delegator ${delegatorProgramName} ${delegator} not found`)
+      const delegatorAddr = await programAddress(delegatorProgramName)
+      const del = delegators.get(delegatorAddr)
+      if (!del) {
+        console.warn(`delegator ${delegatorProgramName} ${delegatorAddr} not found`)
         continue
       }
-      const [validatorIndex, validator] = val
-      const bonded = await this.credits.getBonded(delegator)
-      delegatorBonded.push({ delegator, delegatorProgramName, delegatorProgramPath, validatorIndex, validator, bonded })
+      const [index, delegator] = del
+      const bonded = await this.credits.getBonded(delegator.delegator)
+      delegatorBonded.push({
+        delegator: delegator.delegator,
+        delegatorProgramName,
+        delegatorProgramPath,
+        index,
+        validator: delegator.validator,
+        bonded
+      })
     }
 
     console.log("delegators:", delegatorBonded)
@@ -304,26 +310,22 @@ class StCreditsProgram extends StCreditsProgramBase {
   async claimUnbond() {
     const currentHeight = (await this.programManager.networkClient.getLatestHeight()) as number
 
-    const count = await this.getValidatorsCount()
+    const count = await this.getDelegatorsCount()
     for (let i = 0n; i < count; i++) {
-      const validator = await this.getValidator(Number(i))
-      if (!validator) {
-        console.warn(`validator ${i} not found`)
+      const del = await this.getDelegator(i)
+      if (!del) {
+        console.warn(`delegator ${i} not found`)
         continue
       }
-      const delegator = await this.getValidatorDelegator(validator)
-      if (!delegator) {
-        console.warn(`validator ${i} ${validator} has no delegator`)
-        continue
-      }
+      const delegator = del.delegator
       const unbonding = await this.credits.getUnbonding(delegator)
       if (!unbonding) {
-        console.log(`validator ${i} ${validator} has no unbonding`)
+        console.log(`delegator ${i} ${delegator} has no unbonding`)
         continue
       }
       if (unbonding.height > BigInt(currentHeight)) {
         console.log(
-          `validator ${i} ${validator} has unbonding height ${unbonding.height} > current height ${currentHeight}`
+          `delegator ${i} ${delegator} has unbonding height ${unbonding.height} > current height ${currentHeight}`
         )
         continue
       }
@@ -334,7 +336,7 @@ class StCreditsProgram extends StCreditsProgramBase {
           programName: STCREDITS_PROGRAM(),
           functionName: "claim_unbond",
           privateFee: false,
-          inputs: [u32Str(i), validator, delegator]
+          inputs: [delegator]
         })
     }
   }
@@ -374,9 +376,9 @@ class StCreditsProgram extends StCreditsProgramBase {
       return
     }
 
-    const count = await this.getValidatorsCount()
+    const count = await this.getDelegatorsCount()
     if (count <= 0n) {
-      console.log("no need to cache, since no validator")
+      console.log("no need to cache, since no delegator")
       return
     }
 
