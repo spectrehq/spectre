@@ -1,6 +1,6 @@
-import { bool, field, fieldStr, ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from "./types"
+import { ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from "./types"
 import { bhp256HashToField, programAddress } from "./wasm"
-import { STCREDITS_PROGRAM, ZERO_ADDRESS } from "./const"
+import { STCREDITS_PROGRAM } from "./const"
 import { CreditsProgram } from "./credits"
 
 export interface Approval {
@@ -85,7 +85,7 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   async getState(key: StateEnum) {
-    return field(await this.getMappingValue("state", u8Str(key)))
+    return u64(await this.getMappingValue("state", u8Str(key)))
   }
 
   async getCacheState() {
