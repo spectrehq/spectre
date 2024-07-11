@@ -15,21 +15,22 @@ import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
 import { useCreditsBond } from '~/hooks/use-credits-bond'
-import { useCreditsUnbond } from '~/hooks/use-credits-unbond'
-import { useBondState } from '~/hooks/use-bond-state'
 import { cn } from '~/lib/utils'
 import type { AleoAddress } from '~/types'
+import { useStepper } from '~/components/ui/stepper'
 
-export function UnbondWidget() {
+export interface BondFormProps {
+  validator: AleoAddress
+}
+
+export function BondForm({ validator }: BondFormProps) {
   const tPrompts = useTranslations('Prompts')
 
   const { address } = useAccount()
 
-  const { data: bondState } = useBondState(address)
-  const bondedCreditsDN = useMemo(
-    () => dn.from([bondState?.microcredits ?? 0n, 6]),
-    [bondState]
-  )
+  // credits balance
+  const { data: balance } = useBalance(address)
+  const balanceDN = useMemo(() => dn.from([balance ?? 0n, 6]), [balance])
 
   const formSchema = useMemo(
     () =>
@@ -41,12 +42,12 @@ export function UnbondWidget() {
           })
           .gt(0, { message: tPrompts('Enter an amount') })
           .max(
-            bondState ? dn.toNumber(bondedCreditsDN) : 0,
+            balance ? dn.toNumber(balanceDN) : Number.MAX_SAFE_INTEGER,
             tPrompts('Insufficient balance')
           )
           .default(0),
       }),
-    [tPrompts, bondState, bondedCreditsDN]
+    [tPrompts, balance, balanceDN]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -62,7 +63,7 @@ export function UnbondWidget() {
     form.trigger()
   }, [form])
 
-  const { mutate, isPending } = useCreditsUnbond()
+  const { mutate, isPending } = useCreditsBond()
 
   const handleBond = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -70,21 +71,28 @@ export function UnbondWidget() {
 
       const amount = dn.from(data.amount, 6)[0]
 
-      mutate({ amount, fee: 250_000 })
+      mutate({
+        validator: validator,
+        recipient: address,
+        amount,
+        fee: 250_000,
+      })
     },
-    [address, mutate]
+    [address, mutate, validator]
   )
 
+  const { prevStep } = useStepper()
+
   return (
-    <div className="rounded-xl bg-secondary-foreground max-w-lg mx-auto">
+    <div className="rounded-xl bg-secondary-foreground max-w-xl mx-auto">
       <div className="p-6 text-background">
         <div className="grid">
           <div>
             <div className="font-medium text-lg/6 sm:text-sm/6">
-              Staking Credits
+              Available to bond
             </div>
             <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(bondedCreditsDN, { digits: 2, trailingZeros: true })}
+              {dn.format(balanceDN, { digits: 2, trailingZeros: true })} ALEO
             </div>
           </div>
         </div>
@@ -110,7 +118,7 @@ export function UnbondWidget() {
                       type="button"
                       size="sm"
                       onClick={() => {
-                        field.onChange(dn.toNumber(bondedCreditsDN))
+                        field.onChange(dn.toNumber(balanceDN))
                       }}
                     >
                       MAX
@@ -130,9 +138,19 @@ export function UnbondWidget() {
                   <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
                 )}
                 {form.formState.errors.amount?.message ||
-                  (isPending ? 'Waiting for wallet confirmation' : 'Withdraw')}
+                  (isPending ? 'Waiting for wallet confirmation' : 'Stake')}
               </Button>
             </WalletConnectionChecker>
+            <Button
+              className="w-full"
+              variant="secondary"
+              type="button"
+              size="xl"
+              disabled={isPending}
+              onClick={prevStep}
+            >
+              Validator Detail
+            </Button>
           </form>
         </Form>
       </div>

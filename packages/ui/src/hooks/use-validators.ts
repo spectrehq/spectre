@@ -39,11 +39,6 @@ export function useValidatorsFromAleo123() {
         ...data,
         validators: (data.Validators as ValidatorFromAleo123[]).map(
           (validator) => {
-            console.log(
-              validator.trend[validator.trend.length - 2],
-              validator.stake
-            )
-
             const startTime = new Date(validator.start_time).getTime()
             const now = Date.now()
 
@@ -54,7 +49,7 @@ export function useValidatorsFromAleo123() {
                 4
               )
             )
-            return { ...validator, apr }
+            return { ...validator, trend: validator.trend ?? [], apr }
           }
         ),
       } as UseValidatorsFromAleo123Response

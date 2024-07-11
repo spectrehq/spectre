@@ -19,15 +19,20 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
     accessorKey: 'staked',
     header: () => <div className="text-end">Stake</div>,
     cell: ({ getValue }) => {
-      if (!getValue<number | undefined>()) {
-        return <Skeleton className="w-40 h-5" />
-      }
+      const staked = getValue<number | undefined | null>()
+
       return (
-        <div className="text-end">
-          {dn.format([BigInt(getValue<number>()), 6], {
-            digits: 2,
-            trailingZeros: true,
-          })}
+        <div className="flex justify-end">
+          {staked === null || staked === undefined ? (
+            <Skeleton className="w-40 h-5" />
+          ) : (
+            <span>
+              {dn.format([BigInt(getValue<number>()), 6], {
+                digits: 2,
+                trailingZeros: true,
+              })}
+            </span>
+          )}
         </div>
       )
     },
@@ -88,13 +93,17 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
     accessorKey: 'isOpen',
     header: () => <div className="text-center">Bonding State</div>,
     cell: ({ getValue }) => {
-      const isOpen = getValue<boolean>()
+      const isOpen = getValue<boolean | undefined | null>()
 
       return (
-        <div className="text-center text-xs font-semibold">
-          <span className={isOpen ? 'text-success' : 'text-warning'}>
-            {isOpen ? 'OPEN' : 'CLOSED'}
-          </span>
+        <div className="text-xs font-semibold flex justify-center items-center">
+          {isOpen === null || isOpen === undefined ? (
+            <Skeleton className="w-12 h-5" />
+          ) : (
+            <span className={isOpen ? 'text-success' : 'text-warning'}>
+              {isOpen ? 'OPEN' : 'CLOSED'}
+            </span>
+          )}
         </div>
       )
     },

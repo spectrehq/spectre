@@ -53,19 +53,18 @@ export function CreditsClaimWidget() {
   }, [address, mutate, unbonding])
 
   return (
-    <div className="rounded-xl bg-foreground max-w-lg mx-auto">
+    <div className="rounded-xl bg-secondary-foreground min-w-96 max-w-lg mx-auto">
       <div className="p-6 text-background">
         <div className="grid">
           <div>
             <div className="font-medium text-lg/6 sm:text-sm/6">
-              Unbonding Credits
+              Withdrawing Credits
             </div>
             <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
               {dn.format(unbondingCreditsDN, {
                 digits: 2,
                 trailingZeros: true,
-              })}{' '}
-              ALEO
+              })}
             </div>
           </div>
         </div>
@@ -78,7 +77,7 @@ export function CreditsClaimWidget() {
               trailingZeros: true,
             })}
           </span>
-          <span className="text-xl">ALEO</span>
+          <span className="text-xl">Credits</span>
         </div>
         <WalletConnectionChecker className="w-full" size="xl">
           <Button
