@@ -657,7 +657,7 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(total_supply, 0u8, total_stcredits_supply - stcredits);
 
         // Update total withdraw and total pending withdraw.
-        let liquidity: u64 = total_buffered > (total_withdraw + total_pending_withdraw) ? total_buffered - (total_withdraw + total_pending_withdraw) : 0u64;
+        let liquidity: u64 = total_buffered > (total_withdraw + total_pending_withdraw) ? total_buffered.sub_wrapped(total_withdraw + total_pending_withdraw) : 0u64;
         let withdraw_credits: u64 = liquidity >= credits ? credits : liquidity;
         let pending_credits: u64 = credits - withdraw_credits;
         Mapping::set(state, 0u8, State {

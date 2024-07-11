@@ -163,8 +163,8 @@ export declare enum CacheStatus {
 export interface CacheState {
 	status: CacheStatus;
 	height: bigint;
-	total_bonded: bigint;
-	total_unbonding: bigint;
+	bonded: bigint;
+	unbonding: bigint;
 	next_index: bigint;
 }
 export interface Withdraw {

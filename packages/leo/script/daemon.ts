@@ -206,7 +206,7 @@ class StCreditsProgram extends StCreditsProgramBase {
     const totalWithdraw = state.withdraw
     const totalPendingWithdraw = state.pending_withdraw
     const totalUnbonding = state.unbonding // TODO: get from credits.aleo
-    let amount = totalWithdraw + totalPendingWithdraw + totalUnbonding - totalBuffered
+    let amount = totalWithdraw + totalPendingWithdraw - totalBuffered - totalUnbonding
 
     if (amount <= 0n) {
       console.log(`no need to unbond`)

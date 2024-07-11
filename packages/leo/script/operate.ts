@@ -145,8 +145,8 @@ program
     const cacheState = await stcredits.getCacheState()
     console.log(`    Status: ${cacheStatusStrings.get(Number(cacheState.status))}`)
     console.log(`    Height: ${cacheState.height}`)
-    console.log(`    Total bonded: ${Number(cacheState.total_bonded) / 1e6}`)
-    console.log(`    Total unbonding: ${Number(cacheState.total_unbonding) / 1e6}`)
+    console.log(`    Total bonded: ${Number(cacheState.bonded) / 1e6}`)
+    console.log(`    Total unbonding: ${Number(cacheState.unbonding) / 1e6}`)
     console.log(`    Next index: ${cacheState.next_index}`)
   })
 
@@ -204,7 +204,9 @@ program
       console.log(`    Validator: ${delegator.validator}`)
       console.log(`    Bonded (at last settlement): ${Number(delegator.bonded) / 1e6}`)
       const bonded = await stcredits.credits.getBonded(delegator.delegator)
+      const unbonding = await stcredits.credits.getUnbonding(delegator.delegator)
       console.log(`    Bonded (actual): ${bonded ? Number(bonded.microcredits) / 1e6 : 0}`)
+      console.log(`    Unbonding (actual): ${unbonding ? `${Number(unbonding.microcredits) / 1e6}, height: ${unbonding.height}` : 0}`)
     }
   })
 
