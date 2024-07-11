@@ -30,23 +30,26 @@ export type NetworkClientActions = {
 
 export type NetworkClientStore = NetworkClientState & NetworkClientActions
 
+const defaultCreditsProgram = new CreditsProgram(
+  generateGetMappingValueString(
+    DEFAULT_HOST,
+    DEFAULT_NETWORK,
+    CREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
+  )
+)
+
 export const defaultNetworkClientState: NetworkClientState = {
   host: DEFAULT_HOST,
   network: DEFAULT_NETWORK,
 
-  creditsProgram: new CreditsProgram(
-    generateGetMappingValueString(
-      DEFAULT_HOST,
-      DEFAULT_NETWORK,
-      CREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
-    )
-  ),
+  creditsProgram: defaultCreditsProgram,
   stCreditsProgram: new StCreditsProgram(
     generateGetMappingValueString(
       DEFAULT_HOST,
       DEFAULT_NETWORK,
       STCREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
-    )
+    ),
+    defaultCreditsProgram
   ),
   stCreditsPointsProgram: new StCreditsPointsProgram(
     generateGetMappingValueString(
@@ -78,7 +81,8 @@ export const createNetworkClientStore = (
           host,
           network,
           STCREDITS_PROGRAM_IDS[network]
-        )
+        ),
+        creditsProgram
       )
 
       const stCreditsPointsProgram = new StCreditsPointsProgram(
@@ -107,7 +111,8 @@ export const createNetworkClientStore = (
           host,
           network,
           STCREDITS_PROGRAM_IDS[network]
-        )
+        ),
+        creditsProgram
       )
 
       const stCreditsPointsProgram = new StCreditsPointsProgram(

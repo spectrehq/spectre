@@ -1,9 +1,8 @@
 import { useQuery } from '@tanstack/react-query'
-import { StateEnum } from 'spectre'
 import { useMemo } from 'react'
 import { useNetworkClientStore } from '~/stores/network-client'
 import { STCREDITS_PROGRAM_IDS } from '~/config'
-import { AleoAddress } from '~/types'
+import type { AleoAddress } from '~/types'
 import { useBalance } from './use-balance'
 
 export function useLiquidity() {
@@ -16,13 +15,13 @@ export function useLiquidity() {
     STCREDITS_PROGRAM_IDS[network] as AleoAddress
   )
 
-  const { data: totalWithdraw, isLoading: isTotalWithdrawLoading } = useQuery({
+  const { data: state, isLoading: isTotalWithdrawLoading } = useQuery({
     queryKey: ['stCredits', 'totalWithdraw'],
-    queryFn: () => stCreditsProgram.getState(StateEnum.TOTAL_WITHDRAW_KEY),
+    queryFn: () => stCreditsProgram.getState(),
   })
 
   const data = useMemo(() => {
-    if (!totalBuffered || !totalWithdraw) {
+    if (!totalBuffered || !state) {
       return null
     }
 
@@ -30,8 +29,8 @@ export function useLiquidity() {
       return 0n
     }
 
-    return totalBuffered - totalWithdraw
-  }, [totalBuffered, totalWithdraw])
+    return totalBuffered - state.withdraw
+  }, [totalBuffered, state])
 
   return { data, isLoading: isTotalBufferedLoading || isTotalWithdrawLoading }
 }

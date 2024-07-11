@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNetworkClientStore } from '~/stores/network-client'
-import { AleoAddress } from '~/types'
+import type { AleoAddress } from '~/types'
 
 export function usePendingWithdraw(address?: AleoAddress | null) {
   const stCreditsProgram = useNetworkClientStore(
@@ -8,7 +8,14 @@ export function usePendingWithdraw(address?: AleoAddress | null) {
   )
   return useQuery({
     queryKey: ['stCredits', 'pendingWithdraw', address],
-    queryFn: () => stCreditsProgram.getPendingWithdraw(address!),
+    queryFn: async () => {
+      const res = await stCreditsProgram.getWithdraw(address!)
+      if (res?.pending) {
+        return res
+      }
+
+      return null
+    },
     enabled: Boolean(address),
   })
 }

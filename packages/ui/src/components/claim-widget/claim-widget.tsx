@@ -10,7 +10,6 @@ import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { useClaim } from '~/hooks/use-claim'
-import { useQueueStartEnd } from '~/hooks/use-queue-start-end'
 import { useBlockHeight } from '~/hooks/use-block-height'
 
 export function ClaimWidget() {
@@ -59,20 +58,6 @@ export function ClaimWidget() {
     return 'Claim'
   }, [latestBlockHeight, userWithdraw])
 
-  const { data: queueStartEnd } = useQueueStartEnd()
-
-  const queueStatus = useMemo(() => {
-    if (!queueStartEnd || !pendingWithdraw) {
-      return '-'
-    }
-
-    if (queueStartEnd && pendingWithdraw) {
-      return (pendingWithdraw.index - queueStartEnd.start).toString()
-    }
-
-    return '-'
-  }, [queueStartEnd, pendingWithdraw])
-
   const { mutate, isPending } = useClaim()
 
   const handleClaim = useCallback(async () => {
@@ -114,9 +99,7 @@ export function ClaimWidget() {
             <div className="font-medium text-lg/6 sm:text-sm/6">
               Withdrawals ahead
             </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {queueStatus}
-            </div>
+            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">-</div>
           </div>
         </div>
       </div>
