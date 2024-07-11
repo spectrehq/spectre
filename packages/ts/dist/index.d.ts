@@ -9,6 +9,8 @@ export declare const EMERGENCY_ADMIN_ROLE = 4;
 export declare const RISK_ADMIN_ROLE = 5;
 export declare const ASSET_LISTING_ADMIN_ROLE = 6;
 export declare const STCREDITS_CACHE_BATCH_NUM = 10n;
+export declare const START_INVITE_CODE = 10000n;
+export declare const EMPTY_INVITE_CODE = 0n;
 export declare const VERSION = "v1";
 export declare const PREFIX = "spectre";
 export declare const ACCESS_CONTROL_PROGRAM: () => string;
@@ -205,8 +207,14 @@ export declare class StCreditsProgram extends ProgramBase {
 export interface StCreditsPointsState {
 	stcredits: bigint;
 	height: bigint;
+	inviter: string;
+	inviter_of_inviter: string;
 }
 export declare class StCreditsPointsProgram extends ProgramBase {
+	/**
+	 * Whether the program is paused.
+	 */
+	isPaused(): Promise<boolean>;
 	/**
 	 * Get the total supply of points.
 	 */
@@ -220,7 +228,21 @@ export declare class StCreditsPointsProgram extends ProgramBase {
 	 * Get the state of an account.
 	 * @param account
 	 */
-	getState(account: string): Promise<StCreditsPointsState>;
+	getState(account: string): Promise<StCreditsPointsState | null>;
+	/**
+	 * Get the inviter by the invite code.
+	 * @param code
+	 */
+	getInviterByCode(code: number | bigint): Promise<string | null>;
+	/**
+	 * Get the invite code by the inviter.
+	 * @param inviter
+	 */
+	getInviteCode(inviter: string): Promise<bigint>;
+	/**
+	 * Get the invite code counter.
+	 */
+	getInviteCodeCounter(): Promise<bigint>;
 }
 
 export {};

@@ -13,6 +13,9 @@ export const ASSET_LISTING_ADMIN_ROLE = 6
 
 export const STCREDITS_CACHE_BATCH_NUM = 10n
 
+export const START_INVITE_CODE = 10000n
+export const EMPTY_INVITE_CODE = 0n
+
 export const VERSION = "v1"
 export const PREFIX = "spectre"
 
