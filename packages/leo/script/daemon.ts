@@ -122,7 +122,9 @@ class StCreditsProgram extends StCreditsProgramBase {
     const totalWithdraw = state.withdraw
     const totalPendingWithdraw = state.pending_withdraw
     const totalUnbonding = state.unbonding
-    const amount = totalBuffered + totalUnbonding - totalWithdraw - totalPendingWithdraw
+    const amount1 = totalBuffered - totalWithdraw
+    const amount2 = totalBuffered + totalUnbonding - totalWithdraw - totalPendingWithdraw
+    const amount = amount1 < amount2 ? amount1 : amount2
 
     if (amount < BigInt(1e6)) {
       console.log(`no enough buffered amount to bond: ${amount}`)

@@ -383,7 +383,10 @@ program spectre_stcredits_v1.aleo {
         let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
         let total_withdraw: u64 = state_.withdraw;
         let total_pending_withdraw: u64 = state_.pending_withdraw;
-        assert(total_buffered >= total_withdraw + total_pending_withdraw + amount);
+        let total_bonded: u64 = state_.bonded;
+        let total_unbonding: u64 = state_.unbonding;
+        assert(total_buffered >= total_withdraw + amount);
+        assert(total_buffered + total_unbonding >= total_withdraw + total_pending_withdraw + amount);
 
         // Transfer `amount` credits to the `delegator` program.
         f2.await();
@@ -406,9 +409,6 @@ program spectre_stcredits_v1.aleo {
             let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {
-                let total_bonded: u64 = state_.bonded;
-                let total_unbonding: u64 = state_.unbonding;
-
                 let total_pooled: u64 = total_buffered + total_bonded + total_unbonding - total_withdraw - total_pending_withdraw;
 
                 let total_stcredits_supply: u64 = Mapping::get_or_use(total_supply, 0u8, 0u64);
