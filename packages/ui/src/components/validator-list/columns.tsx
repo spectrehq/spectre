@@ -2,12 +2,12 @@
 
 import type { ColumnDef } from '@tanstack/react-table'
 import * as dn from 'dnum'
-import { Badge } from '~/components/ui/badge'
+// import { Badge } from '~/components/ui/badge'
 import { Skeleton } from '~/components/ui/skeleton'
 import type { Validator } from '~/hooks/use-committee'
 import type { ValidatorFromAleo123 } from '~/hooks/use-validators'
 import { shortenAddress } from '~/utils'
-import { TrendChart } from './trend-chart'
+// import { TrendChart } from './trend-chart'
 
 export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
   {
@@ -50,41 +50,35 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
       </div>
     ),
   },
-  {
-    accessorKey: 'trend',
-    header: () => <div>Daily Earnings Change</div>,
-    cell: ({ getValue }) => <TrendChart data={getValue<number[]>()} />,
-  },
-  {
-    accessorKey: 'apr',
-    header: () => <div className="text-center">APR</div>,
-    cell: ({ getValue }) => {
-      return (
-        <div className="text-center text-xs font-semibold">
-          {dn.format(dn.from((getValue<number>() ?? 0) * 100), { digits: 2 })}%
-        </div>
-      )
-    },
-  },
+  // {
+  //   accessorKey: 'trend',
+  //   header: () => <div>Daily Earnings Change</div>,
+  //   cell: ({ getValue }) => <TrendChart data={getValue<number[]>()} />,
+  // },
+  // {
+  //   accessorKey: 'apr',
+  //   header: () => <div className="text-center">APR</div>,
+  //   cell: ({ getValue }) => {
+  //     return (
+  //       <div className="text-center text-xs font-semibold">
+  //         {dn.format(dn.from((getValue<number>() ?? 0) * 100), { digits: 2 })}%
+  //       </div>
+  //     )
+  //   },
+  // },
   {
     accessorKey: 'commission',
     header: () => <div className="text-end">Commission</div>,
     cell: ({ getValue }) => {
-      const commission = getValue<number>()
+      const commission = getValue<number | undefined>()
 
       return (
-        <div className="text-end">
-          <Badge
-            variant={
-              commission > 20
-                ? 'destructive'
-                : commission > 10
-                  ? 'warning'
-                  : 'success'
-            }
-          >
-            {dn.format(dn.from(getValue<number>() ?? 0), { digits: 2 })}%
-          </Badge>
+        <div className="flex justify-end items-center font-semibold">
+          {commission === undefined || commission === null ? (
+            <Skeleton className="w-10 h-5" />
+          ) : (
+            <span>{dn.format(dn.from(commission), { digits: 2 })}%</span>
+          )}
         </div>
       )
     },
@@ -100,9 +94,7 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
           {isOpen === null || isOpen === undefined ? (
             <Skeleton className="w-12 h-5" />
           ) : (
-            <span className={isOpen ? 'text-success' : 'text-warning'}>
-              {isOpen ? 'OPEN' : 'CLOSED'}
-            </span>
+            <span>{isOpen ? 'OPEN' : 'CLOSED'}</span>
           )}
         </div>
       )
