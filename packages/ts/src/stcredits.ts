@@ -1,6 +1,6 @@
 import { ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from "./types"
 import { bhp256HashToField, programAddress } from "./wasm"
-import { STCREDITS_PROGRAM } from "./const"
+import { STCREDITS_PROGRAM, WITHDRAW_DELAY } from "./const"
 import { CreditsProgram } from "./credits"
 
 export interface Approval {
@@ -100,7 +100,10 @@ export class StCreditsProgram extends ProgramBase {
   }
 
   isWithdrawClaimable(withdraw: Withdraw, totalWithdraw: bigint, resolvedHeight: bigint, currentHeight: bigint) {
-    return (withdraw.height <= (!withdraw.pending ? currentHeight : resolvedHeight)) && (withdraw.amount <= totalWithdraw)
+    return (withdraw.height <= (!withdraw.pending ?
+        currentHeight :
+        resolvedHeight + WITHDRAW_DELAY
+    )) && (withdraw.amount <= totalWithdraw)
   }
 
   async getDelegatorsCount() {

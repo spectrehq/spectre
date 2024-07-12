@@ -11,6 +11,7 @@ export const EMERGENCY_ADMIN_ROLE = 4
 export const RISK_ADMIN_ROLE = 5
 export const ASSET_LISTING_ADMIN_ROLE = 6
 
+export const WITHDRAW_DELAY = 360n
 export const STCREDITS_CACHE_BATCH_NUM = 10n
 
 export const START_INVITE_CODE = 10000n

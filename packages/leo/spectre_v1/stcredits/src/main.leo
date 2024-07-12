@@ -673,6 +673,7 @@ program spectre_stcredits_v1.aleo {
         Mapping::set(withdraws, user, Withdraw {
             amount: withdraw.amount + credits,
             pending: withdraw.pending || pending_credits > 0u64,
+            // <withdraw.height> == <withdraw created height> + WITHDRAW_DELAY
             height: block.height + WITHDRAW_DELAY,
         });
     }
@@ -696,7 +697,9 @@ program spectre_stcredits_v1.aleo {
         let resolved_height: u32 = state_.resolved_height;
 
         let withdraw: Withdraw = Mapping::get(withdraws, user);
-        assert(withdraw.height <= (!withdraw.pending ? block.height : resolved_height));
+        // For non-pending withdraw, <withdraw.height> == <withdraw created height> + WITHDRAW_DELAY <= <current block height>.
+        // For pending withdraw, <withdraw.height> - WITHDRAW_DELAY == <withdraw created height> <= <pending resolved height>
+        assert(withdraw.height <= (!withdraw.pending ? block.height : resolved_height + WITHDRAW_DELAY));
         assert_eq(withdraw.amount, amount);
 
         Mapping::remove(withdraws, user);

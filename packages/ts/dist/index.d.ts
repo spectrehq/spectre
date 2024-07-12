@@ -8,6 +8,7 @@ export declare const POOL_ADMIN_ROLE = 3;
 export declare const EMERGENCY_ADMIN_ROLE = 4;
 export declare const RISK_ADMIN_ROLE = 5;
 export declare const ASSET_LISTING_ADMIN_ROLE = 6;
+export declare const WITHDRAW_DELAY = 360n;
 export declare const STCREDITS_CACHE_BATCH_NUM = 10n;
 export declare const START_INVITE_CODE = 10000n;
 export declare const EMPTY_INVITE_CODE = 0n;

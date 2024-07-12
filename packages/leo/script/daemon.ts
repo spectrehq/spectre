@@ -121,7 +121,8 @@ class StCreditsProgram extends StCreditsProgramBase {
     const totalBuffered = await this.getTotalBuffered()
     const totalWithdraw = state.withdraw
     const totalPendingWithdraw = state.pending_withdraw
-    const amount = totalBuffered - totalWithdraw - totalPendingWithdraw
+    const totalUnbonding = state.unbonding
+    const amount = totalBuffered + totalUnbonding - totalWithdraw - totalPendingWithdraw
 
     if (amount < BigInt(1e6)) {
       console.log(`no enough buffered amount to bond: ${amount}`)
@@ -205,7 +206,7 @@ class StCreditsProgram extends StCreditsProgramBase {
     const totalBuffered = await this.getTotalBuffered()
     const totalWithdraw = state.withdraw
     const totalPendingWithdraw = state.pending_withdraw
-    const totalUnbonding = state.unbonding // TODO: get from credits.aleo
+    const totalUnbonding = state.unbonding
     let amount = totalWithdraw + totalPendingWithdraw - totalBuffered - totalUnbonding
 
     if (amount <= 0n) {
