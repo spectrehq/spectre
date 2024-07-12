@@ -33,6 +33,7 @@
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
     "cmdk": "^1.0.0",
+    "color-hash": "^2.0.2",
     "dnum": "^2.13.1",
     "lodash.orderby": "^4.6.0",
     "lucide-react": "^0.399.0",
@@ -52,6 +53,7 @@
   },
   "devDependencies": {
     "@biomejs/biome": "1.8.3",
+    "@types/color-hash": "^2.0.0",
     "@types/lodash.orderby": "^4.6.9",
     "@types/node": "^20.11.5",
     "@types/react": "^18.3.3",

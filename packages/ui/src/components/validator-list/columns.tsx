@@ -7,13 +7,19 @@ import { Skeleton } from '~/components/ui/skeleton'
 import type { Validator } from '~/hooks/use-committee'
 import type { ValidatorFromAleo123 } from '~/hooks/use-validators'
 import { shortenAddress } from '~/utils'
+import { GradientsAvatar } from '../gradients-avatar'
 // import { TrendChart } from './trend-chart'
 
 export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
   {
     accessorKey: 'address',
     header: 'Address',
-    cell: ({ getValue }) => shortenAddress(getValue<string>()),
+    cell: ({ getValue }) => (
+      <div className="flex items-center space-x-2">
+        <GradientsAvatar text={getValue<string>()} size={32} />
+        <span>{shortenAddress(getValue<string>())}</span>
+      </div>
+    ),
   },
   {
     accessorKey: 'staked',
