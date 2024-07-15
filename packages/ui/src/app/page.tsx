@@ -3,6 +3,9 @@ import Image from 'next/image'
 import { Button } from '~/components/ui/button'
 import FeaturesImage from '~/assets/features-banner.jpg'
 import { Separator } from '~/components/ui/separator'
+import ImagePlaceholder from '~/assets/image-placeholder.svg'
+import { AspectRatio } from '~/components/ui/aspect-ratio'
+import { ExternalLinkIcon } from 'lucide-react'
 
 export default function HomePage() {
   return (
@@ -54,25 +57,102 @@ export default function HomePage() {
         </defs>
       </svg>
       <main className="flex-auto">
-        <div className="mx-auto mt-24 max-w-7xl px-6 sm:mt-32 md:mt-56 lg:px-8">
+        <div className="mx-auto mt-16 max-w-7xl px-6 sm:mt-24 md:mt-40 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-3xl">
-              <h1 className="font-display text-5xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl">
-                AleoStaking liquidity protocol: Stake credits and earn rewards.
+              <h1 className="font-display text-5xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl mb-12">
+                Zero-Knowledge Staking on Aleo
               </h1>
-              <p className="mt-6 text-xl" />
-              <div className="pt-12">
+              <p className="mb-4 text-xl">
+                Stake your Credits to validators and earn rewards.
+              </p>
+              <div className="mb-8">
                 <Button
                   className="rounded-full px-10 py-4 h-auto text-2xl"
                   asChild
                 >
-                  <Link href="/stake">Stake credits</Link>
+                  <Link href="/validators">Staking</Link>
+                </Button>
+              </div>
+
+              <p className="mb-4 text-xl">
+                Stake Credits and receive stCredits. Get daily staking rewards
+                and put your stCredits to ZeFi to work across the Aleo
+                ecosystem.
+              </p>
+              <div className="">
+                <Button
+                  className="rounded-full px-10 py-4 h-auto text-2xl"
+                  asChild
+                >
+                  <Link href="/stake">
+                    <span>Liquid&nbsp;</span>
+                    <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                      Staking
+                    </span>
+                  </Link>
                 </Button>
               </div>
             </div>
           </div>
         </div>
+
         <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-60">
+          <div className="mx-auto max-w-2xl lg:max-w-none">
+            <div className="max-w-2xl">
+              <h2>
+                <span className="sr-only"> - </span>
+                <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-5xl">
+                  Validators
+                </span>
+              </h2>
+              <div className="mt-6 text-xl text-muted-foreground">
+                <p>Explore validators that help grow Aleo</p>
+              </div>
+            </div>
+          </div>
+          <div className="max-w-2xl lg:max-w-full mx-auto grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-10 lg:gap-20">
+            <div className="col-span-1 lg:col-span-2">
+              <AspectRatio ratio={1} className="bg-muted">
+                <Image
+                  src={ImagePlaceholder}
+                  alt=""
+                  className="rounded-md object-cover"
+                />
+              </AspectRatio>
+            </div>
+            <div className="col-span-1 lg:col-span-3">
+              <div className="mx-auto max-w-2xl lg:max-w-none">
+                <div style={{}}>
+                  <figure className="mx-auto max-w-4xl">
+                    <blockquote className="relative font-display text-3xl font-medium tracking-tight sm:text-4xl">
+                      <p className="before:content-['“'] after:content-['”'] sm:before:absolute sm:before:right-full">
+                        Validators run nodes, validate transactions, and
+                        participate in consensus to add new blocks. They earn
+                        fees and rewards.
+                      </p>
+                    </blockquote>
+                    <figcaption className="mt-10" />
+                  </figure>
+                </div>
+              </div>
+              {/* <p className="mt-6 max-w-3xl text-xl text-secondary-foreground">
+                Validators run nodes, validate transactions, and participate in
+                consensus to add new blocks. They earn fees and rewards.
+              </p> */}
+              <div className="mt-6">
+                <Button
+                  asChild
+                  className="rounded-full px-8 py-3 h-auto text-xl"
+                >
+                  <Link href="/validators">Explore</Link>
+                </Button>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 md:max-w-lg lg:max-w-full mx-auto">
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center">
               <div className="flex flex-col lg:flex-row items-center h-64 lg:h-auto">
@@ -176,12 +256,30 @@ export default function HomePage() {
               </div>
               <div>
                 <div className="text-4xl">Use</div>
-                <div className="text-2xl">stCredits in DeFi</div>
+                <div className="text-2xl">stCredits in ZeFi</div>
               </div>
             </div>
           </div>
         </div>
-        <div className="mx-auto mt-24 sm:mt-32 lg:mt-40 max-w-7xl px-6 lg:px-8">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+          <div className="mx-auto max-w-2xl lg:max-w-none">
+            <div className="max-w-2xl">
+              <h2>
+                <span className="sr-only"> - </span>
+                <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-5xl">
+                  stCredits
+                </span>
+              </h2>
+              <div className="mt-6 text-xl text-muted-foreground">
+                <p>
+                  Aleo&apos;s liquid staking token, with best-in-class security,
+                  deepest liquidity and competitive rewards.
+                </p>
+              </div>
+            </div>
+          </div>
+        </div>
+        {/* <div className="mx-auto mt-24 sm:mt-32 lg:mt-40 max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
               <div className="flex" style={{ opacity: 1, transform: 'none' }}>
@@ -291,10 +389,11 @@ export default function HomePage() {
               </div>
             </div>
           </div>
-        </div>
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+        </div> */}
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-16 sm:mt-20 lg:mt-28">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="lg:flex lg:items-center lg:justify-end">
+            <div className="lg:flex lg:items-center lg:justify-end overflow-hidden lg:overflow-[unset]">
               <div className="flex justify-center lg:w-1/2 lg:justify-end lg:pr-12">
                 <div className="w-[33.75rem] flex-none lg:w-[45rem]">
                   <div className="justify-center lg:justify-end relative flex aspect-[719/680] w-full ">
@@ -338,9 +437,12 @@ export default function HomePage() {
                   <li className="group mt-10 first:mt-0">
                     <div>
                       <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
-                        <strong className="font-semibold">stCredits. </strong>
-                        Aleo leading liquid staking token, with best-in-class
-                        security, deepest liquidity and competitive rewards.
+                        <strong className="font-semibold">
+                          Fully open-sourced{' '}
+                        </strong>
+                        Including programs, operator service, UI, and everything
+                        else. Allowing continuous peer reviews and enhancements
+                        from developers across the Aleo ecosystem.
                       </div>
                     </div>
                   </li>
@@ -348,10 +450,11 @@ export default function HomePage() {
                     <div>
                       <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
                         <strong className="font-semibold">
-                          Higher returns.{' '}
+                          Role based access control{' '}
                         </strong>
-                        In addition to Aleo staking rewards, you can get
-                        additional point rewards by staking on the platform.
+                        Multiple roles with different permissions to set the
+                        staking parameters, manage the treasury and tackling
+                        emergencies.
                       </div>
                     </div>
                   </li>
@@ -359,28 +462,118 @@ export default function HomePage() {
                     <div>
                       <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
                         <strong className="font-semibold text-primary">
-                          Stable income.{' '}
+                          Points incentives{' '}
                         </strong>
-                        AleoStaking adopts a decentralized staking method,
-                        staking Credits to multiple different nodes, and there
-                        is no profit risk if a single node fails.
-                      </div>
-                    </div>
-                  </li>
-                  <li className="group mt-10 first:mt-0">
-                    <div>
-                      <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
-                        <strong className="font-semibold text-primary">
-                          No threshold.{' '}
-                        </strong>
-                        There is no minimum pledge requirement of 1,000 credits
-                        for AleoStaking pledge, and 1 credit can also
-                        participate in the pledge.
+                        Stakers earn points for locking up their stCredits. And
+                        will earn more bonus points on top of any points their
+                        invites earn.
                       </div>
                     </div>
                   </li>
                 </ul>
               </div>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+          <div className="grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-20">
+            <div className="col-span-1 lg:col-span-3">
+              <div className="mx-auto max-w-2xl lg:max-w-none">
+                <div className="max-w-2xl">
+                  <h2>
+                    <span className="sr-only"> - </span>
+                    <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-5xl">
+                      Governance
+                    </span>
+                  </h2>
+                  <div className="mt-6 text-xl text-muted-foreground">
+                    <p>
+                      Governed by the Spectre Governance, who is a
+                      mission-driven decentralized organization.
+                    </p>
+                  </div>
+                </div>
+              </div>
+              <blockquote className="mt-6 border-l-4 pl-6 italic relative font-display text-muted-foreground text-xl font-medium tracking-tight sm:text-4xl">
+                Key decisions require public votes by SPT token holders,
+                ensuring accountability to both users and the wider Aleo
+                community.
+              </blockquote>
+              <div className="mt-6">
+                <Button
+                  asChild
+                  className="rounded-full px-8 py-3 h-auto text-xl"
+                >
+                  <Link
+                    href="https://docs.spectre.guru/spectre/governance"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    Governance
+                    <ExternalLinkIcon className="w-5 h-5 ml-2" />
+                  </Link>
+                </Button>
+              </div>
+            </div>
+            <div className="col-span-1 lg:col-span-2">
+              <AspectRatio ratio={1} className="bg-muted">
+                <Image
+                  src={ImagePlaceholder}
+                  alt=""
+                  className="rounded-md object-cover"
+                />
+              </AspectRatio>
+            </div>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+          <div className="mx-auto max-w-2xl lg:max-w-none">
+            <div
+              className="-mx-6 rounded-3xl bg-primary px-6 py-20 sm:mx-0 sm:py-32 md:px-12"
+              style={{ opacity: 1, transform: 'none' }}
+            >
+              <div
+                className="flex items-center gap-x-8"
+                style={{ opacity: 1, transform: 'none' }}
+              >
+                <h2 className="text-center font-display text-sm font-semibold tracking-wider text-background sm:text-left">
+                  We’ve worked with amazing projects
+                </h2>
+                <div className="h-px flex-auto bg-neutral-800" />
+              </div>
+              <ul className="grid grid-cols-3 gap-x-8 gap-y-10 mt-10">
+                <li className="overflow-hidden rounded-md">
+                  <AspectRatio ratio={184 / 36}>
+                    <Image
+                      src={ImagePlaceholder}
+                      alt=""
+                      className="rounded-md object-cover"
+                    />
+                  </AspectRatio>
+                </li>
+
+                <li className="overflow-hidden rounded-md">
+                  <AspectRatio ratio={184 / 36}>
+                    <Image
+                      src={ImagePlaceholder}
+                      alt=""
+                      className="rounded-md object-cover"
+                    />
+                  </AspectRatio>
+                </li>
+
+                <li className="overflow-hidden rounded-md">
+                  <AspectRatio ratio={184 / 36}>
+                    <Image
+                      src={ImagePlaceholder}
+                      alt=""
+                      className="rounded-md object-cover"
+                    />
+                  </AspectRatio>
+                </li>
+              </ul>
             </div>
           </div>
         </div>

@@ -15,7 +15,7 @@ export function Footer() {
                 </span>
               </Link>
               <p className="text-sm text-muted-foreground">
-                AleoStaking liquidity protocol: Stake credits and earn rewards.
+                Liquid Staking for Aleo
               </p>
             </div>
           </div>

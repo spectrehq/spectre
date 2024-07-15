@@ -17,6 +17,7 @@
     "@demox-labs/aleo-wallet-adapter-reactui": "^0.0.34",
     "@hookform/resolvers": "^3.7.0",
     "@puzzlehq/sdk": "^0.4.2",
+    "@radix-ui/react-aspect-ratio": "^1.1.0",
     "@radix-ui/react-collapsible": "^1.1.0",
     "@radix-ui/react-dialog": "^1.1.1",
     "@radix-ui/react-dropdown-menu": "^2.1.1",
