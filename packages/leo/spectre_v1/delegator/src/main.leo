@@ -1,16 +1,16 @@
 import credits.aleo;
 import spectre_acl_manager_v1.aleo;
-import spectre_stcredits_v1.aleo;
+import staking_stcredits_v1.aleo;
 
-program spectre_delegator_v1.aleo {
+program staking_delegator_v1.aleo {
     transition get_address() -> address {
-        return spectre_delegator_v1.aleo as address;
+        return staking_delegator_v1.aleo as address;
     }
 
     async transition register(public validator: address) -> Future {
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 
-        let f2: Future = spectre_stcredits_v1.aleo/register_delegator(spectre_delegator_v1.aleo as address, validator);
+        let f2: Future = staking_stcredits_v1.aleo/register_delegator(staking_delegator_v1.aleo as address, validator);
 
         return finalize_register(f1, f2);
     }
@@ -23,9 +23,9 @@ program spectre_delegator_v1.aleo {
     async transition bond(public validator: address, public amount: u64) -> Future {
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 
-        let f2: Future = spectre_stcredits_v1.aleo/bond(spectre_delegator_v1.aleo as address, validator, amount);
+        let f2: Future = staking_stcredits_v1.aleo/bond(staking_delegator_v1.aleo as address, validator, amount);
 
-        let f3: Future = credits.aleo/bond_public(validator, spectre_stcredits_v1.aleo as address, amount);
+        let f3: Future = credits.aleo/bond_public(validator, staking_stcredits_v1.aleo as address, amount);
 
         return finalize_bond(f1, f2, f3);
     }

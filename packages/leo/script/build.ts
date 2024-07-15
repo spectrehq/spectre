@@ -21,7 +21,7 @@ async function copyProgram(program: string, cloneNo?: string) {
       } else {
         return !["build", "leo.lock", "outputs"].some((s) => source.includes(s))
       }
-    },
+    }
   })
 
   await fs.cp(path.join(ROOT_DIR, ".env"), path.join(dest, ".env"), {
@@ -46,7 +46,9 @@ async function copyProgram(program: string, cloneNo?: string) {
   let srcMain = await fs.readFile(srcMainPath, "utf-8")
   srcMain = srcMain.replaceAll(originalProgram, programJson.program)
   srcMain = srcMain.replaceAll("_v1.aleo", `_v1_${config.programSuffix}.aleo`)
-  if (program === "access_control") {
+
+  // Insert the initial admin account address.
+  if (program === config.programs.spectre.accessControl) {
     const { stdout } = await exec(`leo account import ${process.env.ADMIN_PRIVATE_KEY || process.env.PRIVATE_KEY}`)
     const parts = stdout.trim().split("Address")
     const adminAddress = parts[parts.length - 1].trim()
@@ -67,7 +69,7 @@ async function compileProgram(program: string, cloneNo?: string) {
   console.log(`leo build --non-recursive ${programPath}`)
 
   const { stdout, stderr } = await exec("leo build --non-recursive", {
-    cwd: programPath,
+    cwd: programPath
   })
   if (stdout) {
     console.log(stdout)
@@ -85,15 +87,21 @@ async function main() {
 
   await fs.rm(path.join(os.homedir(), ".aleo/registry"), { recursive: true, force: true })
 
-  for (const program of ["access_control", "acl_manager", "stcredits", "stcredits_points"]) {
+  for (const program of [
+    config.programs.spectre.accessControl,
+    config.programs.spectre.aclManager,
+    config.programs.staking.stcredits,
+    config.programs.staking.stcreditsPoints
+  ]) {
     await copyProgram(program)
     await compileProgram(program)
   }
 
+  const delegatorName = config.programs.staking.delegator
   for (const i of Array(config.delegatorNum).keys()) {
     const cloneNo = (i + 1).toString().padStart(3, "0")
-    await copyProgram("delegator", cloneNo)
-    await compileProgram("delegator", cloneNo)
+    await copyProgram(delegatorName, cloneNo)
+    await compileProgram(delegatorName, cloneNo)
   }
 }
 

@@ -16,32 +16,48 @@ export const STCREDITS_CACHE_BATCH_NUM = 10n
 
 export const START_INVITE_CODE = 10000n
 export const EMPTY_INVITE_CODE = 0n
+export const INVITER_REWARD = 16n
+export const INVITER_OF_INVITER_REWARD = 8n
 
 export const VERSION = "v1"
-export const PREFIX = "spectre"
+export const SPECTRE = "spectre"
+export const STAKING = "staking"
 
-function programName(program: string) {
-  return `${PREFIX}_${program}_${VERSION}_${config!.programSuffix}.aleo`
+function programName(program: string, prefix: string, cloneNo?: string) {
+  return `${prefix}_${program}_${VERSION}${config!.programSuffix ? "_" + config!.programSuffix : ""}${cloneNo ? "_" + cloneNo : ""}.aleo`
 }
 
-export const ACCESS_CONTROL_PROGRAM = () => programName(config!.programs.accessControl)
-export const ACL_MANAGER_PROGRAM = () => programName(config!.programs.aclManager)
-export const STCREDITS_PROGRAM = () => programName(config!.programs.stcredits)
-export const STCREDITS_POINTS_PROGRAM = () => programName(config!.programs.stcreditsPoints)
+function spectreProgramName(program: string) {
+  return programName(program, SPECTRE)
+}
+
+function stakingProgramName(program: string) {
+  return programName(program, STAKING)
+}
+
+export const ACCESS_CONTROL_PROGRAM = () => spectreProgramName(config!.programs.spectre.accessControl)
+export const ACL_MANAGER_PROGRAM = () => spectreProgramName(config!.programs.spectre.aclManager)
+export const STCREDITS_PROGRAM = () => stakingProgramName(config!.programs.staking.stcredits)
+export const STCREDITS_POINTS_PROGRAM = () => stakingProgramName(config!.programs.staking.stcreditsPoints)
 
 export function delegatorProgramName(index: number) {
   const cloneNo = (index + 1).toString().padStart(3, "0")
-  return `${PREFIX}_${config!.programs.delegator}_${VERSION}_${config!.programSuffix}_${cloneNo}.aleo`
+  return programName(config!.programs.staking.delegator, STAKING, cloneNo)
 }
 
 interface Configuration {
   programSuffix: string
   programs: {
-    accessControl: string
-    aclManager: string
-    stcredits: string
-    stcreditsPoints: string
-    delegator: string
+    credits: string
+    spectre: {
+      accessControl: string
+      aclManager: string
+    }
+    staking: {
+      stcredits: string
+      stcreditsPoints: string
+      delegator: string
+    }
   }
 }
 

@@ -260,7 +260,7 @@ class StCreditsProgram extends StCreditsProgramBase {
 
       const unbondAmount = amount > maxBonded ? maxBonded : amount
       await this.execute(
-        programPath("stcredits"),
+        programPath(config.programs.staking.stcredits),
         {
           programName: STCREDITS_PROGRAM(),
           functionName: "unbond",
@@ -294,7 +294,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       bonded: BondState | null
     }>()
     for (let i = 0; i < config.delegatorNum; i++) {
-      const delegatorProgramPath = programPath("delegator", i + 1)
+      const delegatorProgramPath = programPath(config.programs.staking.delegator, i + 1)
       const delegatorProgramName = getDelegatorProgramName(i)
       const delegatorAddr = await programAddress(delegatorProgramName)
       const del = delegators.get(delegatorAddr)
@@ -342,7 +342,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       }
 
       await this.execute(
-        programPath("stcredits"),
+        programPath(config.programs.staking.stcredits),
         {
           programName: STCREDITS_PROGRAM(),
           functionName: "claim_unbond",
@@ -371,7 +371,7 @@ class StCreditsProgram extends StCreditsProgramBase {
       // TODO: calculate an appropriate height
 
       await this.execute(
-        programPath("stcredits"),
+        programPath(config.programs.staking.stcredits),
         {
           programName: STCREDITS_PROGRAM(),
           functionName: "resolve_withdrawal_force",
@@ -397,7 +397,7 @@ class StCreditsProgram extends StCreditsProgramBase {
     let start = cache.status === CacheStatus.IN_PROGRESS && !restart ? cache.next_index : 0n
     for (; start < count; start += STCREDITS_CACHE_BATCH_NUM) {
       await this.execute(
-        programPath("stcredits"),
+        programPath(config.programs.staking.stcredits),
         {
           programName: STCREDITS_PROGRAM(),
           functionName: "cache",

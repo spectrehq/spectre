@@ -33,10 +33,10 @@ import config from "../config.json"
 initialize(config)
 
 const credits = new CreditsProgram(async (mapping: string, key: string) => {
-  return await queryMappingValue("credits", mapping, key)
+  return await queryMappingValue(config.programs.credits, mapping, key)
 })
 const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
-  return await queryMappingValueFromPath(programPath("stcredits"), mapping, key)
+  return await queryMappingValueFromPath(programPath(config.programs.staking.stcredits), mapping, key)
 }, credits)
 
 const program = new Command()
@@ -47,11 +47,11 @@ program
   .description("initialize Access Control and ACL")
   .action(async () => {
     const accessControl = new AccessControlProgram(async (mapping: string, key: string) => {
-      return await queryMappingValueFromPath(programPath("access_control"), mapping, key)
+      return await queryMappingValueFromPath(programPath(config.programs.spectre.accessControl), mapping, key)
     })
 
     if (!(await accessControl.isInitialized())) {
-      await execute(programPath("access_control"), "initialize", [], ADMIN_PRIVATE_KEY)
+      await execute(programPath(config.programs.spectre.accessControl), "initialize", [], ADMIN_PRIVATE_KEY)
     } else {
       console.log("Access Control is already initialized")
     }
@@ -71,7 +71,7 @@ program
       [STAKING_OPERATOR_ROLE, stakingOperatorAddress]
     ] as [number, string][]) {
       if (!(await accessControl.hasRole(role, account))) {
-        await execute(programPath("access_control"), "grant_role", [u8Str(role), account], ADMIN_PRIVATE_KEY)
+        await execute(programPath(config.programs.spectre.accessControl), "grant_role", [u8Str(role), account], ADMIN_PRIVATE_KEY)
       } else {
         console.log(`Account ${account} already has role ${roleStrings.get(role)}`)
       }
@@ -83,7 +83,7 @@ program
   .description("initialize the stcredits program")
   .action(async () => {
     if (!(await stcredits.isInitialized())) {
-      await execute(programPath("stcredits"), "initialize", [], STAKING_ADMIN_PRIVATE_KEY)
+      await execute(programPath(config.programs.staking.stcredits), "initialize", [], STAKING_ADMIN_PRIVATE_KEY)
     }
   })
 
@@ -92,7 +92,7 @@ program
   .description("unpause the stcredits program")
   .action(async () => {
     if (await stcredits.isPaused()) {
-      await execute(programPath("stcredits"), "unpause", [], STAKING_ADMIN_PRIVATE_KEY)
+      await execute(programPath(config.programs.staking.stcredits), "unpause", [], STAKING_ADMIN_PRIVATE_KEY)
     } else {
       console.warn("The stcredits program is not paused")
     }
@@ -103,7 +103,7 @@ program
   .description("pause the stcredits program")
   .action(async () => {
     if (!(await stcredits.isPaused())) {
-      await execute(programPath("stcredits"), "pause", [], STAKING_ADMIN_PRIVATE_KEY)
+      await execute(programPath(config.programs.staking.stcredits), "pause", [], STAKING_ADMIN_PRIVATE_KEY)
     } else {
       console.warn("The stcredits program is already paused")
     }
@@ -169,7 +169,7 @@ program
   })
 
 async function getDelegatorAddressAndProgramName(index: number) {
-  const delegatorPath = programPath("delegator", index + 1)
+  const delegatorPath = programPath(config.programs.staking.delegator, index + 1)
   const programJsonPath = path.join(delegatorPath, "program.json")
   const programJson = JSON.parse(await fs.readFile(programJsonPath, "utf-8")) as ProgramJson
   const parts = (await run(delegatorPath, "get_address", [])).split(" ")
@@ -225,7 +225,7 @@ program
       return
     }
 
-    await execute(programPath("stcredits"), "unregister_delegator", [delegator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath(config.programs.staking.stcredits), "unregister_delegator", [delegator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 program
@@ -248,7 +248,7 @@ program
       return
     }
 
-    await execute(programPath("delegator", delegatorIndex + 1), "register", [validator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath(config.programs.staking.delegator, delegatorIndex + 1), "register", [validator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 const roles = {
@@ -271,7 +271,7 @@ const roleStrings = new Map([
 
 async function grantOrRevokeRole(action: "grant" | "revoke", role: string, account: string) {
   await execute(
-    programPath("access_control"),
+    programPath(config.programs.spectre.accessControl),
     `${action}_role`,
     [u8Str(roles[role as keyof typeof roles]), account],
     ADMIN_PRIVATE_KEY

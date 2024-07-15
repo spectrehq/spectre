@@ -2,11 +2,16 @@
   "programSuffix": "001",
   "delegatorNum": 3,
   "programs": {
-    "accessControl": "access_control",
-    "aclManager": "acl_manager",
-    "stcredits": "stcredits",
-    "stcreditsPoints": "stcredits_points",
-    "delegator": "delegator"
+    "credits": "credits",
+    "spectre": {
+      "accessControl": "access_control",
+      "aclManager": "acl_manager"
+    },
+    "staking": {
+      "stcredits": "stcredits",
+      "stcreditsPoints": "stcredits_points",
+      "delegator": "delegator"
+    }
   },
   "validators": []
 }

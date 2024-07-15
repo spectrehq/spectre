@@ -1,7 +1,7 @@
 import credits.aleo;
 import spectre_acl_manager_v1.aleo;
 
-program spectre_stcredits_v1.aleo {
+program staking_stcredits_v1.aleo {
     /************************* stCredits Token *************************/
 
     struct metadata {
@@ -380,7 +380,7 @@ program spectre_stcredits_v1.aleo {
         let state_: State = Mapping::get(state, 0u8);
 
         // Only allow bond `amount` credits when the actual liquidity is sufficient.
-        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
         let total_withdraw: u64 = state_.withdraw;
         let total_pending_withdraw: u64 = state_.pending_withdraw;
         let total_bonded: u64 = state_.bonded;
@@ -467,7 +467,7 @@ program spectre_stcredits_v1.aleo {
             let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {
-                let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+                let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
                 let total_bonded: u64 = state_.bonded;
                 let total_unbonding: u64 = state_.unbonding;
                 let total_withdraw: u64 = state_.withdraw;
@@ -525,7 +525,7 @@ program spectre_stcredits_v1.aleo {
 
         let state_: State = Mapping::get(state, 0u8);
 
-        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
         let total_withdraw: u64 = state_.withdraw;
         let total_pending_withdraw: u64 = state_.pending_withdraw;
 
@@ -560,7 +560,7 @@ program spectre_stcredits_v1.aleo {
 
         let state_: State = Mapping::get(state, 0u8);
 
-        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
         let total_withdraw: u64 = state_.withdraw;
         let total_pending_withdraw: u64 = state_.pending_withdraw;
 
@@ -587,7 +587,7 @@ program spectre_stcredits_v1.aleo {
         assert(credits > 0u64);
 
         // Transfer credits to this program from the signer.
-        let f1: Future = credits.aleo/transfer_public_as_signer(spectre_stcredits_v1.aleo as address, credits);
+        let f1: Future = credits.aleo/transfer_public_as_signer(staking_stcredits_v1.aleo as address, credits);
 
         // The supplier must be the signer.
         return finalize_supply(f1, self.signer, credits);
@@ -603,7 +603,7 @@ program spectre_stcredits_v1.aleo {
         let state_: State = Mapping::get(state, 0u8);
 
         // Total buffered equals to credits balance of this program.
-        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
         let total_bonded: u64 = state_.bonded;
         let total_unbonding: u64 = state_.unbonding;
         let total_withdraw: u64 = state_.withdraw;
@@ -639,7 +639,7 @@ program spectre_stcredits_v1.aleo {
         let state_: State = Mapping::get(state, 0u8);
 
         // Total buffered equals to credits balance of this program.
-        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, spectre_stcredits_v1.aleo as address, 0u64);
+        let total_buffered: u64 = Mapping::get_or_use(credits.aleo/account, staking_stcredits_v1.aleo as address, 0u64);
         let total_bonded: u64 = state_.bonded;
         let total_unbonding: u64 = state_.unbonding;
         let total_withdraw: u64 = state_.withdraw;

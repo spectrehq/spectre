@@ -1,5 +1,5 @@
 {
-  "program": "spectre_delegator_v1.aleo",
+  "program": "staking_delegator_v1.aleo",
   "version": "0.0.0",
   "description": "",
   "license": "MIT",
@@ -15,7 +15,7 @@
       "path": "../acl_manager"
     },
     {
-      "name": "spectre_stcredits_v1.aleo",
+      "name": "staking_stcredits_v1.aleo",
       "location": "local",
       "path": "../stcredits"
     }

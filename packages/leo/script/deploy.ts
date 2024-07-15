@@ -43,13 +43,18 @@ async function deployProgram(program: string, cloneNo?: string) {
 async function main() {
   await fs.stat(path.join(ROOT_DIR, ".env"))
 
-  for (const program of ["access_control", "acl_manager", "stcredits", "stcredits_points"]) {
+  for (const program of [
+    config.programs.spectre.accessControl,
+    config.programs.spectre.aclManager,
+    config.programs.staking.stcredits,
+    config.programs.staking.stcreditsPoints
+  ]) {
     await deployProgram(program)
   }
 
   for (const i of Array(config.delegatorNum).keys()) {
     const cloneNo = (i + 1).toString().padStart(3, "0")
-    await deployProgram("delegator", cloneNo)
+    await deployProgram(config.programs.staking.delegator, cloneNo)
   }
 }
 

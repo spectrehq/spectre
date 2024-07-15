@@ -224,8 +224,14 @@ export function parsePlaintext(plaintext: string): Plaintext {
 
   const { cst, lexErrors, parseErrors } = parsePlaintextToCst(plaintext)
 
-  assert(lexErrors.length === 0, lexErrors.join("\n"))
-  assert(parseErrors.length === 0, parseErrors.join("\n"))
+  if (lexErrors.length > 0) {
+    console.error("Lex errors:", lexErrors.map(err => JSON.stringify(err)).join("\n"))
+    console.log(`Plaintext: "${plaintext}"`)
+  }
+  if (parseErrors.length > 0) {
+    console.error("Parse errors:", parseErrors.map(err => JSON.stringify(err)).join("\n"))
+    console.log(`Plaintext: "${plaintext}"`)
+  }
 
   return parseCst(cst)
 }

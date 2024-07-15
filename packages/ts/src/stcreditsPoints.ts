@@ -34,6 +34,21 @@ export class StCreditsPointsProgram extends ProgramBase {
   }
 
   /**
+   * Get the balance of points for an account, including the unsettled points.
+   * @param account
+   * @param currentHeight
+   */
+  async getEstimatedBalance(account: string, currentHeight: bigint) {
+    const balance = await this.getBalance(account)
+    const state = await this.getState(account)
+    if (!state) {
+      return balance
+    }
+    const points = state.stcredits * (currentHeight - state.height)
+    return balance + points
+  }
+
+  /**
    * Get the state of an account.
    * @param account
    */

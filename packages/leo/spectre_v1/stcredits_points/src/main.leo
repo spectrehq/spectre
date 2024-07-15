@@ -1,7 +1,7 @@
-import spectre_stcredits_v1.aleo;
+import staking_stcredits_v1.aleo;
 import spectre_acl_manager_v1.aleo;
 
-program spectre_stcredits_points_v1.aleo {
+program staking_stcredits_points_v1.aleo {
     const ZERO_ADDRESS: address = aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc;
 
     const START_INVITE_CODE: u32 = 10000u32;
@@ -89,7 +89,7 @@ program spectre_stcredits_points_v1.aleo {
      */
     async transition lock(public stcredits: u64, public invite_code: u32) -> Future {
         // Transfer stcredits from the user to this program.
-        let f: Future = spectre_stcredits_v1.aleo/transfer_from_public(self.signer, spectre_stcredits_points_v1.aleo as address, stcredits);
+        let f: Future = staking_stcredits_v1.aleo/transfer_from_public(self.signer, staking_stcredits_points_v1.aleo as address, stcredits);
 
         return finalize_lock(f, self.signer, stcredits, invite_code);
     }
@@ -178,7 +178,7 @@ program spectre_stcredits_points_v1.aleo {
      */
     async transition unlock(public stcredits: u64) -> Future {
         // Transfer stcredits from this program to the user.
-        let f: Future = spectre_stcredits_v1.aleo/transfer_public(self.signer, stcredits);
+        let f: Future = staking_stcredits_v1.aleo/transfer_public(self.signer, stcredits);
 
         return finalize_unlock(f, self.signer, stcredits);
     }
