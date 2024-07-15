@@ -15,6 +15,10 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
+import { BondDialog } from '../bond-dialog'
+import { useState } from 'react'
+import type { AleoAddress } from '~/types'
+import type { Validator } from '~/hooks/use-committee'
 
 interface DataTableProps<TData, TValue> {
   columns: ColumnDef<TData, TValue>[]
@@ -30,6 +34,10 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
+
+  const [selectedValidator, setSelectedValidator] = useState<AleoAddress>()
+
+  console.log(selectedValidator)
 
   return (
     <div className="overflow-hidden rounded-3xl border">
@@ -55,16 +63,26 @@ export function DataTable<TData, TValue>({
         <TableBody>
           {table.getRowModel().rows?.length ? (
             table.getRowModel().rows.map((row) => (
-              <TableRow
+              <BondDialog
                 key={row.id}
-                data-state={row.getIsSelected() && 'selected'}
+                step={1}
+                validator={(row.original as Validator).address}
               >
-                {row.getVisibleCells().map((cell) => (
-                  <TableCell key={cell.id}>
-                    {flexRender(cell.column.columnDef.cell, cell.getContext())}
-                  </TableCell>
-                ))}
-              </TableRow>
+                <TableRow
+                  key={row.id}
+                  data-state={row.getIsSelected() && 'selected'}
+                  className="cursor-pointer"
+                >
+                  {row.getVisibleCells().map((cell) => (
+                    <TableCell key={cell.id}>
+                      {flexRender(
+                        cell.column.columnDef.cell,
+                        cell.getContext()
+                      )}
+                    </TableCell>
+                  ))}
+                </TableRow>
+              </BondDialog>
             ))
           ) : (
             <TableRow>

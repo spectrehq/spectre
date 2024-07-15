@@ -13,18 +13,25 @@ const steps = [
   { id: 'stake', label: 'Stake' },
 ] satisfies StepItem[]
 
-export function BondWidget() {
-  const [selectedValidator, setSelectedValidator] = useState<AleoAddress>()
+export interface BondWidgetProps {
+  step?: number
+  validator?: AleoAddress | null
+}
+
+export function BondWidget({ step = 0, validator }: BondWidgetProps) {
+  const [selectedValidator, setSelectedValidator] = useState<
+    AleoAddress | undefined | null
+  >(validator)
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Stepper initialStep={0} steps={steps} variant="line">
+      <Stepper initialStep={step} steps={steps} size="sm">
         <Step key="selectValidator" label="Select validator">
           <ValidatorList onSelect={setSelectedValidator} />
         </Step>
 
         <Step key="validatorDetail" label="Validator detail">
-          <ValidatorDetail address={selectedValidator!} />
+          <ValidatorDetail key="validatorDetail" address={selectedValidator!} />
         </Step>
 
         <Step key="stake" label="Stake">

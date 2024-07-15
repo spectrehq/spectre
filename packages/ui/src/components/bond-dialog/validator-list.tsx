@@ -1,7 +1,6 @@
 'use client'
 
 import {
-  type ColumnDef,
   createColumnHelper,
   flexRender,
   getCoreRowModel,
@@ -9,7 +8,6 @@ import {
 } from '@tanstack/react-table'
 import * as dn from 'dnum'
 import { useCallback } from 'react'
-import { Badge } from '~/components/ui/badge'
 import { useStepper } from '~/components/ui/stepper'
 import {
   Table,
@@ -22,13 +20,20 @@ import {
 import { type Validator, useCommittee } from '~/hooks/use-committee'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
+import { GradientsAvatar } from '~/components/gradients-avatar'
+import { Skeleton } from '~/components/ui/skeleton'
 
 const columnHelper = createColumnHelper<Validator>()
 
 const columns = [
   columnHelper.accessor('address', {
     header: 'Address',
-    cell: ({ getValue }) => shortenAddress(getValue()),
+    cell: ({ getValue }) => (
+      <div className="flex items-center space-x-2">
+        <GradientsAvatar text={getValue<string>()} size={32} />
+        <span>{shortenAddress(getValue<string>())}</span>
+      </div>
+    ),
   }),
 
   columnHelper.accessor('staked', {
@@ -49,18 +54,12 @@ const columns = [
       const commission = getValue<number>()
 
       return (
-        <div className="text-end">
-          <Badge
-            variant={
-              commission > 20
-                ? 'destructive'
-                : commission > 10
-                  ? 'warning'
-                  : 'success'
-            }
-          >
-            {dn.format(dn.from(getValue<number>() ?? 0), { digits: 2 })}%
-          </Badge>
+        <div className="flex justify-end items-center font-semibold">
+          {commission === undefined || commission === null ? (
+            <Skeleton className="w-10 h-5" />
+          ) : (
+            <span>{dn.format(dn.from(commission), { digits: 2 })}%</span>
+          )}
         </div>
       )
     },
@@ -90,8 +89,10 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
     [onSelect, nextStep]
   )
 
+  const { currentStep } = useStepper()
+
   return (
-    <div className="max-h-96 overflow-auto">
+    <div className="max-h-96 overflow-auto w-screen max-w-full md:max-w-4xl">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

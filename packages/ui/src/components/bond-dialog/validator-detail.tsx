@@ -1,6 +1,8 @@
 'use client'
 
 import * as dn from 'dnum'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useMemo } from 'react'
 import {
   Area,
@@ -10,6 +12,10 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import Aleo123Logo from '~/assets/aleo123-logo.png'
+import AleoscanLogo from '~/assets/aleoscan-logo.png'
+import { GradientsAvatar } from '~/components/gradients-avatar'
+import { Button } from '~/components/ui/button'
 import {
   Card,
   CardContent,
@@ -23,12 +29,11 @@ import {
   ChartTooltip,
   ChartTooltipContent,
 } from '~/components/ui/chart'
+import { useStepper } from '~/components/ui/stepper'
+import { useCommittee } from '~/hooks/use-committee'
 import { useQueryValidator } from '~/hooks/use-query-validator'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
-import { Button } from '../ui/button'
-import { useStepper } from '../ui/stepper'
-import { useCommittee } from '~/hooks/use-committee'
 
 const chartConfig = {
   stake: {
@@ -68,30 +73,48 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
     [data]
   )
 
-  const apr = useMemo(() => {
-    if (!data) return 0
-    const startTime = new Date(data.Info.StartTime).getTime()
-    const now = Date.now()
+  // const apr = useMemo(() => {
+  //   if (!data) return 0
+  //   const startTime = new Date(data.Info.StartTime).getTime()
+  //   const now = Date.now()
 
-    const days = Math.floor((now - startTime) / (1000 * 60 * 60 * 24))
+  //   const days = Math.floor((now - startTime) / (1000 * 60 * 60 * 24))
 
-    return Number(
-      ((data.Info.ValidatorTotalProfit / data.Info.Stake / days) * 365).toFixed(
-        4
-      )
-    )
-  }, [data])
+  //   return Number(
+  //     ((data.Info.ValidatorTotalProfit / data.Info.Stake / days) * 365).toFixed(
+  //       4
+  //     )
+  //   )
+  // }, [data])
 
   const { prevStep, nextStep } = useStepper()
+  const { currentStep } = useStepper()
 
   return (
-    <div>
+    <div className="w-screen max-w-4xl">
       <Card>
         <CardHeader>
-          <CardTitle>
-            <span>{shortenAddress(address)}</span>
+          <CardTitle className="flex items-center space-x-2">
+            <GradientsAvatar text={address} size={40} />
+            <span>{address && shortenAddress(address)}</span>
           </CardTitle>
-          <CardDescription />
+          <CardDescription className="flex items-center space-x-2">
+            <span>view on explorer: </span>
+            <Link
+              href={`https://testnet.aleoscan.io/address?a=${address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
+            </Link>
+            <Link
+              href={`https://testnetbeta.aleo123.io/address/${address}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image src={Aleo123Logo} alt="Aleo123" width={16} height={16} />
+            </Link>
+          </CardDescription>
         </CardHeader>
         <CardContent>
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
@@ -181,7 +204,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
               </li>
             </ul>
 
-            <ul className="grid gap-2 text-sm">
+            <ul className="grid gap-2 items-start text-sm">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Stake Ratio</span>
                 <span>
@@ -198,10 +221,10 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   %
                 </span>
               </li>
-              <li className="flex items-center justify-between">
+              {/* <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">APR</span>
                 <span>{dn.format(dn.from(apr * 100), { digits: 2 })}%</span>
-              </li>
+              </li> */}
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Vote</span>
                 <span>
@@ -211,6 +234,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   %
                 </span>
               </li>
+              <li className="h-5" />
             </ul>
           </div>
           <div className="pt-6">
@@ -222,6 +246,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                 margin={{
                   left: -24,
                   right: -24,
+                  top: 10,
                 }}
               >
                 <CartesianGrid vertical={false} />
@@ -253,7 +278,15 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                 />
                 <ChartTooltip
                   cursor={false}
-                  content={<ChartTooltipContent indicator="line" />}
+                  content={
+                    <ChartTooltipContent
+                      indicator="line"
+                      labelFormatter={(_, [payload]) => {
+                        const date = new Date(payload.payload.timestamp * 1000)
+                        return `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`
+                      }}
+                    />
+                  }
                 />
                 <Line
                   yAxisId="stake"
@@ -279,7 +312,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
 
       <div className="flex items-center justify-end pt-5 space-x-4">
         <Button variant="secondary" disabled={isLoading} onClick={prevStep}>
-          Select another validator
+          Back
         </Button>
         <Button variant="default" disabled={isLoading} onClick={nextStep}>
           Stake

@@ -39,6 +39,10 @@ export function ValidatorList() {
     }
   }, [committee, validatorsFromAleo123])
 
-  // @ts-ignore
-  return <DataTable columns={columns} data={data ?? []} />
+  return (
+    <>
+      {/* @ts-ignore */}
+      <DataTable columns={columns} data={data ?? []} on />
+    </>
+  )
 }

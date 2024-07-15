@@ -9,6 +9,7 @@ import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
 import { useBondState } from '~/hooks/use-bond-state'
 import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
+import { Button } from '~/components/ui/button'
 
 export function MyDelegation() {
   const { address } = useAccount()
@@ -43,7 +44,9 @@ export function MyDelegation() {
                 <div className="text-2xl font-bold">
                   {dn.format(balanceDN, { digits: 2, trailingZeros: true })}
                 </div>
-                <BondDialog />
+                <BondDialog>
+                  <Button>Stake</Button>
+                </BondDialog>
               </div>
               {/* <p className="text-xs text-muted-foreground" /> */}
             </div>
