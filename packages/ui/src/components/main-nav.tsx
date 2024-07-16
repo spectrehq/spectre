@@ -15,24 +15,24 @@ export function MainNav() {
   return (
     <NavigationMenu className="hidden lg:block">
       <NavigationMenuList>
-        <NavigationMenuItem className="relative">
-          <Link href="/stake" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
-              {t('stake')}
-            </NavigationMenuLink>
-          </Link>
-        </NavigationMenuItem>
-        <NavigationMenuItem className="relative">
+        {/* <NavigationMenuItem className="relative">
           <Link href="/withdrawals" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               {t('withdrawals')}
             </NavigationMenuLink>
           </Link>
-        </NavigationMenuItem>
+        </NavigationMenuItem> */}
         <NavigationMenuItem className="relative">
           <Link href="/validators" legacyBehavior passHref>
             <NavigationMenuLink className={navigationMenuTriggerStyle()}>
               {t('validators')}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem className="relative">
+          <Link href="/stake" legacyBehavior passHref>
+            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+              {t('stake')}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
