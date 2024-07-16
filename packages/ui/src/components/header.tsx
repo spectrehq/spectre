@@ -1,5 +1,8 @@
 import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
+import Image from 'next/image'
+import LogoImage from '~/assets/logo.png'
+import LogoDarkImage from '~/assets/logo-dark.png'
 import { Button } from '~/components/ui/button'
 import { ModeToggle } from '~/components/mode-toggle'
 import { MainNav } from './main-nav'
@@ -13,9 +16,25 @@ export function Header() {
           <Button className="lg:hidden" variant="ghost" size="icon">
             <MenuIcon />
           </Button>
-          <Link href="/" className="font-bold text-2xl">
-            <span>A</span>
-            <span>leo</span>
+          <Link
+            href="/"
+            className="font-bold text-2xl relative flex items-center"
+          >
+            <Image
+              src={LogoImage}
+              alt=""
+              width={32}
+              height={32}
+              className="mr-1 block dark:hidden"
+            />
+            <Image
+              src={LogoDarkImage}
+              alt=""
+              width={32}
+              height={32}
+              className="mr-1 hidden dark:block"
+            />
+            <span>Aleo</span>
             <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
               Staking
             </span>
