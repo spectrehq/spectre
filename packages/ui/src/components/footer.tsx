@@ -5,7 +5,7 @@ import LogoDarkImage from '~/assets/logo-dark.png'
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-24 w-full max-w-7xl px-6 sm:mt-32 lg:mt-40 lg:px-8">
+    <footer className="mx-auto mt-16 w-full max-w-7xl px-6 sm:mt-20 lg:mt-32 lg:px-8">
       <div className="mx-auto max-w-2xl lg:max-w-none">
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 pb-20 lg:grid-cols-2">
           <div className="flex flex-col justify-between">
@@ -33,11 +33,14 @@ export function Footer() {
                   Staking
                 </span>
               </Link>
-              <p className="text-sm text-muted-foreground">
+              <p className="text-sm text-muted-foreground mt-1">
                 Liquid Staking for Aleo
               </p>
+              <p className="text-sm text-muted-foreground mt-1">
+                Powered by the Spectre team
+              </p>
             </div>
-            <div className="hidden lg:block">
+            <div className="mt-10">
               <div className="flex gap-x-6 items-center">
                 <Link
                   href="https://x.com/AleoStaking"
@@ -103,9 +106,6 @@ export function Footer() {
                   </svg>
                 </Link>
               </div>
-              <p className="text-sm text-muted-foreground">
-                Powered by the Spectre team
-              </p>
             </div>
           </div>
           <nav>
@@ -230,7 +230,7 @@ export function Footer() {
             </ul>
           </nav>
         </div>
-        <div className="flex lg:hidden flex-col flex-wrap items-center justify-center md:flex-row md:justify-between gap-x-6 gap-y-4 border-t border-secondary py-12">
+        {/* <div className="flex lg:hidden flex-col flex-wrap items-center justify-center md:flex-row md:justify-between gap-x-6 gap-y-4 border-t border-secondary py-12">
           <div className="flex gap-x-6 items-center">
             <Link
               href="https://x.com/AleoStaking"
@@ -299,7 +299,7 @@ export function Footer() {
           <p className="text-sm text-muted-foreground">
             Powered by the Spectre team
           </p>
-        </div>
+        </div> */}
       </div>
     </footer>
   )

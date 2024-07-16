@@ -1,11 +1,21 @@
-import Link from 'next/link'
+import { ExternalLinkIcon } from 'lucide-react'
 import Image from 'next/image'
-import { Button } from '~/components/ui/button'
-import FeaturesImage from '~/assets/features-banner.jpg'
-import { Separator } from '~/components/ui/separator'
+import Link from 'next/link'
+import LogoImage from '~/assets/logo.png'
+import LogoDarkImage from '~/assets/logo-dark.png'
+import AleoLogoLight from '~/assets/aleo-logo-light.svg'
+import AleoLogoDark from '~/assets/aleo-logo-dark.svg'
+import ArcaneLogoDark from '~/assets/arcane-logo-dark.svg'
+import ArcaneLogoLight from '~/assets/arcane-logo-light.svg'
+import PuzzleLogoLight from '~/assets/puzzle-logo-light.png'
+import PuzzleLogoDark from '~/assets/puzzle-logo-dark.png'
+import StCreditsImage from '~/assets/stCredits-banner.png'
+import ValidatorsImage from '~/assets/validators-image.png'
+import GovernanceImage from '~/assets/governance-image.png'
 import ImagePlaceholder from '~/assets/image-placeholder.svg'
 import { AspectRatio } from '~/components/ui/aspect-ratio'
-import { ExternalLinkIcon } from 'lucide-react'
+import { Button } from '~/components/ui/button'
+import { Separator } from '~/components/ui/separator'
 
 export default function HomePage() {
   return (
@@ -57,7 +67,7 @@ export default function HomePage() {
         </defs>
       </svg>
       <main className="flex-auto">
-        <div className="mx-auto mt-16 max-w-7xl px-6 sm:mt-24 md:mt-40 lg:px-8">
+        <div className="mx-auto mt-16 max-w-7xl px-6 sm:mt-24 md:mt-40 lg:px-8 mb-64">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-3xl">
               <h1 className="font-display text-5xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl mb-12">
@@ -86,9 +96,8 @@ export default function HomePage() {
                   asChild
                 >
                   <Link href="/stake">
-                    <span>Liquid&nbsp;</span>
                     <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                      Staking
+                      Liquid Staking
                     </span>
                   </Link>
                 </Button>
@@ -97,7 +106,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-60">
+        <Separator />
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-2xl">
               <h2>
@@ -113,11 +124,11 @@ export default function HomePage() {
           </div>
           <div className="max-w-2xl lg:max-w-full mx-auto grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-10 lg:gap-20">
             <div className="col-span-1 lg:col-span-2">
-              <AspectRatio ratio={1} className="bg-muted">
+              <AspectRatio ratio={1}>
                 <Image
-                  src={ImagePlaceholder}
+                  src={ValidatorsImage}
                   alt=""
-                  className="rounded-md object-cover"
+                  className="rounded-3xl object-cover"
                 />
               </AspectRatio>
             </div>
@@ -126,7 +137,7 @@ export default function HomePage() {
                 <div style={{}}>
                   <figure className="mx-auto max-w-4xl">
                     <blockquote className="relative font-display text-3xl font-medium tracking-tight sm:text-4xl">
-                      <p className="before:content-['“'] after:content-['”'] sm:before:absolute sm:before:right-full">
+                      <p className="sm:before:absolute sm:before:right-full">
                         Validators run nodes, validate transactions, and
                         participate in consensus to add new blocks. They earn
                         fees and rewards.
@@ -152,7 +163,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+        <Separator />
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 md:max-w-lg lg:max-w-full mx-auto">
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center">
               <div className="flex flex-col lg:flex-row items-center h-64 lg:h-auto">
@@ -192,43 +205,21 @@ export default function HomePage() {
             </div>
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center">
               <div className="flex flex-col lg:flex-row items-center h-64 lg:h-auto">
-                <div className="p-4 border rounded-full">
-                  <svg
-                    id="Layer_1"
-                    data-name="Layer 1"
-                    xmlns="http://www.w3.org/2000/svg"
-                    viewBox="0 0 1079.72 1080"
-                    className="w-16 h-16 flex-none"
-                    stroke="url(#grad1)"
-                    fill="url(#grad1)"
-                  >
-                    <title>Aleo Logo</title>
-                    <defs>
-                      <linearGradient
-                        id="grad1"
-                        x1="0%"
-                        y1="0%"
-                        x2="100%"
-                        y2="0%"
-                      >
-                        <stop
-                          offset="0%"
-                          style={{ stopColor: '#b794f4', stopOpacity: 1 }}
-                        />
-                        <stop
-                          offset="50%"
-                          style={{ stopColor: '#ed64a6', stopOpacity: 1 }}
-                        />
-                        <stop
-                          offset="100%"
-                          style={{ stopColor: '#f56565', stopOpacity: 1 }}
-                        />
-                      </linearGradient>
-                    </defs>
-                    <polygon points="612.33 247.34 547.82 247.34 477.26 247.34 360 589.53 431.41 589.53 526.38 310.37 560.76 310.37 655.72 589.53 524.82 589.53 431.41 589.53 409.31 652.56 546.1 652.56 677.01 652.56 738.4 832.66 812.08 832.66 612.33 247.34" />
-                    <polygon points="276.69 832.66 347.91 832.66 409.31 652.56 338.4 652.56 276.69 832.66" />
-                    <polygon points="289.24 589.53 267.64 652.56 338.4 652.56 360 589.53 289.24 589.53" />
-                  </svg>
+                <div className="p-4 w-24 h-24 border rounded-full flex justify-center items-center">
+                  <div className="w-11 h-11">
+                    <AspectRatio ratio={1}>
+                      <Image
+                        src={LogoImage}
+                        alt=""
+                        className="block dark:hidden object-cover"
+                      />
+                      <Image
+                        src={LogoDarkImage}
+                        alt=""
+                        className="hidden dark:block object-cover"
+                      />
+                    </AspectRatio>
+                  </div>
                 </div>
                 <Separator
                   className="lg:hidden flex-1"
@@ -261,6 +252,9 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
+        <Separator />
+
         <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-2xl">
@@ -279,6 +273,7 @@ export default function HomePage() {
             </div>
           </div>
         </div>
+
         {/* <div className="mx-auto mt-24 sm:mt-32 lg:mt-40 max-w-7xl px-6 lg:px-8">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
@@ -391,19 +386,19 @@ export default function HomePage() {
           </div>
         </div> */}
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-16 sm:mt-20 lg:mt-28">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-8 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="lg:flex lg:items-center lg:justify-end overflow-hidden lg:overflow-[unset]">
+            <div className="lg:flex lg:items-center lg:justify-end overflow-hidden lg:overflow-visible">
               <div className="flex justify-center lg:w-1/2 lg:justify-end lg:pr-12">
-                <div className="w-[33.75rem] flex-none lg:w-[45rem]">
-                  <div className="justify-center lg:justify-end relative flex aspect-[719/680] w-full ">
+                <div className="w-96 flex-none lg:w-[40rem]">
+                  <div className="justify-center lg:justify-end relative flex aspect-[1024/926] w-full">
                     <svg viewBox="0 0 655 680" fill="none" className="h-full">
                       <title>Features</title>
                       <g clipPath="url(#:S1:-clip)" className="group">
                         <g className="origin-center scale-100 transition duration-500 motion-safe:group-hover:scale-105">
                           <foreignObject width="655" height="680">
                             <Image
-                              src={FeaturesImage}
+                              src={StCreditsImage}
                               alt=""
                               width={2400}
                               height={3000}
@@ -429,44 +424,110 @@ export default function HomePage() {
                         </clipPath>
                       </defs>
                     </svg>
+                    {/* <Image
+                      src={StCreditsImage}
+                      alt=""
+                      className="object-cover rounded-3xl"
+                    /> */}
                   </div>
                 </div>
               </div>
               <div>
-                <ul className="text-base mt-16 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
-                  <li className="group mt-10 first:mt-0">
+                <ul className="text-base mt-10 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
+                  <li className="group mt-6 first:mt-0">
                     <div>
-                      <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
-                        <strong className="font-semibold">
+                      <div className="pt-6 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          Fully open-sourced
+                        </h3>
+                        <p>
+                          {/* <strong className="font-semibold">
                           Fully open-sourced{' '}
-                        </strong>
-                        Including programs, operator service, UI, and everything
-                        else. Allowing continuous peer reviews and enhancements
-                        from developers across the Aleo ecosystem.
+                        </strong> */}
+                          Including programs, operator service, UI, and
+                          everything else. Allowing continuous peer reviews and
+                          enhancements from developers across the Aleo
+                          ecosystem.
+                        </p>
+                        <div className="mt-4">
+                          <Button asChild className="rounded-full">
+                            <Link
+                              href="https://github.com/spectrehq/spectre/tree/main/packages/leo/spectre_v1/stcredits"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <svg
+                                role="img"
+                                viewBox="0 0 24 24"
+                                xmlns="http://www.w3.org/2000/svg"
+                                className="w-4 h-4 fill-current mr-2"
+                              >
+                                <title>GitHub</title>
+                                <path
+                                  fill="currentColor"
+                                  d="M12 .297c-6.63 0-12 5.373-12 12 0 5.303 3.438 9.8 8.205 11.385.6.113.82-.258.82-.577 0-.285-.01-1.04-.015-2.04-3.338.724-4.042-1.61-4.042-1.61C4.422 18.07 3.633 17.7 3.633 17.7c-1.087-.744.084-.729.084-.729 1.205.084 1.838 1.236 1.838 1.236 1.07 1.835 2.809 1.305 3.495.998.108-.776.417-1.305.76-1.605-2.665-.3-5.466-1.332-5.466-5.93 0-1.31.465-2.38 1.235-3.22-.135-.303-.54-1.523.105-3.176 0 0 1.005-.322 3.3 1.23.96-.267 1.98-.399 3-.405 1.02.006 2.04.138 3 .405 2.28-1.552 3.285-1.23 3.285-1.23.645 1.653.24 2.873.12 3.176.765.84 1.23 1.91 1.23 3.22 0 4.61-2.805 5.625-5.475 5.92.42.36.81 1.096.81 2.22 0 1.606-.015 2.896-.015 3.286 0 .315.21.69.825.57C20.565 22.092 24 17.592 24 12.297c0-6.627-5.373-12-12-12"
+                                />
+                              </svg>
+                              <span>Github</span>
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </li>
-                  <li className="group mt-10 first:mt-0">
+                  <li className="group mt-6 first:mt-0">
                     <div>
-                      <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
-                        <strong className="font-semibold">
-                          Role based access control{' '}
-                        </strong>
-                        Multiple roles with different permissions to set the
-                        staking parameters, manage the treasury and tackling
-                        emergencies.
+                      <div className="pt-6 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          Role based access control
+                        </h3>
+                        <p>
+                          {/* <strong className="font-semibold">
+                            Role based access control{' '}
+                          </strong> */}
+                          Multiple roles with different permissions to set the
+                          staking parameters, manage the treasury and tackling
+                          emergencies.
+                        </p>
+                        <div className="mt-4">
+                          <Button asChild className="rounded-full">
+                            <Link
+                              href="https://github.com/spectrehq/spectre/tree/main/packages/leo/spectre_v1/access_control"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <span>RBAC</span>
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </li>
-                  <li className="group mt-10 first:mt-0">
+                  <li className="group mt-6 first:mt-0">
                     <div>
-                      <div className="pt-10 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
-                        <strong className="font-semibold text-primary">
+                      <div className="pt-6 group-first:pt-0 group-first:before:hidden group-first:after:hidden relative before:absolute after:absolute before:bg-primary after:bg-primary/10 before:left-0 before:top-0 before:h-px before:w-6 after:left-8 after:right-0 after:top-0 after:h-px">
+                        <h3 className="scroll-m-20 text-2xl font-semibold tracking-tight">
+                          Points incentives
+                        </h3>
+                        <p>
+                          {/* <strong className="font-semibold text-primary">
                           Points incentives{' '}
-                        </strong>
-                        Stakers earn points for locking up their stCredits. And
-                        will earn more bonus points on top of any points their
-                        invites earn.
+                        </strong> */}
+                          Stakers earn points for locking up their stCredits.
+                          And will earn more bonus points on top of any points
+                          their invites earn.
+                        </p>
+                        <div className="mt-4">
+                          <Button asChild className="rounded-full">
+                            <Link
+                              href="https://docs.spectre.guru/spectre/points"
+                              target="_blank"
+                              rel="noreferrer"
+                            >
+                              <span>Points</span>
+                            </Link>
+                          </Button>
+                        </div>
                       </div>
                     </div>
                   </li>
@@ -476,7 +537,9 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+        <Separator />
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-20">
             <div className="col-span-1 lg:col-span-3">
               <div className="mx-auto max-w-2xl lg:max-w-none">
@@ -495,12 +558,21 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <blockquote className="mt-6 border-l-4 pl-6 italic relative font-display text-muted-foreground text-xl font-medium tracking-tight sm:text-4xl">
-                Key decisions require public votes by SPT token holders,
-                ensuring accountability to both users and the wider Aleo
-                community.
-              </blockquote>
-              <div className="mt-6">
+            </div>
+            <div className="col-span-1 lg:col-span-2">
+              <div className="mt-6" style={{}}>
+                <figure className="mx-auto max-w-4xl">
+                  <blockquote className="relative font-display text-xl font-medium tracking-tight">
+                    <p className="sm:before:absolute sm:before:right-full">
+                      Key decisions require public votes by SPT token holders,
+                      ensuring accountability to both users and the wider Aleo
+                      community.
+                    </p>
+                  </blockquote>
+                  <figcaption />
+                </figure>
+              </div>
+              <div className="mt-2">
                 <Button
                   asChild
                   className="rounded-full px-8 py-3 h-auto text-xl"
@@ -515,68 +587,76 @@ export default function HomePage() {
                   </Link>
                 </Button>
               </div>
-            </div>
-            <div className="col-span-1 lg:col-span-2">
-              <AspectRatio ratio={1} className="bg-muted">
+              <AspectRatio ratio={1} className="mt-8">
                 <Image
-                  src={ImagePlaceholder}
+                  src={GovernanceImage}
                   alt=""
-                  className="rounded-md object-cover"
+                  className="rounded-3xl object-cover"
                 />
               </AspectRatio>
             </div>
           </div>
         </div>
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 sm:mt-32 lg:mt-40">
+        <Separator />
+
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-12 sm:my-16 lg:my-20">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div
-              className="-mx-6 rounded-3xl bg-primary px-6 py-20 sm:mx-0 sm:py-32 md:px-12"
+              className="-mx-6 rounded-3xl px-6 py-10 sm:mx-0 md:px-12"
               style={{ opacity: 1, transform: 'none' }}
             >
-              <div
-                className="flex items-center gap-x-8"
-                style={{ opacity: 1, transform: 'none' }}
-              >
-                <h2 className="text-center font-display text-sm font-semibold tracking-wider text-background sm:text-left">
-                  We’ve worked with amazing projects
-                </h2>
-                <div className="h-px flex-auto bg-neutral-800" />
-              </div>
-              <ul className="grid grid-cols-3 gap-x-8 gap-y-10 mt-10">
+              <ul className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-10">
                 <li className="overflow-hidden rounded-md">
-                  <AspectRatio ratio={184 / 36}>
-                    <Image
-                      src={ImagePlaceholder}
-                      alt=""
-                      className="rounded-md object-cover"
-                    />
-                  </AspectRatio>
+                  <Image
+                    src={AleoLogoLight}
+                    alt=""
+                    className="hidden dark:block rounded-md object-cover mx-auto lg:mx-0"
+                    width={96}
+                  />
+                  <Image
+                    src={AleoLogoDark}
+                    alt=""
+                    className="block dark:hidden rounded-md object-cover mx-auto lg:mx-0"
+                    width={96}
+                  />
                 </li>
 
                 <li className="overflow-hidden rounded-md">
-                  <AspectRatio ratio={184 / 36}>
-                    <Image
-                      src={ImagePlaceholder}
-                      alt=""
-                      className="rounded-md object-cover"
-                    />
-                  </AspectRatio>
+                  <Image
+                    src={PuzzleLogoLight}
+                    alt=""
+                    className="hidden dark:block rounded-md object-cover mx-auto lg:mx-0"
+                    width={141}
+                  />
+                  <Image
+                    src={PuzzleLogoDark}
+                    alt=""
+                    className="block dark:hidden rounded-md object-cover mx-auto lg:mx-0"
+                    width={141}
+                  />
                 </li>
 
-                <li className="overflow-hidden rounded-md">
-                  <AspectRatio ratio={184 / 36}>
-                    <Image
-                      src={ImagePlaceholder}
-                      alt=""
-                      className="rounded-md object-cover"
-                    />
-                  </AspectRatio>
+                <li className="overflow-hidden rounded-md mx-auto lg:mx-0">
+                  <Image
+                    src={ArcaneLogoLight}
+                    alt=""
+                    className="hidden dark:block rounded-md object-cover"
+                    width={410}
+                  />
+                  <Image
+                    src={ArcaneLogoDark}
+                    alt=""
+                    className="block dark:hidden rounded-md object-cover"
+                    width={410}
+                  />
                 </li>
               </ul>
             </div>
           </div>
         </div>
+
+        <Separator />
       </main>
     </>
   )
