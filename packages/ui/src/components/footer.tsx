@@ -5,39 +5,42 @@ import LogoDarkImage from '~/assets/logo-dark.png'
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-16 w-full max-w-7xl px-6 sm:mt-20 lg:mt-32 lg:px-8">
+    <footer className="mx-auto mt-12 w-full max-w-7xl px-6 sm:mt-16 lg:mt-28 lg:px-8">
       <div className="mx-auto max-w-2xl lg:max-w-none">
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 pb-20 lg:grid-cols-2">
           <div className="flex flex-col justify-between">
             <div className="lg:max-w-96">
               <Link
                 href="/"
-                className="font-bold text-2xl relative flex items-baseline"
+                className="font-bold text-2xl relative flex items-center"
               >
                 <Image
                   src={LogoImage}
                   alt=""
-                  width={32}
-                  height={32}
-                  className="mr-1 block dark:hidden"
+                  width={40}
+                  height={40}
+                  className="mr-2 block dark:hidden"
                 />
                 <Image
                   src={LogoDarkImage}
                   alt=""
-                  width={32}
-                  height={32}
-                  className="mr-1 hidden dark:block"
+                  width={40}
+                  height={40}
+                  className="mr-2 hidden dark:block"
                 />
                 <span>Aleo</span>
                 <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
                   Staking
                 </span>
               </Link>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-sm text-muted-foreground mt-2">
                 Liquid Staking for Aleo
               </p>
-              <p className="text-sm text-muted-foreground mt-1">
-                Powered by the Spectre team
+              <p className="text-sm text-muted-foreground mt-2">
+                Powered by the{' '}
+                <strong className="font-semibold text-primary">
+                  Spectre team
+                </strong>
               </p>
             </div>
             <div className="mt-10">

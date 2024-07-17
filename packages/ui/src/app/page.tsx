@@ -9,7 +9,7 @@ import ArcaneLogoDark from '~/assets/arcane-logo-dark.svg'
 import ArcaneLogoLight from '~/assets/arcane-logo-light.svg'
 import PuzzleLogoLight from '~/assets/puzzle-logo-light.png'
 import PuzzleLogoDark from '~/assets/puzzle-logo-dark.png'
-import StCreditsImage from '~/assets/stCredits-banner.png'
+import StCreditsImage from '~/assets/st-credits-image.png'
 import ValidatorsImage from '~/assets/validators-image.png'
 import GovernanceImage from '~/assets/governance-image.png'
 import LeoWalletLogoLight from '~/assets/leo-wallet-logo.svg'
@@ -142,7 +142,7 @@ export default function HomePage() {
                         fees and rewards.
                       </p>
                     </blockquote>
-                    <figcaption className="mt-10" />
+                    <figcaption />
                   </figure>
                 </div>
               </div>
@@ -150,7 +150,7 @@ export default function HomePage() {
                 Validators run nodes, validate transactions, and participate in
                 consensus to add new blocks. They earn fees and rewards.
               </p> */}
-              <div className="mt-6">
+              <div className="mt-8">
                 <Button
                   asChild
                   className="rounded-full px-8 py-3 h-auto text-xl"
@@ -397,51 +397,15 @@ export default function HomePage() {
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-8 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="lg:flex lg:items-center lg:justify-end overflow-hidden lg:overflow-visible">
-              <div className="flex justify-center lg:w-1/2 lg:justify-end lg:pr-12">
-                <div className="w-96 flex-none lg:w-[40rem]">
-                  <div className="justify-center lg:justify-end relative flex aspect-[1024/926] w-full">
-                    <svg viewBox="0 0 655 680" fill="none" className="h-full">
-                      <title>Features</title>
-                      <g clipPath="url(#:S1:-clip)" className="group">
-                        <g className="origin-center scale-100 transition duration-500 motion-safe:group-hover:scale-105">
-                          <foreignObject width="655" height="680">
-                            <Image
-                              src={StCreditsImage}
-                              alt=""
-                              width={2400}
-                              height={3000}
-                              className="w-full bg-neutral-100 object-cover scale-150"
-                              sizes="(min-width: 1024px) 41rem, 31rem"
-                            />
-                          </foreignObject>
-                        </g>
-                        <use
-                          href="#:S1:-shape"
-                          strokeWidth="2"
-                          className="stroke-primary/10"
-                        />
-                      </g>
-                      <defs>
-                        <clipPath id=":S1:-clip">
-                          <path
-                            id=":S1:-shape"
-                            d="M537.827 9.245A11.5 11.5 0 0 1 549.104 0h63.366c7.257 0 12.7 6.64 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 586.87 151h-28.275a15.999 15.999 0 0 0-15.689 12.862l-59.4 297c-1.98 9.901 5.592 19.138 15.689 19.138h17.275l.127.001c.85.009 1.701.074 2.549.009 11.329-.874 21.411-7.529 24.88-25.981.002-.012.016-.016.023-.007.008.009.022.005.024-.006l24.754-123.771A11.5 11.5 0 0 1 580.104 321h63.366c7.257 0 12.7 6.639 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 617.87 472H559c-22.866 0-28.984 7.98-31.989 25.931-.004.026-.037.035-.052.014-.015-.02-.048-.013-.053.012l-24.759 123.798A11.5 11.5 0 0 1 490.87 631h-29.132a14.953 14.953 0 0 0-14.664 12.021c-4.3 21.502-23.18 36.979-45.107 36.979H83.502c-29.028 0-50.8-26.557-45.107-55.021l102.4-512C145.096 91.477 163.975 76 185.902 76h318.465c10.136 0 21.179-5.35 23.167-15.288l10.293-51.467Zm-512 160A11.5 11.5 0 0 1 37.104 160h63.366c7.257 0 12.7 6.639 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 74.87 311H11.504c-7.257 0-12.7-6.639-11.277-13.755l25.6-128Z"
-                            fillRule="evenodd"
-                            clipRule="evenodd"
-                          />
-                        </clipPath>
-                      </defs>
-                    </svg>
-                    {/* <Image
-                      src={StCreditsImage}
-                      alt=""
-                      className="object-cover rounded-3xl"
-                    /> */}
-                  </div>
-                </div>
+            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-12">
+              <div className="col-span-1 lg:col-span-6">
+                <Image
+                  src={StCreditsImage}
+                  alt=""
+                  className="object-cover rounded-3xl"
+                />
               </div>
-              <div>
+              <div className="col-span-1 lg:col-span-5">
                 <ul className="text-base mt-10 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
                   <li className="group mt-6 first:mt-0">
                     <div>
@@ -555,6 +519,46 @@ export default function HomePage() {
                 </ul>
               </div>
             </div>
+            {/* <div className="lg:flex lg:items-center lg:justify-end overflow-hidden lg:overflow-visible">
+              <div className="flex justify-center lg:w-1/2 lg:justify-end lg:pr-12">
+                <div className="w-96 flex-none lg:w-[40rem]">
+                  <div className="justify-center lg:justify-end relative flex aspect-[1024/926] w-full">
+                    <svg viewBox="0 0 655 680" fill="none" className="h-full">
+                      <title>Features</title>
+                      <g clipPath="url(#:S1:-clip)" className="group">
+                        <g className="origin-center scale-100 transition duration-500 motion-safe:group-hover:scale-105">
+                          <foreignObject width="655" height="680">
+                            <Image
+                              src={StCreditsImage}
+                              alt=""
+                              width={2400}
+                              height={3000}
+                              className="w-full bg-neutral-100 object-cover scale-150"
+                              sizes="(min-width: 1024px) 41rem, 31rem"
+                            />
+                          </foreignObject>
+                        </g>
+                        <use
+                          href="#:S1:-shape"
+                          strokeWidth="2"
+                          className="stroke-primary/10"
+                        />
+                      </g>
+                      <defs>
+                        <clipPath id=":S1:-clip">
+                          <path
+                            id=":S1:-shape"
+                            d="M537.827 9.245A11.5 11.5 0 0 1 549.104 0h63.366c7.257 0 12.7 6.64 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 586.87 151h-28.275a15.999 15.999 0 0 0-15.689 12.862l-59.4 297c-1.98 9.901 5.592 19.138 15.689 19.138h17.275l.127.001c.85.009 1.701.074 2.549.009 11.329-.874 21.411-7.529 24.88-25.981.002-.012.016-.016.023-.007.008.009.022.005.024-.006l24.754-123.771A11.5 11.5 0 0 1 580.104 321h63.366c7.257 0 12.7 6.639 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 617.87 472H559c-22.866 0-28.984 7.98-31.989 25.931-.004.026-.037.035-.052.014-.015-.02-.048-.013-.053.012l-24.759 123.798A11.5 11.5 0 0 1 490.87 631h-29.132a14.953 14.953 0 0 0-14.664 12.021c-4.3 21.502-23.18 36.979-45.107 36.979H83.502c-29.028 0-50.8-26.557-45.107-55.021l102.4-512C145.096 91.477 163.975 76 185.902 76h318.465c10.136 0 21.179-5.35 23.167-15.288l10.293-51.467Zm-512 160A11.5 11.5 0 0 1 37.104 160h63.366c7.257 0 12.7 6.639 11.277 13.755l-25.6 128A11.5 11.5 0 0 1 74.87 311H11.504c-7.257 0-12.7-6.639-11.277-13.755l25.6-128Z"
+                            fillRule="evenodd"
+                            clipRule="evenodd"
+                          />
+                        </clipPath>
+                      </defs>
+                    </svg>
+                  </div>
+                </div>
+              </div>
+            </div> */}
           </div>
         </div>
 
@@ -591,7 +595,7 @@ export default function HomePage() {
                   <figcaption />
                 </figure>
               </div>
-              <div className="mt-6">
+              <div className="mt-8">
                 <Button
                   asChild
                   className="rounded-full px-8 py-3 h-auto text-xl"

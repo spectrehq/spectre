@@ -15,21 +15,21 @@ export function Header() {
           <MobileNav />
           <Link
             href="/"
-            className="font-bold text-2xl relative flex items-baseline"
+            className="font-bold text-lg relative flex items-center"
           >
             <Image
               src={LogoImage}
               alt=""
-              width={32}
-              height={32}
-              className="mr-1 block dark:hidden"
+              width={40}
+              height={40}
+              className="mr-2 block dark:hidden"
             />
             <Image
               src={LogoDarkImage}
               alt=""
-              width={32}
-              height={32}
-              className="mr-1 hidden dark:block"
+              width={40}
+              height={40}
+              className="mr-2 hidden dark:block"
             />
             <span>Aleo</span>
             <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
