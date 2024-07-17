@@ -1,9 +1,7 @@
-import { MenuIcon } from 'lucide-react'
 import Link from 'next/link'
 import Image from 'next/image'
 import LogoImage from '~/assets/logo.png'
 import LogoDarkImage from '~/assets/logo-dark.png'
-import { Button } from '~/components/ui/button'
 import { ModeToggle } from '~/components/mode-toggle'
 import { MainNav } from './main-nav'
 import { Account } from './account'
@@ -17,7 +15,7 @@ export function Header() {
           <MobileNav />
           <Link
             href="/"
-            className="font-bold text-2xl relative flex items-center"
+            className="font-bold text-2xl relative flex items-baseline"
           >
             <Image
               src={LogoImage}

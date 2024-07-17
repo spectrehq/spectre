@@ -12,6 +12,8 @@ import PuzzleLogoDark from '~/assets/puzzle-logo-dark.png'
 import StCreditsImage from '~/assets/stCredits-banner.png'
 import ValidatorsImage from '~/assets/validators-image.png'
 import GovernanceImage from '~/assets/governance-image.png'
+import LeoWalletLogoLight from '~/assets/leo-wallet-logo.svg'
+import LeoWalletLogoDark from '~/assets/leo-wallet-logo-dark.svg'
 import ImagePlaceholder from '~/assets/image-placeholder.svg'
 import { AspectRatio } from '~/components/ui/aspect-ratio'
 import { Button } from '~/components/ui/button'
@@ -80,6 +82,7 @@ export default function HomePage() {
                 <Button
                   className="rounded-full px-10 py-4 h-auto text-2xl"
                   asChild
+                  variant="outline"
                 >
                   <Link href="/validators">Staking</Link>
                 </Button>
@@ -93,11 +96,16 @@ export default function HomePage() {
               <div className="">
                 <Button
                   className="rounded-full px-10 py-4 h-auto text-2xl"
+                  variant="outline"
                   asChild
                 >
                   <Link href="/stake">
                     <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                      Liquid Staking
+                      Liquid
+                    </span>
+                    &nbsp;
+                    <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                      Staking
                     </span>
                   </Link>
                 </Button>
@@ -109,34 +117,25 @@ export default function HomePage() {
         <Separator />
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-24 mb-24 sm:mb-32 lg:mb-40">
-          <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="max-w-2xl">
-              <h2>
-                <span className="sr-only"> - </span>
-                <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-5xl">
-                  Validators
-                </span>
-              </h2>
-              <div className="mt-6 text-xl text-muted-foreground">
-                <p>Explore validators that help grow Aleo</p>
-              </div>
-            </div>
-          </div>
           <div className="max-w-2xl lg:max-w-full mx-auto grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-10 lg:gap-20">
-            <div className="col-span-1 lg:col-span-2">
-              <AspectRatio ratio={1}>
-                <Image
-                  src={ValidatorsImage}
-                  alt=""
-                  className="rounded-3xl object-cover"
-                />
-              </AspectRatio>
-            </div>
             <div className="col-span-1 lg:col-span-3">
               <div className="mx-auto max-w-2xl lg:max-w-none">
+                <div className="max-w-2xl">
+                  <h2>
+                    <span className="sr-only"> - </span>
+                    <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-5xl">
+                      Validators
+                    </span>
+                  </h2>
+                  <div className="mt-6 text-xl text-muted-foreground">
+                    <p>Explore validators that help grow Aleo</p>
+                  </div>
+                </div>
+              </div>
+              <div className="mx-auto max-w-2xl lg:max-w-none mt-10">
                 <div style={{}}>
                   <figure className="mx-auto max-w-4xl">
-                    <blockquote className="relative font-display text-3xl font-medium tracking-tight sm:text-4xl">
+                    <blockquote className="relative font-display text-2xl tracking-tight font-light text-muted-foreground sm:text-3xl">
                       <p className="sm:before:absolute sm:before:right-full">
                         Validators run nodes, validate transactions, and
                         participate in consensus to add new blocks. They earn
@@ -155,10 +154,20 @@ export default function HomePage() {
                 <Button
                   asChild
                   className="rounded-full px-8 py-3 h-auto text-xl"
+                  variant="outline"
                 >
                   <Link href="/validators">Explore</Link>
                 </Button>
               </div>
+            </div>
+            <div className="col-span-1 lg:col-span-2">
+              <AspectRatio ratio={1}>
+                <Image
+                  src={ValidatorsImage}
+                  alt=""
+                  className="rounded-3xl object-cover"
+                />
+              </AspectRatio>
             </div>
           </div>
         </div>
@@ -450,7 +459,11 @@ export default function HomePage() {
                           ecosystem.
                         </p>
                         <div className="mt-4">
-                          <Button asChild className="rounded-full">
+                          <Button
+                            asChild
+                            className="rounded-full"
+                            variant="outline"
+                          >
                             <Link
                               href="https://github.com/spectrehq/spectre/tree/main/packages/leo/spectre_v1/stcredits"
                               target="_blank"
@@ -490,7 +503,11 @@ export default function HomePage() {
                           emergencies.
                         </p>
                         <div className="mt-4">
-                          <Button asChild className="rounded-full">
+                          <Button
+                            asChild
+                            className="rounded-full"
+                            variant="outline"
+                          >
                             <Link
                               href="https://github.com/spectrehq/spectre/tree/main/packages/leo/spectre_v1/access_control"
                               target="_blank"
@@ -518,7 +535,11 @@ export default function HomePage() {
                           their invites earn.
                         </p>
                         <div className="mt-4">
-                          <Button asChild className="rounded-full">
+                          <Button
+                            asChild
+                            className="rounded-full"
+                            variant="outline"
+                          >
                             <Link
                               href="https://docs.spectre.guru/spectre/points"
                               target="_blank"
@@ -558,11 +579,9 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-            </div>
-            <div className="col-span-1 lg:col-span-2">
-              <div className="mt-6" style={{}}>
+              <div className="mt-10" style={{}}>
                 <figure className="mx-auto max-w-4xl">
-                  <blockquote className="relative font-display text-xl font-medium tracking-tight">
+                  <blockquote className="relative font-display text-2xl tracking-tight font-light text-muted-foreground sm:text-3xl">
                     <p className="sm:before:absolute sm:before:right-full">
                       Key decisions require public votes by SPT token holders,
                       ensuring accountability to both users and the wider Aleo
@@ -572,10 +591,11 @@ export default function HomePage() {
                   <figcaption />
                 </figure>
               </div>
-              <div className="mt-2">
+              <div className="mt-6">
                 <Button
                   asChild
                   className="rounded-full px-8 py-3 h-auto text-xl"
+                  variant="outline"
                 >
                   <Link
                     href="https://docs.spectre.guru/spectre/governance"
@@ -587,6 +607,8 @@ export default function HomePage() {
                   </Link>
                 </Button>
               </div>
+            </div>
+            <div className="col-span-1 lg:col-span-2">
               <AspectRatio ratio={1} className="mt-8">
                 <Image
                   src={GovernanceImage}
@@ -606,50 +628,83 @@ export default function HomePage() {
               className="-mx-6 rounded-3xl px-6 py-10 sm:mx-0 md:px-12"
               style={{ opacity: 1, transform: 'none' }}
             >
-              <ul className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-10">
-                <li className="overflow-hidden rounded-md">
+              <ul className="grid grid-cols-1 lg:grid-cols-3 gap-x-8 gap-y-10 items-center">
+                {/* <li className="overflow-hidden rounded-md">
                   <Image
                     src={AleoLogoLight}
                     alt=""
-                    className="hidden dark:block rounded-md object-cover mx-auto lg:mx-0"
+                    className="hidden dark:block object-cover mx-auto lg:mx-0"
                     width={96}
                   />
                   <Image
                     src={AleoLogoDark}
                     alt=""
-                    className="block dark:hidden rounded-md object-cover mx-auto lg:mx-0"
+                    className="block dark:hidden object-cover mx-auto lg:mx-0"
                     width={96}
                   />
+                </li> */}
+
+                <li className="">
+                  <Link
+                    href="https://www.leo.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Image
+                      src={LeoWalletLogoLight}
+                      alt=""
+                      className="hidden dark:block object-cover mx-auto lg:mx-0"
+                      width={256}
+                    />
+                    <Image
+                      src={LeoWalletLogoDark}
+                      alt=""
+                      className="block dark:hidden object-cover mx-auto lg:mx-0"
+                      width={256}
+                    />
+                  </Link>
                 </li>
 
-                <li className="overflow-hidden rounded-md">
-                  <Image
-                    src={PuzzleLogoLight}
-                    alt=""
-                    className="hidden dark:block rounded-md object-cover mx-auto lg:mx-0"
-                    width={141}
-                  />
-                  <Image
-                    src={PuzzleLogoDark}
-                    alt=""
-                    className="block dark:hidden rounded-md object-cover mx-auto lg:mx-0"
-                    width={141}
-                  />
+                <li className="">
+                  <Link
+                    href="https://puzzle.online/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Image
+                      src={PuzzleLogoLight}
+                      alt=""
+                      className="hidden dark:block object-cover mx-auto lg:mx-0"
+                      width={141}
+                    />
+                    <Image
+                      src={PuzzleLogoDark}
+                      alt=""
+                      className="block dark:hidden object-cover mx-auto lg:mx-0"
+                      width={141}
+                    />
+                  </Link>
                 </li>
 
-                <li className="overflow-hidden rounded-md mx-auto lg:mx-0">
-                  <Image
-                    src={ArcaneLogoLight}
-                    alt=""
-                    className="hidden dark:block rounded-md object-cover"
-                    width={410}
-                  />
-                  <Image
-                    src={ArcaneLogoDark}
-                    alt=""
-                    className="block dark:hidden rounded-md object-cover"
-                    width={410}
-                  />
+                <li className="mx-auto lg:mx-0">
+                  <Link
+                    href="https://www.arcane.finance/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Image
+                      src={ArcaneLogoLight}
+                      alt=""
+                      className="hidden dark:block object-cover"
+                      width={410}
+                    />
+                    <Image
+                      src={ArcaneLogoDark}
+                      alt=""
+                      className="block dark:hidden object-cover"
+                      width={410}
+                    />
+                  </Link>
                 </li>
               </ul>
             </div>

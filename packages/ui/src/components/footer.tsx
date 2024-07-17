@@ -12,7 +12,7 @@ export function Footer() {
             <div className="lg:max-w-96">
               <Link
                 href="/"
-                className="font-bold text-2xl relative flex items-center"
+                className="font-bold text-2xl relative flex items-baseline"
               >
                 <Image
                   src={LogoImage}
