@@ -32,7 +32,10 @@ export function Account() {
 
   return (
     <Dialog defaultOpen={false} open={open} onOpenChange={setOpen}>
-      <WalletConnectionChecker className="hidden lg:inline-flex">
+      <WalletConnectionChecker
+        className="hidden lg:inline-flex border-muted-foreground"
+        variant="outline"
+      >
         <DialogTrigger asChild>
           <Button className="hidden lg:inline-flex">
             {dn.format(balanceDN, 2)} ALEO

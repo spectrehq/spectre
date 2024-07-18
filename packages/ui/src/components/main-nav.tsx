@@ -8,6 +8,7 @@ import {
   NavigationMenuList,
   navigationMenuTriggerStyle,
 } from '~/components/ui/navigation-menu'
+import { cn } from '~/lib/utils'
 
 export function MainNav() {
   const t = useTranslations('MainNav')
@@ -24,14 +25,18 @@ export function MainNav() {
         </NavigationMenuItem> */}
         <NavigationMenuItem className="relative">
           <Link href="/validators" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              className={cn(navigationMenuTriggerStyle(), 'text-base')}
+            >
               {t('validators')}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
           <Link href="/stake" legacyBehavior passHref>
-            <NavigationMenuLink className={navigationMenuTriggerStyle()}>
+            <NavigationMenuLink
+              className={cn(navigationMenuTriggerStyle(), 'text-base')}
+            >
               {t('stake')}
             </NavigationMenuLink>
           </Link>
@@ -39,7 +44,7 @@ export function MainNav() {
         <NavigationMenuItem className="relative">
           <Link href="https://docs.spectre.guru" legacyBehavior passHref>
             <NavigationMenuLink
-              className={navigationMenuTriggerStyle()}
+              className={cn(navigationMenuTriggerStyle(), 'text-base')}
               target="_blank"
               rel="noreferrer"
             >

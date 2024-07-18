@@ -40,7 +40,11 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <ThemeProvider attribute="class" enableSystem disableTransitionOnChange>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="dark"
+          disableTransitionOnChange
+        >
           <NextIntlClientProvider messages={messages}>
             <Providers>
               <Header />

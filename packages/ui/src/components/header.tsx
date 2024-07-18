@@ -10,7 +10,7 @@ import { MobileNav } from './mobile-nav'
 export function Header() {
   return (
     <header>
-      <div className="container flex items-center gap-8 py-6">
+      <div className="container flex items-center gap-16 py-6">
         <div className="flex flex-none items-center gap-2">
           <MobileNav />
           <Link
@@ -41,7 +41,7 @@ export function Header() {
           <MainNav />
         </div>
         <div className="flex flex-none items-center gap-4">
-          <ModeToggle />
+          {/* <ModeToggle /> */}
           <Account />
         </div>
       </div>
