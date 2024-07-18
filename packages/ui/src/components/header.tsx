@@ -10,9 +10,8 @@ import { MobileNav } from './mobile-nav'
 export function Header() {
   return (
     <header>
-      <div className="container flex items-center gap-16 py-6">
+      <div className="container flex items-center justify-between gap-0 lg:gap-16 py-6">
         <div className="flex flex-none items-center gap-2">
-          <MobileNav />
           <Link
             href="/"
             className="font-bold text-lg relative flex items-center"
@@ -31,8 +30,8 @@ export function Header() {
               height={40}
               className="mr-2 hidden dark:block"
             />
-            <span>Aleo</span>
-            <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+            <span className="hidden lg:inline-block">Aleo</span>
+            <span className="hidden lg:inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
               Staking
             </span>
           </Link>
@@ -43,6 +42,7 @@ export function Header() {
         <div className="flex flex-none items-center gap-4">
           {/* <ModeToggle /> */}
           <Account />
+          <MobileNav />
         </div>
       </div>
     </header>

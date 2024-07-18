@@ -74,7 +74,7 @@ export default function HomePage() {
         <div className="mx-auto mt-16 max-w-7xl px-6 sm:mt-24 md:mt-40 lg:px-8 mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-3xl">
-              <h1 className="font-display text-5xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl mb-16">
+              <h1 className="font-display text-4xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl mb-16">
                 Zero-Knowledge Staking on Aleo
               </h1>
               <p className="mb-6 text-xl">
@@ -122,17 +122,17 @@ export default function HomePage() {
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-0 lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
                 <div className="mx-auto max-w-2xl lg:max-w-none">
                   <div className="max-w-2xl">
                     <h2>
                       <span className="sr-only"> - </span>
-                      <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-8xl">
+                      <span className="block font-display tracking-tight [text-wrap:balance] text-5xl font-medium sm:text-8xl">
                         Validators
                       </span>
                     </h2>
-                    <div className="mt-6 text-3xl font-light" />
+                    <div className="text-3xl font-light" />
                   </div>
                 </div>
                 {/* <Image
@@ -142,7 +142,7 @@ export default function HomePage() {
                 /> */}
               </div>
               <div className="col-span-1 lg:col-span-5">
-                <ul className="text-base mt-10 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
+                <ul className="text-base mt-4 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
                   <li className="group mt-6 first:mt-0">
                     <div>
                       <div className="pt-6 text-xl">
@@ -234,13 +234,17 @@ export default function HomePage() {
 
         <Separator />
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-4 my-12 sm:my-32 lg:my-40">
           {/* <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 md:max-w-lg lg:max-w-full mx-auto"> */}
 
           <div className="flex flex-col lg:flex-row justify-between relative">
-            <Separator className="absolute top-12 -z-10 bg-muted-foreground" />
+            <Separator className="hidden lg:block absolute top-12 -z-10 bg-muted-foreground" />
+            <Separator
+              className="block lg:hidden absolute left-12 -z-10 bg-muted-foreground"
+              orientation="vertical"
+            />
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center">
-              <div className="flex flex-col lg:flex-row justify-center items-center h-64 lg:h-auto bg-background">
+              <div className="flex flex-col lg:flex-row lg:justify-center items-center h-64 lg:h-auto bg-background">
                 <div className="flex-grow" />
                 <div className="p-4 border rounded-full flex-none border-muted-foreground">
                   <svg
@@ -266,20 +270,20 @@ export default function HomePage() {
                   </svg>
                 </div>
                 <div className="flex-grow">
+                  <Separator
+                    className="block lg:hidden bg-muted-foreground -ml-px"
+                    orientation="vertical"
+                  />
                   <Separator className="hidden lg:block flex-1 -mt-px bg-muted-foreground" />
                 </div>
-                {/* <Separator
-                  className="block lg:hidden flex-1"
-                  orientation="vertical"
-                /> */}
               </div>
-              <div className="text-center">
-                <div className="text-7xl">Stake</div>
-                <div className="text-3xl mt-4">Credits</div>
+              <div className="flex flex-col justify-center text-start lg:text-center">
+                <div className="text-4xl lg:text-7xl">Stake</div>
+                <div className="text-2xl lg:text-3xl mt-4">Credits</div>
               </div>
             </div>
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center items-center">
-              <div className="flex flex-col lg:flex-row items-center h-64 lg:h-auto">
+              <div className="flex flex-col lg:flex-row justify-center items-center h-64 lg:h-auto">
                 <div className="p-4 w-24 h-24 border border-muted-foreground rounded-full flex justify-center items-center bg-background">
                   <div className="w-11 h-11">
                     <AspectRatio ratio={1}>
@@ -297,14 +301,20 @@ export default function HomePage() {
                   </div>
                 </div>
               </div>
-              <div className="lg:text-center">
-                <div className="text-7xl">Receive</div>
-                <div className="text-3xl mt-4">stCredits and get rewards</div>
+              <div className="flex flex-col justify-center text-start lg:text-center">
+                <div className="text-4xl lg:text-7xl">Receive</div>
+                <div className="text-2xl lg:text-3xl mt-4">
+                  stCredits and get rewards
+                </div>
               </div>
             </div>
             <div className="flex flex-row gap-14 lg:flex-col justify-start lg:justify-center">
               <div className="flex flex-col lg:flex-row items-center h-64 lg:h-auto bg-background">
                 <div className="flex-grow">
+                  <Separator
+                    className="block lg:hidden bg-muted-foreground -ml-px"
+                    orientation="vertical"
+                  />
                   <Separator className="hidden lg:block flex-1 -mt-px bg-muted-foreground" />
                 </div>
                 <div className="p-4 border rounded-full border-muted-foreground">
@@ -319,9 +329,11 @@ export default function HomePage() {
                 </div>
                 <div className="flex-grow" />
               </div>
-              <div className="lg:text-center">
-                <div className="text-7xl">Use</div>
-                <div className="text-3xl mt-4">stCredits in ZeFi</div>
+              <div className="flex flex-col justify-center text-start lg:text-center">
+                <div className="text-4xl lg:text-7xl">Use</div>
+                <div className="text-2xl lg:text-3xl mt-4">
+                  stCredits in ZeFi
+                </div>
               </div>
             </div>
           </div>
@@ -441,15 +453,15 @@ export default function HomePage() {
           </div>
         </div> */}
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-8 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
+        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-20 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-11 gap-2 items-center lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
                 <div className="mx-auto max-w-2xl lg:max-w-none">
                   <div className="max-w-2xl">
                     <h2>
                       <span className="sr-only"> - </span>
-                      <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-8xl">
+                      <span className="block font-display tracking-tight [text-wrap:balance] text-5xl font-medium sm:text-8xl">
                         stCredits
                       </span>
                     </h2>
@@ -487,7 +499,7 @@ export default function HomePage() {
                         <div className="mt-4">
                           <Button
                             asChild
-                            className="rounded-full border-muted-foreground"
+                            className="rounded-full border-muted-foreground min-w-32"
                             variant="outline"
                           >
                             <Link
@@ -532,7 +544,7 @@ export default function HomePage() {
                         <div className="mt-4">
                           <Button
                             asChild
-                            className="rounded-full border-muted-foreground"
+                            className="rounded-full border-muted-foreground min-w-32"
                             variant="outline"
                           >
                             <Link
@@ -565,7 +577,7 @@ export default function HomePage() {
                         <div className="mt-4">
                           <Button
                             asChild
-                            className="rounded-full border-muted-foreground"
+                            className="rounded-full border-muted-foreground min-w-32"
                             variant="outline"
                           >
                             <Link
@@ -630,17 +642,17 @@ export default function HomePage() {
 
         <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
-            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-12">
+            <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-0 lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
                 <div className="mx-auto max-w-2xl lg:max-w-none">
                   <div className="max-w-2xl">
                     <h2>
                       <span className="sr-only"> - </span>
-                      <span className="block font-display tracking-tight [text-wrap:balance] text-4xl font-medium sm:text-8xl">
+                      <span className="block font-display tracking-tight [text-wrap:balance] text-5xl font-medium sm:text-8xl">
                         Governance
                       </span>
                     </h2>
-                    <div className="mt-6 text-3xl font-light" />
+                    <div className="text-3xl font-light" />
                   </div>
                 </div>
                 {/* <Image
@@ -650,7 +662,7 @@ export default function HomePage() {
                 /> */}
               </div>
               <div className="col-span-1 lg:col-span-5">
-                <ul className="text-base mt-10 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
+                <ul className="text-base mt-4 lg:mt-0 lg:w-1/2 lg:min-w-[33rem] lg:pl-4">
                   <li className="group mt-6 first:mt-0">
                     <div>
                       <div className="pt-6 text-xl">
@@ -744,7 +756,7 @@ export default function HomePage() {
               Governance
             </span>
           </h2>
-          <div className="grid grid-cols-1 mt-16 lg:grid-cols-2 gap-20">
+          <div className="grid grid-cols-1 mt-16 lg:grid-cols-2 gap-10 lg:gap-20">
             <div className="col-span-1 lg:col-span-1">
               <div className="mx-auto max-w-2xl lg:max-w-none text-center">
                 <div className="">

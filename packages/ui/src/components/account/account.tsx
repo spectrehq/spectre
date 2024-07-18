@@ -33,7 +33,7 @@ export function Account() {
   return (
     <Dialog defaultOpen={false} open={open} onOpenChange={setOpen}>
       <WalletConnectionChecker
-        className="hidden lg:inline-flex border-muted-foreground"
+        className="border-muted-foreground h-9 px-3 lg:h-10 lg:px-4"
         variant="outline"
       >
         <DialogTrigger asChild>
