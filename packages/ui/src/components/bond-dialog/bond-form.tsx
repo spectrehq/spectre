@@ -2,11 +2,11 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as dn from 'dnum'
-import { Loader2Icon } from 'lucide-react'
+import { CircleCheckIcon, CopyIcon, Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
 import Aleo123Logo from '~/assets/aleo123-logo.png'
@@ -34,6 +34,8 @@ import { cn } from '~/lib/utils'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
 import { Skeleton } from '../ui/skeleton'
+import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard'
+import { toast } from 'sonner'
 
 export interface BondFormProps {
   validator: AleoAddress
@@ -75,7 +77,8 @@ export function BondForm({ validator }: BondFormProps) {
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: 0,
+      // @ts-ignore
+      amount: '',
     },
   })
 
@@ -103,32 +106,42 @@ export function BondForm({ validator }: BondFormProps) {
 
   const { prevStep } = useStepper()
 
+  const [isCopied, setIsCopied] = useState(false)
+  const [, copy] = useCopyToClipboard()
+
+  const handleCopyAddress = useCallback(async () => {
+    if (!validator) return
+    setIsCopied(await copy(validator))
+    toast.success('Copied!')
+  }, [validator, copy])
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (isCopied) {
+      timer = setTimeout(() => setIsCopied(false), 2000)
+    }
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [isCopied])
+
   return (
     <Card className="border-none shadow-none w-screen max-w-xl">
       <CardHeader className="px-0">
         <CardTitle className="flex items-center space-x-2">
           <GradientsAvatar text={validator} size={40} />
           <span>{validator && shortenAddress(validator)}</span>
-          <div>
-            {isLoading ? (
-              <Skeleton className="h-5 w-10" />
+          <button type="button" onClick={handleCopyAddress}>
+            {isCopied ? (
+              <CircleCheckIcon className="h-5 w-5 text-green-600" />
             ) : (
-              data &&
-              (data.Info.IsOpen ? (
-                <span className="inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-lime-400/20 text-lime-700 group-data-[hover]:bg-lime-400/30 dark:bg-lime-400/10 dark:text-lime-300 dark:group-data-[hover]:bg-lime-400/15">
-                  OPEN
-                </span>
-              ) : (
-                <span className="max-sm:hidden inline-flex items-center gap-x-1.5 rounded-md px-1.5 py-0.5 text-sm/5 font-medium sm:text-xs/5 forced-colors:outline bg-zinc-600/10 text-zinc-700 group-data-[hover]:bg-zinc-600/20 dark:bg-white/5 dark:text-zinc-400 dark:group-data-[hover]:bg-white/10">
-                  CLOSED
-                </span>
-              ))
+              <CopyIcon className="h-5 w-5" />
             )}
-          </div>
-          <div className="flex-1" />
+          </button>
         </CardTitle>
         <CardDescription className="flex items-center space-x-2">
-          <span>view on explorer: </span>
+          <span>View on explorer: </span>
           <Link
             href={`https://testnet.aleoscan.io/address?a=${validator}`}
             target="_blank"
@@ -150,9 +163,7 @@ export function BondForm({ validator }: BondFormProps) {
           <div className="bg-secondary p-6 rounded-xl">
             <ul className="grid gap-2 text-sm">
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Total Staking Credits
-                </span>
+                <span className="text-muted-foreground">Total Stake</span>
                 <span>
                   {dn.format([BigInt(data?.Info.Stake ?? 0), 6], {
                     digits: 2,
@@ -161,36 +172,7 @@ export function BondForm({ validator }: BondFormProps) {
                 </span>
               </li>
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Validator stake</span>
-                <span>
-                  {dn.format([BigInt(data?.Info.Delegate ?? 0), 6], {
-                    digits: 2,
-                    trailingZeros: true,
-                  })}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Delegators Stake</span>
-                <span>
-                  {dn.format(
-                    dn.sub(
-                      dn.from([BigInt(data?.Info.Stake ?? 0), 6]),
-                      dn.from([BigInt(data?.Info.Delegate ?? 0), 6])
-                    ),
-                    {
-                      digits: 2,
-                      trailingZeros: true,
-                    }
-                  )}
-                </span>
-              </li>
-            </ul>
-            <Separator className="my-4" />
-            <ul className="grid gap-2 text-sm">
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Total Credits Earned
-                </span>
+                <span className="text-muted-foreground">Total Earning</span>
                 <span>
                   {dn.format(
                     [BigInt(data?.Info.ValidatorTotalProfit ?? 0), 6],
@@ -202,40 +184,6 @@ export function BondForm({ validator }: BondFormProps) {
                 </span>
               </li>
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Validator Earnings
-                </span>
-                <span>
-                  {dn.format([BigInt(data?.Info.TotalProfit ?? 0), 6], {
-                    digits: 2,
-                    trailingZeros: true,
-                  })}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Delegators Earnings
-                </span>
-                <span>
-                  {dn.format(
-                    dn.sub(
-                      dn.from([
-                        BigInt(data?.Info.ValidatorTotalProfit ?? 0),
-                        6,
-                      ]),
-                      dn.from([BigInt(data?.Info.TotalProfit ?? 0), 6])
-                    ),
-                    {
-                      digits: 2,
-                      trailingZeros: true,
-                    }
-                  )}
-                </span>
-              </li>
-            </ul>
-            <Separator className="my-4" />
-            <ul className="grid gap-2 text-sm">
-              <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Commission</span>
                 <span>
                   {dn.format(dn.from(validatorState?.commission ?? 0), {
@@ -244,18 +192,10 @@ export function BondForm({ validator }: BondFormProps) {
                   %
                 </span>
               </li>
+
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Vote</span>
-                <span>
-                  {dn.format(dn.from((data?.Info.Votes ?? 0) * 100), {
-                    digits: 2,
-                  })}
-                  %
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Unstaking Period</span>
-                <span>360 blocks</span>
+                <span className="text-muted-foreground">Status</span>
+                <span>{validatorState?.is_open ? 'OPEN' : 'CLOSE'}</span>
               </li>
             </ul>
           </div>
@@ -288,6 +228,16 @@ export function BondForm({ validator }: BondFormProps) {
                           <NumberInput
                             {...field}
                             className="h-auto rounded-xl p-3 pr-20 text-xl"
+                            placeholder="0.000000"
+                            onChange={(event) => {
+                              const value = event.currentTarget.value ?? ''
+                              if (
+                                value === '' ||
+                                /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                              ) {
+                                field.onChange(value)
+                              }
+                            }}
                           />
                         </FormControl>
                         <div className="absolute top-0 right-2 z-10">
@@ -306,13 +256,11 @@ export function BondForm({ validator }: BondFormProps) {
                     )}
                   />
                   <div className="flex items-center justify-end text-sm">
-                    <span className="text-muted-foreground">
-                      Available to bond:
-                    </span>{' '}
+                    <span className="text-muted-foreground">Available:</span>
+                    &nbsp;
                     <span className="font-medium">
                       {dn.format(balanceDN, {
-                        digits: 2,
-                        trailingZeros: true,
+                        digits: 6,
                       })}{' '}
                       Credits
                     </span>
@@ -339,6 +287,24 @@ export function BondForm({ validator }: BondFormProps) {
                           : 'Stake')}
                     </Button>
                   </WalletConnectionChecker>
+                  <div className="mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-px w-full">
+                    <Button
+                      className="rounded-xl border-muted-foreground border-none w-full"
+                      variant="outline"
+                      size="xl"
+                      asChild
+                    >
+                      <Link href="/stake">
+                        <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                          Liquid
+                        </span>
+                        &nbsp;
+                        <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                          Staking
+                        </span>
+                      </Link>
+                    </Button>
+                  </div>
                   <Button
                     className="w-full"
                     variant="secondary"

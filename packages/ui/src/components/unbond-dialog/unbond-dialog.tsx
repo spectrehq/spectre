@@ -15,7 +15,7 @@ export function UnbondDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Withdraw</Button>
+        <Button variant="secondary">Unstake</Button>
       </DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>

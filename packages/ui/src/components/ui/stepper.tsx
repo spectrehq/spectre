@@ -808,7 +808,10 @@ const StepButtonContainer = ({
 
 // <---------- STEP ICON ---------->
 
-type IconType = LucideIcon | React.ComponentType<any> | undefined
+type IconType =
+  | LucideIcon
+  | React.ComponentType<Record<string, unknown>>
+  | undefined
 
 const iconVariants = cva('', {
   variants: {

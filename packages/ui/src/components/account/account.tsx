@@ -38,7 +38,7 @@ export function Account() {
       >
         <DialogTrigger asChild>
           <Button className="hidden lg:inline-flex">
-            {dn.format(balanceDN, 2)} ALEO
+            {dn.format(balanceDN, { digits: 2, locale: 'en' })} Credits
             <Wallet2Icon className="mx-2 h-5 w-5" />
             {address && shortenAddress(address)}
           </Button>

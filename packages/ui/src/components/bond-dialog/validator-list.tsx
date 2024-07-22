@@ -92,7 +92,7 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
   const { currentStep } = useStepper()
 
   return (
-    <div className="max-h-96 overflow-auto w-screen max-w-full md:max-w-4xl">
+    <div className="overflow-auto w-screen max-w-full md:max-w-4xl">
       <Table>
         <TableHeader>
           {table.getHeaderGroups().map((headerGroup) => (

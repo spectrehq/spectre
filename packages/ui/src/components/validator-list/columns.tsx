@@ -15,15 +15,15 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
     accessorKey: 'address',
     header: 'Address',
     cell: ({ getValue }) => (
-      <div className="flex items-center space-x-2">
-        <GradientsAvatar text={getValue<string>()} size={32} />
+      <div className="flex items-center space-x-4">
+        <GradientsAvatar text={getValue<string>()} size={40} />
         <span>{shortenAddress(getValue<string>())}</span>
       </div>
     ),
   },
   {
     accessorKey: 'staked',
-    header: () => <div className="text-end">Stake</div>,
+    header: () => <div className="text-end">Total Stake</div>,
     cell: ({ getValue }) => {
       const staked = getValue<number | undefined | null>()
 
@@ -46,7 +46,7 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
 
   {
     accessorKey: 'profit_total',
-    header: () => <div className="text-end">Total Earnings</div>,
+    header: () => <div className="text-end">Total Earning</div>,
     cell: ({ getValue }) => (
       <div className="text-end">
         {dn.format([BigInt(getValue<number>() ?? 0), 6], {
@@ -91,7 +91,7 @@ export const columns: ColumnDef<Validator & ValidatorFromAleo123>[] = [
   },
   {
     accessorKey: 'isOpen',
-    header: () => <div className="text-center">Bonding State</div>,
+    header: () => <div className="text-center">Status</div>,
     cell: ({ getValue }) => {
       const isOpen = getValue<boolean | undefined | null>()
 

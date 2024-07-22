@@ -16,8 +16,6 @@ import {
   TableRow,
 } from '~/components/ui/table'
 import { BondDialog } from '../bond-dialog'
-import { useState } from 'react'
-import type { AleoAddress } from '~/types'
 import type { Validator } from '~/hooks/use-committee'
 
 interface DataTableProps<TData, TValue> {
@@ -34,10 +32,6 @@ export function DataTable<TData, TValue>({
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
-
-  const [selectedValidator, setSelectedValidator] = useState<AleoAddress>()
-
-  console.log(selectedValidator)
 
   return (
     <div className="overflow-hidden rounded-3xl border">

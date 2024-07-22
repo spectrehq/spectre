@@ -1,9 +1,10 @@
 'use client'
 
 import * as dn from 'dnum'
+import { CircleCheckIcon, CopyIcon } from 'lucide-react'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import {
   Area,
   CartesianGrid,
@@ -12,6 +13,7 @@ import {
   XAxis,
   YAxis,
 } from 'recharts'
+import { toast } from 'sonner'
 import Aleo123Logo from '~/assets/aleo123-logo.png'
 import AleoscanLogo from '~/assets/aleoscan-logo.png'
 import { GradientsAvatar } from '~/components/gradients-avatar'
@@ -31,7 +33,9 @@ import {
 } from '~/components/ui/chart'
 import { useStepper } from '~/components/ui/stepper'
 import { useCommittee } from '~/hooks/use-committee'
+import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard'
 import { useQueryValidator } from '~/hooks/use-query-validator'
+import { useValidatorState } from '~/hooks/use-validator-state'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
 
@@ -53,6 +57,7 @@ export interface ValidatorDetailProps {
 export function ValidatorDetail({ address }: ValidatorDetailProps) {
   const { data, isLoading } = useQueryValidator(address)
   const { data: committee } = useCommittee()
+  const { data: validatorState } = useValidatorState(address)
 
   const chartData = useMemo(
     () =>
@@ -88,7 +93,26 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
   // }, [data])
 
   const { prevStep, nextStep } = useStepper()
-  const { currentStep } = useStepper()
+
+  const [isCopied, setIsCopied] = useState(false)
+  const [, copy] = useCopyToClipboard()
+
+  const handleCopyAddress = useCallback(async () => {
+    if (!address) return
+    setIsCopied(await copy(address))
+    toast.success('Copied!')
+  }, [address, copy])
+
+  useEffect(() => {
+    let timer: NodeJS.Timeout
+    if (isCopied) {
+      timer = setTimeout(() => setIsCopied(false), 2000)
+    }
+
+    return () => {
+      clearTimeout(timer)
+    }
+  }, [isCopied])
 
   return (
     <div className="w-screen max-w-4xl">
@@ -97,9 +121,16 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
           <CardTitle className="flex items-center space-x-2">
             <GradientsAvatar text={address} size={40} />
             <span>{address && shortenAddress(address)}</span>
+            <button type="button" onClick={handleCopyAddress}>
+              {isCopied ? (
+                <CircleCheckIcon className="h-5 w-5 text-green-600" />
+              ) : (
+                <CopyIcon className="h-5 w-5" />
+              )}
+            </button>
           </CardTitle>
           <CardDescription className="flex items-center space-x-2">
-            <span>view on explorer: </span>
+            <span>View on explorer: </span>
             <Link
               href={`https://testnet.aleoscan.io/address?a=${address}`}
               target="_blank"
@@ -120,9 +151,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
           <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
             <ul className="grid gap-2 text-sm">
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Total Staking Credits
-                </span>
+                <span className="text-muted-foreground">Total Stake</span>
                 <span>
                   {dn.format([BigInt(data?.Info.Stake ?? 0), 6], {
                     digits: 2,
@@ -131,7 +160,35 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                 </span>
               </li>
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Validator stake</span>
+                <span className="text-muted-foreground">Total Earning</span>
+                <span>
+                  {dn.format([BigInt(data?.Info.TotalProfit ?? 0), 6], {
+                    digits: 2,
+                    trailingZeros: true,
+                  })}
+                </span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Stake Share</span>
+                <span>
+                  {dn.format(
+                    dn.mul(
+                      dn.div(
+                        dn.from([BigInt(data?.Info.Stake ?? 0), 6]),
+                        dn.from([BigInt(committee?.totalStake ?? 1), 6])
+                      ),
+                      100
+                    ),
+                    { digits: 2 }
+                  )}
+                  %
+                </span>
+              </li>
+            </ul>
+
+            <ul className="grid gap-2 text-sm">
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Validator Stake</span>
                 <span>
                   {dn.format([BigInt(data?.Info.Delegate ?? 0), 6], {
                     digits: 2,
@@ -154,91 +211,31 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   )}
                 </span>
               </li>
-            </ul>
-
-            <ul className="grid gap-2 text-sm">
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Total Credits Earned
-                </span>
-                <span>
-                  {dn.format(
-                    [BigInt(data?.Info.ValidatorTotalProfit ?? 0), 6],
-                    {
-                      digits: 2,
-                      trailingZeros: true,
-                    }
-                  )}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Validator Earnings
-                </span>
-                <span>
-                  {dn.format([BigInt(data?.Info.TotalProfit ?? 0), 6], {
-                    digits: 2,
-                    trailingZeros: true,
-                  })}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">
-                  Delegators Earnings
-                </span>
-                <span>
-                  {dn.format(
-                    dn.sub(
-                      dn.from([
-                        BigInt(data?.Info.ValidatorTotalProfit ?? 0),
-                        6,
-                      ]),
-                      dn.from([BigInt(data?.Info.TotalProfit ?? 0), 6])
-                    ),
-                    {
-                      digits: 2,
-                      trailingZeros: true,
-                    }
-                  )}
-                </span>
-              </li>
+              <li className="h-5" />
             </ul>
 
             <ul className="grid gap-2 items-start text-sm">
               <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Stake Ratio</span>
+                <span className="text-muted-foreground">Commission</span>
                 <span>
-                  {dn.format(
-                    dn.mul(
-                      dn.div(
-                        dn.from([BigInt(data?.Info.Stake ?? 0), 6]),
-                        dn.from([BigInt(committee?.totalStake ?? 1), 6])
-                      ),
-                      100
-                    ),
-                    { digits: 2 }
-                  )}
-                  %
-                </span>
-              </li>
-              {/* <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">APR</span>
-                <span>{dn.format(dn.from(apr * 100), { digits: 2 })}%</span>
-              </li> */}
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Vote</span>
-                <span>
-                  {dn.format(dn.from((data?.Info.Votes ?? 0) * 100), {
+                  {dn.format(dn.from(validatorState?.commission ?? 0), {
                     digits: 2,
                   })}
                   %
                 </span>
               </li>
-              <li className="h-5" />
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Status</span>
+                <span>{validatorState?.is_open ? 'OPEN' : 'CLOSE'}</span>
+              </li>
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Unbonding Period</span>
+                <span>360 blocks</span>
+              </li>
             </ul>
           </div>
           <div className="pt-6">
-            <h4 className="text-lg font-semibold mb-4">Stake/Profit</h4>
+            <h4 className="text-lg font-semibold mb-4">Stake / Earning</h4>
             <ChartContainer config={chartConfig} className="h-40 w-full">
               <ComposedChart
                 accessibilityLayer
@@ -251,6 +248,12 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
               >
                 <CartesianGrid vertical={false} />
                 <XAxis
+                  type="number"
+                  domain={[
+                    chartData[0]?.timestamp ?? 0,
+                    chartData[chartData.length - 1]?.timestamp ?? 0,
+                  ]}
+                  scale="time"
                   dataKey="timestamp"
                   tickLine={false}
                   axisLine={false}
@@ -264,6 +267,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   yAxisId="stake"
                   tickFormatter={(value) => {
                     return dn.format(dn.from(value), {
+                      locale: 'en',
                       digits: 2,
                       compact: true,
                     })
@@ -273,7 +277,11 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   yAxisId="profit"
                   orientation="right"
                   tickFormatter={(value) =>
-                    dn.format(dn.from(value), { digits: 2, compact: true })
+                    dn.format(dn.from(value), {
+                      digits: 2,
+                      compact: true,
+                      locale: 'en',
+                    })
                   }
                 />
                 <ChartTooltip

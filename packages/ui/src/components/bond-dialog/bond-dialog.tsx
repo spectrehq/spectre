@@ -34,12 +34,12 @@ export function BondDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="max-w-full md:max-w-fit max-h-[90%] overflow-y-scroll">
-        <DialogHeader>
+      <DialogContent className="max-w-full md:max-w-fit max-h-[90%] flex flex-col">
+        <DialogHeader className="flex-none">
           <DialogTitle>Stake</DialogTitle>
           <DialogDescription />
         </DialogHeader>
-        <div>
+        <div className="flex-grow overflow-y-scroll">
           <BondWidget step={step} validator={validator} />
         </div>
       </DialogContent>

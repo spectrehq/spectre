@@ -15,7 +15,9 @@ export function CreditsClaimDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button>Claim</Button>
+        <Button variant="outline" className="border-muted-foreground">
+          Claim
+        </Button>
       </DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>
