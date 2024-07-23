@@ -25,7 +25,7 @@ export function BondWidget({ step = 0, validator }: BondWidgetProps) {
 
   return (
     <div className="flex w-full flex-col gap-4">
-      <Stepper initialStep={step} steps={steps} size="sm" className="mb-4 mt-5">
+      <Stepper initialStep={step} steps={steps} size="sm" className="my-6">
         <Step key="selectValidator" label="Select validator">
           <ValidatorList onSelect={setSelectedValidator} />
         </Step>

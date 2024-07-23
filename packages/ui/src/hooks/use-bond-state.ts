@@ -1,6 +1,6 @@
 import { useQuery } from '@tanstack/react-query'
 import { useNetworkClientStore } from '~/stores/network-client'
-import { AleoAddress } from '~/types'
+import type { AleoAddress } from '~/types'
 
 export function useBondState(address?: AleoAddress | null) {
   const creditsProgram = useNetworkClientStore((store) => store.creditsProgram)

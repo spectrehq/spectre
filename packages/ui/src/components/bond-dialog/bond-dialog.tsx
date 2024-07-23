@@ -39,7 +39,7 @@ export function BondDialog({
           <DialogTitle>Stake</DialogTitle>
           <DialogDescription />
         </DialogHeader>
-        <div className="flex-grow overflow-y-scroll">
+        <div className="disable-scrollbar flex-grow overflow-y-scroll">
           <BondWidget step={step} validator={validator} />
         </div>
       </DialogContent>

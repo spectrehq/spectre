@@ -49,7 +49,7 @@ export function DepositDialog() {
           <DialogTitle>Deposit Credits</DialogTitle>
           <DialogDescription />
         </DialogHeader>
-        <div className="flex flex-col items-center space-y-6 py-6">
+        <div className="flex flex-col items-center space-y-6 p-6">
           <div className="bg-foreground p-4 rounded-xl">
             <QRCodeSVG value={address!} size={256} />
           </div>

@@ -23,7 +23,10 @@ export function WalletItem({ wallet, onConnected }: WalletItemProps) {
         DecryptPermission.AutoDecrypt,
         WalletAdapterNetwork.TestnetBeta
       )
-    } catch (error) {}
+    } catch (error) {
+      console.log(error)
+      // TODO: WalletNotSelectedError
+    }
     onConnected?.()
   }, [wallet.name, select, connect, onConnected])
 

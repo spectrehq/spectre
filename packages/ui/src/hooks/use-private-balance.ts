@@ -42,8 +42,9 @@ export function usePrivateBalance() {
 
     if (walletType === WalletType.PuzzleWallet) {
       return BigInt(
-        balances?.filter((balance) => balance.programId === 'credits.aleo')?.[0]
-          ?.values.private ?? 0
+        (balances?.filter(
+          (balance) => balance.programId === 'credits.aleo'
+        )?.[0]?.values.private ?? 0) * 1000000
       )
     }
   }, [balances, walletType, leoWalletBalance])

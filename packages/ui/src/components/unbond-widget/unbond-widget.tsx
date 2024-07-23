@@ -76,23 +76,23 @@ export function UnbondWidget() {
   )
 
   return (
-    <div className="rounded-xl bg-secondary-foreground max-w-lg mx-auto">
-      <div className="p-6 text-background">
-        <div className="grid">
+    <div className="rounded-xl w-full mx-auto">
+      <div className="p-6">
+        <div className="grid text-center">
           <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Staking Credits
-            </div>
             <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
               {dn.format(bondedCreditsDN, { digits: 2, trailingZeros: true })}
+            </div>
+            <div className="font-medium sm:text-sm/6 text-muted-foreground">
+              Staking Credits
             </div>
           </div>
         </div>
         {/* <Separator className="my-6" /> */}
       </div>
-      <div className="rounded-xl bg-primary-foreground p-6">
+      <div className="rounded-xl bg-primary-foreground p-6 w-full">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleBond)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleBond)} className="space-y-6">
             <FormField
               control={form.control}
               name="amount"
@@ -107,6 +107,7 @@ export function UnbondWidget() {
                   <div className="absolute top-0 right-2 z-10">
                     <Button
                       className="rounded-lg"
+                      variant="secondary"
                       type="button"
                       size="sm"
                       onClick={() => {
@@ -119,9 +120,14 @@ export function UnbondWidget() {
                 </FormItem>
               )}
             />
-            <WalletConnectionChecker className="w-full" size="xl">
+            <WalletConnectionChecker
+              className="w-full"
+              variant="secondary"
+              size="xl"
+            >
               <Button
                 className="w-full"
+                variant="secondary"
                 type="submit"
                 size="xl"
                 disabled={!form.formState.isValid || isPending}
@@ -133,6 +139,10 @@ export function UnbondWidget() {
                   (isPending ? 'Waiting for wallet confirmation' : 'Withdraw')}
               </Button>
             </WalletConnectionChecker>
+            <div className="text-xs text-muted-foreground">
+              Tip: Default Credits unstaking period takes around 18-60 minutes
+              (360 blocks) to process.
+            </div>
           </form>
         </Form>
       </div>

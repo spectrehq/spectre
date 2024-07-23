@@ -128,7 +128,7 @@ export function BondForm({ validator }: BondFormProps) {
 
   return (
     <Card className="border-none shadow-none w-screen max-w-xl">
-      <CardHeader className="px-0">
+      <CardHeader className="px-0 pt-0">
         <CardTitle className="flex items-center space-x-2">
           <GradientsAvatar text={validator} size={40} />
           <span>{validator && shortenAddress(validator)}</span>
@@ -158,9 +158,9 @@ export function BondForm({ validator }: BondFormProps) {
           </Link>
         </CardDescription>
       </CardHeader>
-      <CardContent className="px-0">
+      <CardContent className="p-0">
         <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-          <div className="bg-secondary p-6 rounded-xl">
+          <div className="bg-primary-foreground p-6 rounded-xl">
             <ul className="grid gap-2 text-sm">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Total Stake</span>
@@ -243,6 +243,7 @@ export function BondForm({ validator }: BondFormProps) {
                         <div className="absolute top-0 right-2 z-10">
                           <Button
                             className="rounded-lg"
+                            variant="secondary"
                             type="button"
                             size="sm"
                             onClick={() => {
@@ -255,7 +256,7 @@ export function BondForm({ validator }: BondFormProps) {
                       </FormItem>
                     )}
                   />
-                  <div className="flex items-center justify-end text-sm">
+                  <div className="flex items-center justify-end text-sm py-1">
                     <span className="text-muted-foreground">Available:</span>
                     &nbsp;
                     <span className="font-medium">
@@ -265,10 +266,15 @@ export function BondForm({ validator }: BondFormProps) {
                       Credits
                     </span>
                   </div>
-                  <WalletConnectionChecker className="w-full" size="xl">
+                  <WalletConnectionChecker
+                    className="w-full"
+                    variant="secondary"
+                    size="xl"
+                  >
                     <Button
                       className="w-full"
                       type="submit"
+                      variant="secondary"
                       size="xl"
                       disabled={
                         !data?.Info.IsOpen ||
@@ -306,7 +312,7 @@ export function BondForm({ validator }: BondFormProps) {
                     </Button>
                   </div>
                   <Button
-                    className="w-full"
+                    className="w-full border-none"
                     variant="secondary"
                     type="button"
                     size="xl"

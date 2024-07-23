@@ -16,6 +16,8 @@ import {
 } from '~/components/ui/dialog'
 import { useAccount } from '~/hooks/use-account'
 import WalletConnectLogo from '~/assets/wallet-connect-logo.svg'
+import PuzzleWalletLogoIcon from '~/assets/puzzle-logo-icon.png'
+import AvailWalletLogoIcon from '~/assets/avail-wallet-logo-icon.svg'
 import { WalletItem } from './wallet-item'
 
 export interface WalletConnectionCheckerProps extends ButtonProps {
@@ -65,15 +67,11 @@ export function WalletConnectionChecker({
           <DialogDescription />
         </DialogHeader>
         <ul className="space-y-2">
-          {wallets
-            .filter(
-              (wallet) => wallet.readyState === WalletReadyState.Installed
-            )
-            .map((wallet) => (
-              <li key={wallet.adapter.name}>
-                <WalletItem wallet={wallet.adapter} onConnected={handleClose} />
-              </li>
-            ))}
+          {wallets.map((wallet) => (
+            <li key={wallet.adapter.name}>
+              <WalletItem wallet={wallet.adapter} onConnected={handleClose} />
+            </li>
+          ))}
           <li>
             <Button
               className="w-full justify-start px-6"
@@ -82,13 +80,31 @@ export function WalletConnectionChecker({
               onClick={handleConnect}
             >
               <Image
-                src={WalletConnectLogo}
-                alt="Wallet Connect"
+                src={PuzzleWalletLogoIcon}
+                alt="Puzzle Wallet"
                 width={24}
                 height={24}
-                className="mr-2 rounded-sm bg-[#3396ff] py-1"
+                className="mr-2 py-1"
               />
-              Wallet Connect
+              Puzzle Wallet
+            </Button>
+          </li>
+
+          <li>
+            <Button
+              className="w-full justify-start px-6"
+              variant="secondary"
+              size="lg"
+              onClick={handleConnect}
+            >
+              <Image
+                src={AvailWalletLogoIcon}
+                alt="Avail Wallet"
+                width={24}
+                height={24}
+                className="mr-2 py-1"
+              />
+              Avail Wallet
             </Button>
           </li>
         </ul>

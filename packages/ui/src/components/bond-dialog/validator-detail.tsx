@@ -45,7 +45,7 @@ const chartConfig = {
     color: 'hsl(var(--chart-1))',
   },
   profit: {
-    label: 'Profit',
+    label: 'Earning',
     color: 'hsl(var(--chart-2))',
   },
 } satisfies ChartConfig
@@ -148,7 +148,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-4">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
             <ul className="grid gap-2 text-sm">
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Total Stake</span>
@@ -211,7 +211,10 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                   )}
                 </span>
               </li>
-              <li className="h-5" />
+              <li className="flex items-center justify-between">
+                <span className="text-muted-foreground">Unbonding Period</span>
+                <span>360 blocks</span>
+              </li>
             </ul>
 
             <ul className="grid gap-2 items-start text-sm">
@@ -228,10 +231,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
                 <span className="text-muted-foreground">Status</span>
                 <span>{validatorState?.is_open ? 'OPEN' : 'CLOSE'}</span>
               </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Unbonding Period</span>
-                <span>360 blocks</span>
-              </li>
+              <li className="h-5" />
             </ul>
           </div>
           <div className="pt-6">
@@ -319,10 +319,15 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
       </Card>
 
       <div className="flex items-center justify-end pt-5 space-x-4">
-        <Button variant="secondary" disabled={isLoading} onClick={prevStep}>
+        <Button
+          variant="secondary"
+          className="border-none"
+          disabled={isLoading}
+          onClick={prevStep}
+        >
           Back
         </Button>
-        <Button variant="default" disabled={isLoading} onClick={nextStep}>
+        <Button variant="secondary" disabled={isLoading} onClick={nextStep}>
           Stake
         </Button>
       </div>

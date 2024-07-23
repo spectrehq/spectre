@@ -1,6 +1,6 @@
 'use client'
 
-import { Button } from '~/components/ui/button'
+import type { PropsWithChildren } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -9,16 +9,12 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import { CreditsClaimWidget } from '../credits-claim-widget'
+import { CreditsClaimWidget } from '~/components/credits-claim-widget'
 
-export function CreditsClaimDialog() {
+export function CreditsClaimDialog({ children }: PropsWithChildren) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="outline" className="border-muted-foreground">
-          Claim
-        </Button>
-      </DialogTrigger>
+      <DialogTrigger asChild>{children}</DialogTrigger>
       <DialogContent className="max-w-fit">
         <DialogHeader>
           <DialogTitle>Claim</DialogTitle>

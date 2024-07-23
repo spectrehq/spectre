@@ -15,10 +15,10 @@ export function ValidatorsOverview() {
       <div className="container">
         <div className="mt-20 my-4">
           <h3 className="scroll-m-20 font-semibold text-2xl tracking-tight">
-            Network Overview
+            Network Statistics
           </h3>
         </div>
-        <div className="py-4 grid grid-cols-1 lg:grid-cols-3 items-center">
+        <div className="py-4 flex justify-between items-center">
           <div>
             <h4 className="text-lg font-medium text-muted-foreground">Block</h4>
             <div className="">

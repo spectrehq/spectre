@@ -10,16 +10,15 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { UnbondWidget } from '../unbond-widget'
+import type { PropsWithChildren } from 'react'
 
-export function UnbondDialog() {
+export function UnbondDialog({ children }: PropsWithChildren) {
   return (
     <Dialog>
-      <DialogTrigger asChild>
-        <Button variant="secondary">Unstake</Button>
-      </DialogTrigger>
-      <DialogContent className="max-w-fit">
+      <DialogTrigger asChild>{children}</DialogTrigger>
+      <DialogContent className="">
         <DialogHeader>
-          <DialogTitle>Withdraw</DialogTitle>
+          <DialogTitle>Unstake</DialogTitle>
           <DialogDescription />
         </DialogHeader>
         <UnbondWidget />

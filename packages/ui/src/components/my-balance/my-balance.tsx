@@ -41,7 +41,7 @@ export function MyBalance() {
               Balance
             </h4>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-4">
+              <div className="flex items-center gap-8">
                 <div>
                   <span className="text-2xl font-semibold">
                     {dn.format([data ?? 0n, 6], {
@@ -63,7 +63,7 @@ export function MyBalance() {
                 </div>
               </div>
               <div>
-                <WalletConnectionChecker variant="outline" label="Deposit">
+                <WalletConnectionChecker variant="secondary" label="Deposit">
                   <DepositDialog />
                 </WalletConnectionChecker>
               </div>
