@@ -36,6 +36,7 @@ import { shortenAddress } from '~/utils'
 import { Skeleton } from '../ui/skeleton'
 import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard'
 import { toast } from 'sonner'
+import { useBondState } from '~/hooks/use-bond-state'
 
 export interface BondFormProps {
   validator: AleoAddress
@@ -54,6 +55,18 @@ export function BondForm({ validator }: BondFormProps) {
   const { data: balance } = useBalance(address)
   const balanceDN = useMemo(() => dn.from([balance ?? 0n, 6]), [balance])
 
+  const { data: bondState } = useBondState(address)
+  const bondedCreditsDN = useMemo(
+    () => dn.from([bondState?.microcredits ?? 0n, 6]),
+    [bondState]
+  )
+
+  // TODO
+  const isFirstBond = useMemo(
+    () => dn.eq(bondedCreditsDN, 0),
+    [bondedCreditsDN]
+  )
+
   const formSchema = useMemo(
     () =>
       z.object({
@@ -63,13 +76,18 @@ export function BondForm({ validator }: BondFormProps) {
             invalid_type_error: tPrompts('Enter an amount'),
           })
           .gt(0, { message: tPrompts('Enter an amount') })
+          .gte(isFirstBond ? 10_000 : 1, {
+            message: isFirstBond
+              ? 'First time staking needs at least 10,000 Credits.'
+              : 'You must stake at least 1 Credits.',
+          })
           .max(
             balance ? dn.toNumber(balanceDN) : Number.MAX_SAFE_INTEGER,
             tPrompts('Insufficient balance')
           )
           .default(0),
       }),
-    [tPrompts, balance, balanceDN]
+    [tPrompts, isFirstBond, balance, balanceDN]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({

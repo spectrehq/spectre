@@ -63,7 +63,11 @@ export function MyBalance() {
                 </div>
               </div>
               <div>
-                <WalletConnectionChecker variant="secondary" label="Deposit">
+                <WalletConnectionChecker
+                  variant="secondary"
+                  label="Deposit"
+                  className="min-w-24"
+                >
                   <DepositDialog />
                 </WalletConnectionChecker>
               </div>

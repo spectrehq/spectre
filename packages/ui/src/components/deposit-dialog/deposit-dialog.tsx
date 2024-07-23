@@ -42,7 +42,9 @@ export function DepositDialog() {
   return (
     <Dialog>
       <DialogTrigger asChild>
-        <Button variant="secondary">Deposit</Button>
+        <Button variant="secondary" className="min-w-24">
+          Deposit
+        </Button>
       </DialogTrigger>
       <DialogContent>
         <DialogHeader>

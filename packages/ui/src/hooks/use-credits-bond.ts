@@ -53,7 +53,7 @@ export function useCreditsBond() {
 
         const id = await requestTransaction?.(tx)
         if (id) {
-          toast.success('Bond successful', {
+          toast.success('Unstake successful', {
             description: 'Go to the wallet to check the transaction status',
           })
         } else {
@@ -81,7 +81,7 @@ export function useCreditsBond() {
             address,
           })
 
-          toast.success('Bond successful', {
+          toast.success('Unstake successful', {
             description: 'Go to the wallet to check the transaction status',
           })
         }

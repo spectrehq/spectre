@@ -9,7 +9,10 @@ import type { AleoAddress } from '~/types'
 import { Skeleton } from '../ui/skeleton'
 
 export function ValidatorInfo() {
-  const { address } = useAccount()
+  // const { address } = useAccount()
+  // TODO: remove
+  const address =
+    'aleo1anfd8kst08fw9ehxatp3f2s98tm4cq3mawq8tt5wv5hstmdmgygsva0tmf'
   const { data: bondState, isLoading: isLoadingBondState } =
     useBondState(address)
   const { data: validatorState, isLoading: isLoadingValidatorState } =

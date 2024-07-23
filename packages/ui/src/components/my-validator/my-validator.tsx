@@ -95,14 +95,12 @@ export function MyValidator() {
                 </div>
               </div>
             </div>
-            <div className="space-x-4 flex items-center">
+            <div className="space-x-6 flex items-center">
               <BondDialog>
                 <Button variant="secondary">Stake</Button>
               </BondDialog>
               <UnbondDialog>
-                <Button variant="secondary" disabled={!canUnstaking}>
-                  Unstake
-                </Button>
+                <Button variant="secondary">Unstake</Button>
               </UnbondDialog>
               <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full p-px w-fit">
                 <Button
@@ -157,8 +155,9 @@ export function MyValidator() {
               <div className="space-x-4">
                 <WalletConnectionChecker variant="secondary" label="Claim">
                   <Button
+                    className="min-w-24"
                     variant="secondary"
-                    disabled={!claimable || isPending}
+                    disabled={isPending}
                     onClick={handleClaim}
                   >
                     {isPending && (
@@ -172,6 +171,10 @@ export function MyValidator() {
               </div>
             </div>
 
+            <div className="text-sm text-muted-foreground">
+              <span>Claim Height: 123456</span>{' '}
+            </div>
+
             {!dn.eq(unbondingCreditsDN, 0) && (
               <div className="text-sm text-muted-foreground">
                 <span>Claim Height: {String(unbonding?.height) ?? '-'}</span>{' '}
@@ -181,7 +184,9 @@ export function MyValidator() {
           </div>
         </div>
 
-        {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />}
+        <ValidatorInfo />
+
+        {/* {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />} */}
       </div>
     </section>
   )

@@ -125,3 +125,8 @@ input[type='number'] {
   -ms-overflow-style: none; /* IE and Edge */
   scrollbar-width: none; /* Firefox */
 }
+
+button:disabled {
+  cursor: not-allowed;
+  pointer-events: all !important;
+}
