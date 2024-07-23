@@ -218,7 +218,7 @@ program staking_stcredits_v1.aleo {
     struct Delegator {
         delegator: address,
         validator: address,
-        bonded: u64,
+        bonded: u64, // the total bonded of the delegator at the time of last bond/unbond operation
     }
 
     mapping delegators_count: u8 => u32; // 0u8 => count of delegators
@@ -228,6 +228,17 @@ program staking_stcredits_v1.aleo {
     mapping delegator_pos: address => u32; // delegator => index
 
     mapping validator_pos: address => u32; // validator => index
+
+    struct RewardHistory {
+        validator: address, // the validator of the delegator
+        bonded: u64, // the total bonded of the delegator immediately before the bond/unbond operation occurred
+        reward: u64, // the reward of the delegator between the last operation and its previous operation
+        height: u32, // block height at which the bond/unbond operation of this delegator occurred
+    }
+
+    mapping reward_history_count: u8 => u32; // 0u8 => count of reward history
+
+    mapping reward_history: u32 => RewardHistory; // index => reward history
 
     async transition initialize() -> Future {
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
@@ -265,6 +276,8 @@ program staking_stcredits_v1.aleo {
         });
         // Initialize the delegators count.
         Mapping::set(delegators_count, 0u8, 0u32);
+        // Initialize the delegator rewards count.
+        Mapping::set(reward_history_count, 0u8, 0u32);
     }
 
     /**
@@ -402,10 +415,23 @@ program staking_stcredits_v1.aleo {
         // Record the updated bonded credits.
         Mapping::set(delegators, index, Delegator {delegator, validator, bonded: bonded.microcredits + amount});
 
+        // Reward = current bonded - last bonded
+        let reward: u64 = bonded.microcredits > last_bonded ? bonded.microcredits.sub_wrapped(last_bonded) : 0u64;
+
+        // Record delegator reward.
+        {
+            let history_count: u32 = Mapping::get(reward_history_count, 0u8);
+            Mapping::set(reward_history, history_count, RewardHistory {
+                validator,
+                bonded: bonded.microcredits,
+                reward,
+                height: block.height,
+            });
+            Mapping::set(reward_history_count, 0u8, history_count + 1u32);
+        }
+
         // Protocol fee.
         {
-            // Reward = current bonded - last bonded
-            let reward: u64 = bonded.microcredits - last_bonded;
             let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {
@@ -461,9 +487,23 @@ program staking_stcredits_v1.aleo {
         // Record the updated bonded credits.
         Mapping::set(delegators, index, Delegator {delegator, validator, bonded: bonded.microcredits - amount});
 
+        // Reward = current bonded - last bonded
+        let reward: u64 = bonded.microcredits > last_bonded ? bonded.microcredits.sub_wrapped(last_bonded) : 0u64;
+
+        // Record delegator reward.
+        {
+            let history_count: u32 = Mapping::get(reward_history_count, 0u8);
+            Mapping::set(reward_history, history_count, RewardHistory {
+                validator,
+                bonded: bonded.microcredits,
+                reward,
+                height: block.height,
+            });
+            Mapping::set(reward_history_count, 0u8, history_count + 1u32);
+        }
+
         // Protocol fee.
         {
-            let reward: u64 = bonded.microcredits - last_bonded;
             let protocol_fee: u64 = reward * (cfg.protocol_fee as u64) / 100u64;
 
             if (protocol_fee > 0u64) {

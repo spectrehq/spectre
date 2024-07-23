@@ -2,6 +2,7 @@ import { ProgramBase, u32, u32Str, u64, u8Str, parsePlaintext } from "./types"
 import { bhp256HashToField, programAddress } from "./wasm"
 import { STCREDITS_PROGRAM, WITHDRAW_DELAY } from "./const"
 import { CreditsProgram } from "./credits"
+import { delay } from "./util"
 
 export interface Approval {
   approver: string
@@ -46,6 +47,13 @@ export interface Delegator {
   delegator: string
   validator: string
   bonded: bigint
+}
+
+export interface RewardHistory {
+  validator: string
+  bonded: bigint
+  reward: bigint
+  height: bigint
 }
 
 export class StCreditsProgram extends ProgramBase {
@@ -164,5 +172,64 @@ export class StCreditsProgram extends ProgramBase {
       (stCredits * (totalPooledCredits > 0n ? totalPooledCredits : 1n)) /
       (totalStCreditsSupply > 0n ? totalStCreditsSupply : 1n)
     )
+  }
+
+  async getRewardHistoryCount() {
+    return u32(await this.getMappingValue("reward_history_count", u8Str(0)))
+  }
+
+  async getRewardHistory(index: number | bigint) {
+    return parsePlaintext(await this.getMappingValue("reward_history", u32Str(index))) as unknown as RewardHistory
+  }
+
+  /**
+   * Get the staking APY.
+   * @param maxHistoryPerValidator
+   * @param getInterval
+   * @param blockInterval
+   * @returns The staking APY, in basis points (0.01%, or 1/100th of a percent).
+   */
+  async getStakingAPY(maxHistoryPerValidator: number = 2, getInterval: number = 100, blockInterval: number = 10000) {
+    const blocksPerYear = BigInt(Math.floor(1000 * 86400 * 365 / blockInterval))
+
+    const delegatorsCount = await this.getDelegatorsCount()
+    const historyCount = await this.getRewardHistoryCount()
+    const histories = new Map<string, RewardHistory>()
+    const historiesPrevious = new Map<string, RewardHistory>()
+
+    for (let i = historyCount - 1n; i >= 0; i--) {
+      const history = await this.getRewardHistory(i)
+
+      if (!histories.has(history.validator)) {
+        histories.set(history.validator, history)
+      } else if (!historiesPrevious.has(history.validator)) {
+        historiesPrevious.set(history.validator, history)
+
+        if (historiesPrevious.size >= delegatorsCount) {
+          break
+        }
+      }
+
+      if (historyCount - i >= BigInt(maxHistoryPerValidator) * delegatorsCount) {
+        break
+      }
+
+      await delay(getInterval)
+    }
+
+    let totalRewardPerYear = 0n
+    let totalBonded = 0n
+    for (const historyPrevious of historiesPrevious.values()) {
+      const history = histories.get(historyPrevious.validator)
+      if (!history) {
+        continue
+      }
+
+      const blocks = history.height - historyPrevious.height
+      totalRewardPerYear += blocks > 0n ? history.reward * blocksPerYear / blocks : 0n
+      totalBonded += history.bonded - history.reward
+    }
+
+    return totalBonded > 0n ? totalRewardPerYear * 10000n / totalBonded : 0n
   }
 }

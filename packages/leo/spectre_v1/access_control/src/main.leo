@@ -8,7 +8,7 @@ program spectre_access_control_v1.aleo {
 
     mapping role_admins: u8 => u8; // role => admin role
 
-    mapping initialized: u8 => bool;
+    mapping initialized: u8 => bool; // 0u8 => initialized
 
     const DEFAULT_ADMIN_ROLE: u8 = 0u8;
 
