@@ -80,10 +80,10 @@ export function MobileNav() {
             <li className="border-b py-2">
               <Link
                 className="flex w-full p-2 justify-between items-center"
-                href="/validators"
+                href="/staking"
                 onClick={() => setOpen(false)}
               >
-                {t('validators')}
+                {t('staking')}
                 <ChevronRightIcon />
               </Link>
             </li>
@@ -91,10 +91,10 @@ export function MobileNav() {
             <li className="border-b py-2">
               <Link
                 className="w-full p-2 flex justify-between items-center"
-                href="/stake"
+                href="/liquid-staking"
                 onClick={() => setOpen(false)}
               >
-                {t('stake')}
+                {t('liquidStaking')}
                 <ChevronRightIcon />
               </Link>
             </li>

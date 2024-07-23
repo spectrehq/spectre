@@ -86,7 +86,7 @@ export default function HomePage() {
                   asChild
                   variant="outline"
                 >
-                  <Link href="/validators">Staking</Link>
+                  <Link href="/staking">Staking</Link>
                 </Button>
               </div>
 
@@ -102,7 +102,7 @@ export default function HomePage() {
                     variant="outline"
                     asChild
                   >
-                    <Link href="/stake">
+                    <Link href="/liquid-staking">
                       <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
                         Liquid
                       </span>
@@ -164,7 +164,7 @@ export default function HomePage() {
                             className="rounded-full px-8 py-3 h-auto text-xl border-muted-foreground"
                             variant="outline"
                           >
-                            <Link href="/validators">Explore</Link>
+                            <Link href="/staking">Explore</Link>
                           </Button>
                         </div>
                       </div>
@@ -216,7 +216,7 @@ export default function HomePage() {
                   className="rounded-full px-8 py-3 h-auto text-xl"
                   variant="outline"
                 >
-                  <Link href="/validators">Explore</Link>
+                  <Link href="/staking">Explore</Link>
                 </Button>
               </div>
             </div>

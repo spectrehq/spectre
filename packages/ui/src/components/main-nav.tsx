@@ -24,20 +24,20 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem> */}
         <NavigationMenuItem className="relative">
-          <Link href="/validators" legacyBehavior passHref>
+          <Link href="/staking" legacyBehavior passHref>
             <NavigationMenuLink
               className={cn(navigationMenuTriggerStyle(), 'text-base')}
             >
-              {t('validators')}
+              {t('staking')}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
-          <Link href="/stake" legacyBehavior passHref>
+          <Link href="/liquid-staking" legacyBehavior passHref>
             <NavigationMenuLink
               className={cn(navigationMenuTriggerStyle(), 'text-base')}
             >
-              {t('stake')}
+              {t('liquidStaking')}
             </NavigationMenuLink>
           </Link>
         </NavigationMenuItem>

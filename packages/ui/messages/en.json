@@ -3,7 +3,9 @@
     "validators": "Validators",
     "stake": "Stake",
     "withdrawals": "Withdrawals",
-    "documentation": "Docs"
+    "documentation": "Docs",
+    "staking": "Staking",
+    "liquidStaking": "Liquid Staking"
   },
 
   "ModeToggle": {

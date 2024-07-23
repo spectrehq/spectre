@@ -135,7 +135,7 @@ export function Footer() {
                   <li className="mt-4">
                     <Link
                       className="transition hover:text-foreground"
-                      href="/validators"
+                      href="/staking"
                     >
                       Explore Validators
                     </Link>
@@ -150,7 +150,7 @@ export function Footer() {
                   <li className="mt-4">
                     <Link
                       className="transition hover:text-foreground"
-                      href="/stake"
+                      href="/liquid-staking"
                     >
                       Stake
                     </Link>
