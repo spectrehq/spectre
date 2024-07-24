@@ -12,8 +12,11 @@ export declare const WITHDRAW_DELAY = 360n;
 export declare const STCREDITS_CACHE_BATCH_NUM = 10n;
 export declare const START_INVITE_CODE = 10000n;
 export declare const EMPTY_INVITE_CODE = 0n;
+export declare const INVITER_REWARD = 16n;
+export declare const INVITER_OF_INVITER_REWARD = 8n;
 export declare const VERSION = "v1";
-export declare const PREFIX = "spectre";
+export declare const SPECTRE = "spectre";
+export declare const STAKING = "staking";
 export declare const ACCESS_CONTROL_PROGRAM: () => string;
 export declare const ACL_MANAGER_PROGRAM: () => string;
 export declare const STCREDITS_PROGRAM: () => string;
@@ -22,11 +25,16 @@ export declare function delegatorProgramName(index: number): string;
 export interface Configuration {
 	programSuffix: string;
 	programs: {
-		accessControl: string;
-		aclManager: string;
-		stcredits: string;
-		stcreditsPoints: string;
-		delegator: string;
+		credits: string;
+		spectre: {
+			accessControl: string;
+			aclManager: string;
+		};
+		staking: {
+			stcredits: string;
+			stcreditsPoints: string;
+			delegator: string;
+		};
 	};
 }
 export declare function initialize(cfg: Configuration): void;
@@ -180,6 +188,12 @@ export interface Delegator {
 	validator: string;
 	bonded: bigint;
 }
+export interface RewardHistory {
+	validator: string;
+	bonded: bigint;
+	reward: bigint;
+	height: bigint;
+}
 export declare class StCreditsProgram extends ProgramBase {
 	credits: CreditsProgram;
 	constructor(getMappingValueString: (mapping: string, key: string) => Promise<string>, credits: CreditsProgram);
@@ -204,6 +218,16 @@ export declare class StCreditsProgram extends ProgramBase {
 	getTotalPooled(totalBuffered: bigint, totalBonded: bigint, totalUnbonding: bigint, totalWithdraw: bigint, totalPendingWithdraw: bigint): bigint;
 	getStCreditsFromCredits(credits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint): bigint;
 	getCreditsFromStCredits(stCredits: bigint, totalPooledCredits: bigint, totalStCreditsSupply: bigint): bigint;
+	getRewardHistoryCount(): Promise<bigint>;
+	getRewardHistory(index: number | bigint): Promise<RewardHistory>;
+	/**
+	 * Get the staking APY.
+	 * @param maxHistoryPerValidator
+	 * @param getInterval
+	 * @param blockInterval
+	 * @returns The staking APY, in basis points (0.01%, or 1/100th of a percent).
+	 */
+	getStakingAPY(maxHistoryPerValidator?: number, getInterval?: number, blockInterval?: number): Promise<bigint>;
 }
 export interface StCreditsPointsState {
 	stcredits: bigint;
@@ -225,6 +249,12 @@ export declare class StCreditsPointsProgram extends ProgramBase {
 	 * @param account
 	 */
 	getBalance(account: string): Promise<bigint>;
+	/**
+	 * Get the balance of points for an account, including the unsettled points.
+	 * @param account
+	 * @param currentHeight
+	 */
+	getEstimatedBalance(account: string, currentHeight: bigint): Promise<bigint>;
 	/**
 	 * Get the state of an account.
 	 * @param account
