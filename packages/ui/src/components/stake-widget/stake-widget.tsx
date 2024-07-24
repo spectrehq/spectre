@@ -4,6 +4,7 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm } from 'react-hook-form'
 import { z } from 'zod'
@@ -16,6 +17,7 @@ import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
 import { useStake } from '~/hooks/use-stake'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
+import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
 import { cn } from '~/lib/utils'
 
 export function StakeWidget() {
@@ -55,7 +57,8 @@ export function StakeWidget() {
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: 0,
+      // @ts-ignore
+      amount: '',
     },
   })
 
@@ -77,40 +80,7 @@ export function StakeWidget() {
   )
 
   return (
-    <div className="rounded-xl bg-secondary-foreground max-w-lg mx-auto">
-      <div className="p-6 text-background">
-        <div className="grid">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Available to stake
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(balanceDN, { digits: 2, trailingZeros: true })} ALEO
-            </div>
-          </div>
-        </div>
-        <Separator className="my-6" />
-        <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Staked amount
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(stCreditsBalanceDN, {
-                digits: 2,
-                trailingZeros: true,
-              })}{' '}
-              stALEO
-            </div>
-          </div>
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">APR</div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              13.23%
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
         <Form {...form}>
           <form onSubmit={form.handleSubmit(handleStake)} className="space-y-4">
@@ -120,29 +90,46 @@ export function StakeWidget() {
               render={({ field }) => (
                 <FormItem className="relative">
                   <FormControl>
-                    <NumberInput
-                      {...field}
-                      className="h-auto rounded-xl p-3 pr-20 text-xl"
-                    />
+                    <div className="flex items-center border rounded-xl p-3 bg-background">
+                      <Image src={AleoLogoIcon} alt="Aleo Logo" width={36} />
+                      <NumberInput
+                        {...field}
+                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-xl bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        placeholder="Credits amount"
+                        onChange={(event) => {
+                          const value = event.currentTarget.value ?? ''
+                          if (
+                            value === '' ||
+                            /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                          ) {
+                            field.onChange(value)
+                          }
+                        }}
+                      />
+                      <Button
+                        className="rounded-lg"
+                        variant="secondary"
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(dn.toNumber(balanceDN))
+                        }}
+                      >
+                        MAX
+                      </Button>
+                    </div>
                   </FormControl>
-                  <div className="absolute top-0 right-2 z-10">
-                    <Button
-                      className="rounded-lg"
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange(dn.toNumber(balanceDN))
-                      }}
-                    >
-                      MAX
-                    </Button>
-                  </div>
                 </FormItem>
               )}
             />
-            <WalletConnectionChecker className="w-full" size="xl">
+            <WalletConnectionChecker
+              className="w-full"
+              variant="secondary"
+              size="xl"
+            >
               <Button
                 className="w-full"
+                variant="secondary"
                 type="submit"
                 size="xl"
                 disabled={!form.formState.isValid || isPending}
@@ -156,6 +143,20 @@ export function StakeWidget() {
             </WalletConnectionChecker>
           </form>
         </Form>
+        <ul className="grid gap-3 text-sm mt-4">
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">You will receive</span>
+            <span>0.923456 stCredits</span>
+          </li>
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">Exchange rate</span>
+            <span>1 Credits = 0.923456 stCredits</span>
+          </li>
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">Network fee</span>
+            <span>0.02 Credits</span>
+          </li>
+        </ul>
       </div>
     </div>
   )

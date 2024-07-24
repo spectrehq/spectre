@@ -2,11 +2,11 @@
 
 import { zodResolver } from '@hookform/resolvers/zod'
 import * as dn from 'dnum'
+import Image from 'next/image'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
-import { AlertCircleIcon } from 'lucide-react'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -18,7 +18,8 @@ import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { useWithdraw } from '~/hooks/use-withdraw'
-import { Alert, AlertDescription, AlertTitle } from '~/components/ui/alert'
+import Link from 'next/link'
+import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -90,7 +91,8 @@ export function WithdrawWidget() {
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: 0,
+      // @ts-ignore
+      amount: '',
     },
   })
 
@@ -116,50 +118,18 @@ export function WithdrawWidget() {
   )
 
   return (
-    <div className="rounded-xl bg-foreground max-w-lg mx-auto">
-      <div className="p-6 text-background">
-        <div className="grid">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              stALEO Balance
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(balanceDN, { digits: 2, trailingZeros: true })} stALEO
-            </div>
-          </div>
-        </div>
-        <Separator className="my-6" />
-        <div className="grid grid-cols-2">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Total withdraw
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(totalWithdrawAmountDN, {
-                digits: 2,
-                trailingZeros: true,
-              })}{' '}
-              stALEO
-            </div>
-          </div>
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Claim height
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {claimHeightPrompt}
-            </div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
-        {dn.lt(liquidityDN, amountValue || 0) && (
-          <Alert className="mb-6" variant="warning">
-            <AlertCircleIcon className="h-4 w-4" />
-            <AlertTitle>Warning</AlertTitle>
-            <AlertDescription>Your withdraw is queuing.</AlertDescription>
-          </Alert>
-        )}
+        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-4">
+          Default stCredits unstaking period takes around 18-60 minutes (360
+          blocks) to process. After that you can claim your rewards in{' '}
+          <Button className="p-0 h-auto text-sky-400" variant="link" asChild>
+            <Link className="" href="/liquid-staking/claim">
+              Claim
+            </Link>
+          </Button>{' '}
+          tab.
+        </div>
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleWithdraw)}
@@ -171,29 +141,52 @@ export function WithdrawWidget() {
               render={({ field }) => (
                 <FormItem className="relative">
                   <FormControl>
-                    <NumberInput
-                      {...field}
-                      className="h-auto rounded-xl p-3 pr-20 text-xl"
-                    />
+                    <div className="flex items-center border rounded-xl p-3 bg-background">
+                      <div className="w-9 flex items-center justify-center">
+                        <Image
+                          src={AleoStakingLogoIcon}
+                          alt="AleoStaking Logo"
+                          width={22}
+                        />
+                      </div>
+                      <NumberInput
+                        {...field}
+                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-xl bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        placeholder="stCredits amount"
+                        onChange={(event) => {
+                          const value = event.currentTarget.value ?? ''
+                          if (
+                            value === '' ||
+                            /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                          ) {
+                            field.onChange(value)
+                          }
+                        }}
+                      />
+                      <Button
+                        className="rounded-lg"
+                        variant="secondary"
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(dn.toNumber(balanceDN))
+                        }}
+                      >
+                        MAX
+                      </Button>
+                    </div>
                   </FormControl>
-                  <div className="absolute top-0 right-2 z-10">
-                    <Button
-                      className="rounded-lg"
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange(dn.toNumber(balanceDN))
-                      }}
-                    >
-                      MAX
-                    </Button>
-                  </div>
                 </FormItem>
               )}
             />
-            <WalletConnectionChecker className="w-full" size="xl">
+            <WalletConnectionChecker
+              className="w-full"
+              variant="secondary"
+              size="xl"
+            >
               <Button
                 className="w-full"
+                variant="secondary"
                 type="submit"
                 size="xl"
                 disabled={!form.formState.isValid || isPending}
@@ -203,6 +196,20 @@ export function WithdrawWidget() {
             </WalletConnectionChecker>
           </form>
         </Form>
+        <ul className="grid gap-3 text-sm mt-4">
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">You will receive</span>
+            <span>1.123456 Credits</span>
+          </li>
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">Exchange rate</span>
+            <span>1 stCredits = 1.123456 Credits</span>
+          </li>
+          <li className="flex items-center justify-between">
+            <span className="text-muted-foreground">Network fee</span>
+            <span>0.02 Credits</span>
+          </li>
+        </ul>
       </div>
     </div>
   )

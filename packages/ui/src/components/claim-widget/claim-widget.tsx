@@ -11,6 +11,13 @@ import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { useClaim } from '~/hooks/use-claim'
 import { useBlockHeight } from '~/hooks/use-block-height'
+import {
+  Tooltip,
+  TooltipContent,
+  TooltipProvider,
+  TooltipTrigger,
+} from '../ui/tooltip'
+import { CircleHelpIcon } from 'lucide-react'
 
 export function ClaimWidget() {
   const { address } = useAccount()
@@ -69,53 +76,51 @@ export function ClaimWidget() {
   }, [address, mutate, userWithdraw])
 
   return (
-    <div className="rounded-xl bg-foreground max-w-lg mx-auto">
-      <div className="p-6 text-background">
-        <div className="grid">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              stALEO Balance
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(balanceDN, { digits: 2, trailingZeros: true })} stALEO
-            </div>
-          </div>
-        </div>
-        <Separator className="my-6" />
-        <div className="grid grid-cols-2">
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Queuing withdraw
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-              {dn.format(pendingWithdrawAmountDN, {
-                digits: 2,
-                trailingZeros: true,
-              })}{' '}
-              stALEO
-            </div>
-          </div>
-          <div>
-            <div className="font-medium text-lg/6 sm:text-sm/6">
-              Withdrawals ahead
-            </div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">-</div>
-          </div>
-        </div>
-      </div>
+    <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
-        <div className="text-center py-10">
-          <span className="text-5xl font-semibold">
-            {dn.format(userWithdrawAmountDN, {
-              digits: 2,
-              trailingZeros: true,
-            })}
-          </span>
-          <span className="text-xl">ALEO</span>
+        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-4">
+          You will be able to claim your rewards after the withdraw request has
+          been processed. To unstake your amount go to Unstake tab.
         </div>
-        <WalletConnectionChecker className="w-full" size="xl">
+
+        <div className="rounded-xl bg-muted grid grid-cols-2 p-5 mb-4">
+          <div>
+            <div className="text-sm text-muted-foreground">
+              Withdrawal amount
+            </div>
+            <div className="text-lg font-bold">1.123456 Credits</div>
+          </div>
+          <div>
+            <div className="text-sm text-muted-foreground flex items-center">
+              Estimated claimable block
+              <TooltipProvider>
+                <Tooltip>
+                  <TooltipTrigger>
+                    <CircleHelpIcon className="w-4 h-4 ml-1 text-muted-foreground" />
+                  </TooltipTrigger>
+                  <TooltipContent className="max-w-xs">
+                    <p>
+                      If there&apos;s not enough liquidity in the liquid staking
+                      pool, we must wait for the operator service to unbond from
+                      the validators, and the claimable block cannot be
+                      estimated.
+                    </p>
+                  </TooltipContent>
+                </Tooltip>
+              </TooltipProvider>
+            </div>
+            <div className="text-lg">65401</div>
+          </div>
+        </div>
+
+        <WalletConnectionChecker
+          className="w-full"
+          size="xl"
+          variant="secondary"
+        >
           <Button
             className="w-full"
+            variant="secondary"
             size="xl"
             disabled={!isClaimable || isPending}
             onClick={handleClaim}

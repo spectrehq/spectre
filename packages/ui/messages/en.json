@@ -14,6 +14,15 @@
     "system": "System"
   },
 
+  "LiquidStakingPage": {
+    "title": "Liquid Staking",
+    "description": "Stake Credits and receive stCredits while staking."
+  },
+
+  "AleoStakingStatistics": {
+    "title": "AleoStaking Statistics"
+  },
+
   "StakePage": {
     "title": "Stake",
     "description": "Stake ALEO and receive stALEO while staking."
