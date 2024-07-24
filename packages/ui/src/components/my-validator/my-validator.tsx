@@ -153,7 +153,11 @@ export function MyValidator() {
                 </div>
               </div>
               <div className="space-x-4">
-                <WalletConnectionChecker variant="secondary" label="Claim">
+                <WalletConnectionChecker
+                  className="min-w-24"
+                  variant="secondary"
+                  label="Claim"
+                >
                   <Button
                     className="min-w-24"
                     variant="secondary"
