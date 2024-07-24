@@ -46,6 +46,7 @@ async function copyProgram(program: string, cloneNo?: string) {
   let srcMain = await fs.readFile(srcMainPath, "utf-8")
   srcMain = srcMain.replaceAll(originalProgram, programJson.program)
   srcMain = srcMain.replaceAll("_v1.aleo", `_v1_${config.programSuffix}.aleo`)
+  srcMain = srcMain.replaceAll("multi_token_support_program.aleo", config.programs.multiTokenSupport + ".aleo")
 
   // Insert the initial admin account address.
   if (program === config.programs.spectre.accessControl) {

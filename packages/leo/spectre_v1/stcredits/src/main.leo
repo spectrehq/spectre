@@ -1,4 +1,5 @@
 import credits.aleo;
+import multi_token_support_program.aleo;
 import spectre_acl_manager_v1.aleo;
 
 program staking_stcredits_v1.aleo {
@@ -167,6 +168,42 @@ program staking_stcredits_v1.aleo {
         Mapping::set(account, sender, current_amount - amount);
     }
 
+    /************************* wrap/unwrap stcredits into/from mtsp *************************/
+    // The stcredits can be wrapped/unwrapped into/from the mstp program.
+    // When wrapped, the stcredits of the user will be locked in this program.
+    // When unwrapped, the stcredits of the user will be unlocked from this program.
+    // The wrapped stcredits in the mstp program can be used across various ZeFi protocols which support the mstp interface.
+
+    async transition wrap_mtsp(public stcredits: u64) -> Future {
+        // Mint stcredits in mtsp program.
+        let f: Future = multi_token_support_program.aleo/mint_public(self.address as field, self.caller, stcredits as u128, 4294967295u32);
+
+        return finalize_wrap_mtsp(f, self.caller, stcredits);
+    }
+
+    async function finalize_wrap_mtsp(f: Future, user: address, stcredits: u64) {
+        f.await();
+
+        // Lock user's stcredits into this program.
+        Mapping::set(account, user, Mapping::get(account, user) - stcredits);
+        Mapping::set(account, self.address, Mapping::get_or_use(account, self.address, 0u64) + stcredits);
+    }
+
+    async transition unwrap_mtsp(public stcredits: u64) -> Future {
+        // Burn stcredits in mtsp program.
+        let f: Future = multi_token_support_program.aleo/burn_public(self.address as field, self.caller, stcredits as u128);
+
+        return finalize_unwrap_mtsp(f, self.caller, stcredits);
+    }
+
+    async function finalize_unwrap_mtsp(f: Future, user: address, stcredits: u64) {
+        f.await();
+
+        // Unlock user's stcredits from this program.
+        Mapping::set(account, user, Mapping::get_or_use(account, user, 0u64) + stcredits);
+        Mapping::set(account, self.address, Mapping::get(account, self.address) - stcredits);
+    }
+
     /************************* Supply/Withdraw credits & Validator Staking *************************/
 
     const WITHDRAW_DELAY: u32 = 360u32; // should be consistent with the delay in the credtis.aleo
@@ -241,13 +278,26 @@ program staking_stcredits_v1.aleo {
     mapping reward_history: u32 => RewardHistory; // index => reward history
 
     async transition initialize() -> Future {
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 
-        return finalize_initialize(f, self.caller);
+        // Register stcredits token in mtsp program.
+        // Admin is this program.
+        let f2: Future = multi_token_support_program.aleo/register_token(
+            self.address as field, // token_id, we use the address of this program
+            8319383754638649716u128, // name, "stcredit" -> 0x7374637265646974 -> 8319383754638649716
+            8319383754638649716u128, // symbol
+            6u8, // decimals
+            340282366920938463463374607431768211455u128, // max_supply, never reach
+            false, // external_authorization_required
+            self.address, // external_authorization_party
+        );
+
+        return finalize_initialize(f1, f2, self.caller);
     }
 
-    async function finalize_initialize(f: Future, admin: address) {
-        f.await();
+    async function finalize_initialize(f1: Future, f2: Future, admin: address) {
+        f1.await();
+        f2.await();
 
         // Ensure the program is not initialized.
         assert(!Mapping::contains(config, 0u8));

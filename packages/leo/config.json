@@ -3,6 +3,7 @@
   "delegatorNum": 3,
   "programs": {
     "credits": "credits",
+    "multiTokenSupport": "multi_token_support_program_v1",
     "spectre": {
       "accessControl": "access_control",
       "aclManager": "acl_manager"
