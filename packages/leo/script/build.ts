@@ -37,6 +37,9 @@ async function copyProgram(program: string, cloneNo?: string) {
     if (dependency.location === "local") {
       dependency.name = addSuffix(dependency.name)
     }
+    if (dependency.name === 'multi_token_support_program.aleo') {
+      dependency.name = config.programs.multiTokenSupport + ".aleo"
+    }
   }
 
   await fs.writeFile(programJsonPath, JSON.stringify(programJson, null, 2), "utf-8")

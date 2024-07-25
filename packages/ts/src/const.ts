@@ -49,6 +49,7 @@ interface Configuration {
   programSuffix: string
   programs: {
     credits: string
+    multiTokenSupport: string
     spectre: {
       accessControl: string
       aclManager: string
