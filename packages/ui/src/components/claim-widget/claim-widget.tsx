@@ -18,6 +18,7 @@ import {
   TooltipTrigger,
 } from '../ui/tooltip'
 import { CircleHelpIcon } from 'lucide-react'
+import Link from 'next/link'
 
 export function ClaimWidget() {
   const { address } = useAccount()
@@ -80,7 +81,13 @@ export function ClaimWidget() {
       <div className="rounded-xl bg-primary-foreground p-6">
         <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
           You will be able to claim your rewards after the withdraw request has
-          been processed. To unstake your amount go to Unstake tab.
+          been processed. To unstake your amount go to
+          <Button className="p-0 h-auto text-sky-400" variant="link" asChild>
+            <Link className="" href="/liquid-staking/unstake">
+              Unstake
+            </Link>
+          </Button>{' '}
+          tab.
         </div>
 
         <div className="rounded-xl bg-muted grid grid-cols-2 p-5 mb-6">
@@ -109,7 +116,15 @@ export function ClaimWidget() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <div className="text-lg">65401</div>
+            {/* TODO: remove */}
+            <div className="text-lg">
+              {dn.format([userWithdraw?.height ?? 65401n, 0])}
+            </div>
+            {/* <div className="text-lg">
+              {userWithdraw
+                ? dn.format([userWithdraw?.height, 0])
+                : '-'}
+            </div> */}
           </div>
         </div>
 
