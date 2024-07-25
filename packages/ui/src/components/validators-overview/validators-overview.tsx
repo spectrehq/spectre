@@ -23,7 +23,11 @@ export function ValidatorsOverview() {
             <h4 className="text-lg font-medium text-muted-foreground">Block</h4>
             <div className="">
               <span className="text-2xl font-semibold">
-                {JSON.stringify(block?.header.metadata.height)}
+                {dn.format(
+                  dn.from(
+                    BigInt(JSON.stringify(block?.header.metadata.height) || 0)
+                  )
+                )}
               </span>{' '}
               {block && (
                 <span className="text-muted-foreground">

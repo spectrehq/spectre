@@ -75,7 +75,7 @@ export function UnbondWidget() {
 
   return (
     <div className="rounded-xl w-full mx-auto">
-      <div className="p-6">
+      <div className="p-10 pt-0">
         <div className="grid text-center">
           <div className="">
             <span className="mt-1 font-semibold text-3xl sm:text-2xl">
