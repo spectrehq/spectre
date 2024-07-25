@@ -37,7 +37,7 @@
     "patchedDependencies": {
       "@aleohq/sdk@0.6.9": "patches/@aleohq__sdk@0.6.9.patch",
       "@aleohq/wasm@0.6.9": "patches/@aleohq__wasm@0.6.9.patch",
-      "@puzzlehq/sdk@0.4.2": "patches/@puzzlehq__sdk@0.4.2.patch"
+      "@puzzlehq/sdk@0.4.3": "patches/@puzzlehq__sdk@0.4.3.patch"
     }
   }
 }

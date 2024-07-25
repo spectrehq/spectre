@@ -1,0 +1,42 @@
+diff --git a/dist/index-B999TH7P.cjs b/dist/index-B999TH7P.cjs
+index cac8cfc459b6d0bb3677860e80dd1429946ef031..29c6688ba83e7d71b6d45a398ebf3b56d6a29a05 100644
+--- a/dist/index-B999TH7P.cjs
++++ b/dist/index-B999TH7P.cjs
+@@ -22720,6 +22720,9 @@ const checkForDesktopConnection$1 = async (sessionTopic) => {
+   }
+ };
+ const hasInjectedConnection$1 = () => {
++  if (typeof window === 'undefined') {
++    return false;
++  }
+   var _a2;
+   const injectedConnection = !!((_a2 = window == null ? void 0 : window.aleo) == null ? void 0 : _a2.puzzleWalletClient);
+   if (!injectedConnection) {
+diff --git a/dist/index-D2X8n86J.js b/dist/index-D2X8n86J.js
+index cbe23cf634c8eed46b4cae70a94dc4213a177550..e7f21114add2a9638dc3fdb6a67a227b5c9afaa8 100644
+--- a/dist/index-D2X8n86J.js
++++ b/dist/index-D2X8n86J.js
+@@ -22703,6 +22703,9 @@ const checkForDesktopConnection$1 = async (sessionTopic) => {
+   }
+ };
+ const hasInjectedConnection$1 = () => {
++  if (typeof window === 'undefined') {
++    return false;
++  }
+   var _a2;
+   const injectedConnection = !!((_a2 = window == null ? void 0 : window.aleo) == null ? void 0 : _a2.puzzleWalletClient);
+   if (!injectedConnection) {
+diff --git a/dist/puzzle.umd.js b/dist/puzzle.umd.js
+index 10bbc056a76755d5cc430783d62847508e99b301..f92de09887f1e4b332b77027b479f9c0a5f7e506 100644
+--- a/dist/puzzle.umd.js
++++ b/dist/puzzle.umd.js
+@@ -22715,6 +22715,9 @@
+     }
+   };
+   const hasInjectedConnection$1 = () => {
++    if (typeof window === 'undefined') {
++      return false;
++    }
+     var _a2;
+     const injectedConnection = !!((_a2 = window == null ? void 0 : window.aleo) == null ? void 0 : _a2.puzzleWalletClient);
+     if (!injectedConnection) {
