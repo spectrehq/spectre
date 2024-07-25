@@ -161,7 +161,7 @@ export function MyValidator() {
                   <Button
                     className="min-w-24"
                     variant="secondary"
-                    disabled={isPending}
+                    disabled={!claimable || isPending}
                     onClick={handleClaim}
                   >
                     {isPending && (
@@ -175,13 +175,16 @@ export function MyValidator() {
               </div>
             </div>
 
-            <div className="text-sm text-muted-foreground">
-              <span>Claim Height: 123456</span>{' '}
+            <div className="text-sm text-muted-foreground mt-1">
+              <span>Claim Height: {dn.format(dn.from(618409n))}</span>{' '}
             </div>
 
             {!dn.eq(unbondingCreditsDN, 0) && (
-              <div className="text-sm text-muted-foreground">
-                <span>Claim Height: {String(unbonding?.height) ?? '-'}</span>{' '}
+              <div className="text-sm text-muted-foreground mt-1">
+                <span>
+                  Claim Height:{' '}
+                  {unbonding ? dn.format(dn.from(unbonding.height)) : '-'}
+                </span>{' '}
                 {/* <span>(ETA. 2024-12-31 12:30:00)</span> */}
               </div>
             )}

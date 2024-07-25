@@ -16,6 +16,7 @@ import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
 import { shortenAddress } from '~/utils'
 import { AccountInfo } from './account-info'
+import { GradientsAvatar } from '../gradients-avatar'
 
 export function Account() {
   const [open, setOpen] = useState(false)
@@ -38,9 +39,13 @@ export function Account() {
       >
         <DialogTrigger asChild>
           <Button variant="secondary" className="hidden lg:inline-flex">
-            {dn.format(balanceDN, { digits: 2, locale: 'en' })} Credits
-            <Wallet2Icon className="mx-2 h-5 w-5" />
-            {address && shortenAddress(address)}
+            <Wallet2Icon className="h-5 w-5" />
+            {address && (
+              <>
+                <span className="mx-2">{shortenAddress(address)}</span>
+                <GradientsAvatar text={address} size={20} />
+              </>
+            )}
           </Button>
         </DialogTrigger>
       </WalletConnectionChecker>

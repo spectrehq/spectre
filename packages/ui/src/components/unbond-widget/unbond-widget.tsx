@@ -13,12 +13,9 @@ import { NumberInput } from '~/components/ui/number-input'
 import { Separator } from '~/components/ui/separator'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
-import { useBalance } from '~/hooks/use-balance'
-import { useCreditsBond } from '~/hooks/use-credits-bond'
 import { useCreditsUnbond } from '~/hooks/use-credits-unbond'
 import { useBondState } from '~/hooks/use-bond-state'
 import { cn } from '~/lib/utils'
-import type { AleoAddress } from '~/types'
 
 export function UnbondWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -42,7 +39,7 @@ export function UnbondWidget() {
           .gt(0, { message: tPrompts('Enter an amount') })
           .max(
             bondState ? dn.toNumber(bondedCreditsDN) : 0,
-            tPrompts('Insufficient balance')
+            'Insufficient staked amount'
           )
           .default(0),
       }),
@@ -54,7 +51,8 @@ export function UnbondWidget() {
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
     defaultValues: {
-      amount: 0,
+      // @ts-ignore
+      amount: '',
     },
   })
 
@@ -79,13 +77,14 @@ export function UnbondWidget() {
     <div className="rounded-xl w-full mx-auto">
       <div className="p-6">
         <div className="grid text-center">
-          <div>
-            <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
+          <div className="">
+            <span className="mt-1 font-semibold text-3xl sm:text-2xl">
               {dn.format(bondedCreditsDN, { digits: 2, trailingZeros: true })}
-            </div>
-            <div className="font-medium sm:text-sm/6 text-muted-foreground">
-              Staking Credits
-            </div>
+            </span>
+            &nbsp;
+            <span className="font-medium sm:text-sm text-muted-foreground">
+              Credits
+            </span>
           </div>
         </div>
         {/* <Separator className="my-6" /> */}
@@ -99,24 +98,34 @@ export function UnbondWidget() {
               render={({ field }) => (
                 <FormItem className="relative">
                   <FormControl>
-                    <NumberInput
-                      {...field}
-                      className="h-auto rounded-xl p-3 pr-20 text-xl"
-                    />
+                    <div className="flex items-center border rounded-xl p-3 bg-background">
+                      <NumberInput
+                        {...field}
+                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        placeholder="0.000000"
+                        onChange={(event) => {
+                          const value = event.currentTarget.value ?? ''
+                          if (
+                            value === '' ||
+                            /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                          ) {
+                            field.onChange(value)
+                          }
+                        }}
+                      />
+                      <Button
+                        className="rounded-lg"
+                        variant="secondary"
+                        type="button"
+                        size="sm"
+                        onClick={() => {
+                          field.onChange(dn.toNumber(bondedCreditsDN))
+                        }}
+                      >
+                        MAX
+                      </Button>
+                    </div>
                   </FormControl>
-                  <div className="absolute top-0 right-2 z-10">
-                    <Button
-                      className="rounded-lg"
-                      variant="secondary"
-                      type="button"
-                      size="sm"
-                      onClick={() => {
-                        field.onChange(dn.toNumber(bondedCreditsDN))
-                      }}
-                    >
-                      MAX
-                    </Button>
-                  </div>
                 </FormItem>
               )}
             />

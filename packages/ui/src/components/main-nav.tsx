@@ -1,6 +1,9 @@
+'use client'
+
 import { ExternalLinkIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Link from 'next/link'
+import { usePathname } from 'next/navigation'
 import {
   NavigationMenu,
   NavigationMenuItem,
@@ -12,6 +15,7 @@ import { cn } from '~/lib/utils'
 
 export function MainNav() {
   const t = useTranslations('MainNav')
+  const pathname = usePathname()
 
   return (
     <NavigationMenu className="hidden lg:block">
@@ -26,7 +30,12 @@ export function MainNav() {
         <NavigationMenuItem className="relative">
           <Link href="/staking" legacyBehavior passHref>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), 'text-base')}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                'text-base',
+                pathname.startsWith('/staking') &&
+                  'bg-accent text-accent-foreground outline-none'
+              )}
             >
               {t('staking')}
             </NavigationMenuLink>
@@ -35,7 +44,12 @@ export function MainNav() {
         <NavigationMenuItem className="relative">
           <Link href="/liquid-staking" legacyBehavior passHref>
             <NavigationMenuLink
-              className={cn(navigationMenuTriggerStyle(), 'text-base')}
+              className={cn(
+                navigationMenuTriggerStyle(),
+                'text-base',
+                pathname.startsWith('/liquid-staking') &&
+                  'bg-accent text-accent-foreground outline-none'
+              )}
             >
               {t('liquidStaking')}
             </NavigationMenuLink>

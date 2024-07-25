@@ -243,34 +243,34 @@ export function BondForm({ validator }: BondFormProps) {
                     render={({ field }) => (
                       <FormItem className="relative">
                         <FormControl>
-                          <NumberInput
-                            {...field}
-                            className="h-auto rounded-xl p-3 pr-20 text-xl"
-                            placeholder="0.000000"
-                            onChange={(event) => {
-                              const value = event.currentTarget.value ?? ''
-                              if (
-                                value === '' ||
-                                /^[0-9]+(.[0-9]{1,6})?$/.test(value)
-                              ) {
-                                field.onChange(value)
-                              }
-                            }}
-                          />
+                          <div className="flex items-center border rounded-xl p-3 bg-background">
+                            <NumberInput
+                              {...field}
+                              className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                              placeholder="0.000000"
+                              onChange={(event) => {
+                                const value = event.currentTarget.value ?? ''
+                                if (
+                                  value === '' ||
+                                  /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                                ) {
+                                  field.onChange(value)
+                                }
+                              }}
+                            />
+                            <Button
+                              className="rounded-lg"
+                              variant="secondary"
+                              type="button"
+                              size="sm"
+                              onClick={() => {
+                                field.onChange(dn.toNumber(balanceDN))
+                              }}
+                            >
+                              MAX
+                            </Button>
+                          </div>
                         </FormControl>
-                        <div className="absolute top-0 right-2 z-10">
-                          <Button
-                            className="rounded-lg"
-                            variant="secondary"
-                            type="button"
-                            size="sm"
-                            onClick={() => {
-                              field.onChange(dn.toNumber(balanceDN))
-                            }}
-                          >
-                            MAX
-                          </Button>
-                        </div>
                       </FormItem>
                     )}
                   />

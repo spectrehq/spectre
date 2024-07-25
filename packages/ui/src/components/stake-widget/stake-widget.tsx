@@ -83,7 +83,7 @@ export function StakeWidget() {
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleStake)} className="space-y-4">
+          <form onSubmit={form.handleSubmit(handleStake)} className="space-y-6">
             <FormField
               control={form.control}
               name="amount"
@@ -94,7 +94,7 @@ export function StakeWidget() {
                       <Image src={AleoLogoIcon} alt="Aleo Logo" width={36} />
                       <NumberInput
                         {...field}
-                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-xl bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="Credits amount"
                         onChange={(event) => {
                           const value = event.currentTarget.value ?? ''
@@ -143,7 +143,7 @@ export function StakeWidget() {
             </WalletConnectionChecker>
           </form>
         </Form>
-        <ul className="grid gap-3 text-sm mt-4">
+        <ul className="grid gap-3 text-sm mt-6">
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">You will receive</span>
             <span>0.923456 stCredits</span>

@@ -120,7 +120,7 @@ export function WithdrawWidget() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
-        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-4">
+        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
           Default stCredits unstaking period takes around 18-60 minutes (360
           blocks) to process. After that you can claim your rewards in{' '}
           <Button className="p-0 h-auto text-sky-400" variant="link" asChild>
@@ -133,7 +133,7 @@ export function WithdrawWidget() {
         <Form {...form}>
           <form
             onSubmit={form.handleSubmit(handleWithdraw)}
-            className="space-y-4"
+            className="space-y-6"
           >
             <FormField
               control={form.control}
@@ -151,7 +151,7 @@ export function WithdrawWidget() {
                       </div>
                       <NumberInput
                         {...field}
-                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-xl bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                        className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
                         placeholder="stCredits amount"
                         onChange={(event) => {
                           const value = event.currentTarget.value ?? ''
@@ -196,7 +196,7 @@ export function WithdrawWidget() {
             </WalletConnectionChecker>
           </form>
         </Form>
-        <ul className="grid gap-3 text-sm mt-4">
+        <ul className="grid gap-3 text-sm mt-6">
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">You will receive</span>
             <span>1.123456 Credits</span>
