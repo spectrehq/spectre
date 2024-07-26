@@ -146,7 +146,7 @@ export function BondForm({ validator }: BondFormProps) {
   }, [isCopied])
 
   return (
-    <Card className="border-none shadow-none w-screen max-w-xl">
+    <Card className="border-none shadow-none w-screen max-w-full lg:max-w-xl">
       <CardHeader className="px-0 pt-0">
         <CardTitle className="flex items-center space-x-2">
           <GradientsAvatar text={validator} size={40} />

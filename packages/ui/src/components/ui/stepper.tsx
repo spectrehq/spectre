@@ -574,7 +574,7 @@ const VerticalStep = React.forwardRef<HTMLDivElement, VerticalStepProps>(
       <div
         ref={ref}
         className={cn(
-          'stepper__vertical-step',
+          'stepper__vertical-step w-full',
           verticalStepVariants({
             variant: variant?.includes('circle') ? 'circle' : 'line',
           }),

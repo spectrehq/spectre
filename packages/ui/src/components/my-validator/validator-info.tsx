@@ -7,6 +7,7 @@ import { useBondState } from '~/hooks/use-bond-state'
 import { useValidatorState } from '~/hooks/use-validator-state'
 import type { AleoAddress } from '~/types'
 import { Skeleton } from '../ui/skeleton'
+import { shortenAddress } from '~/utils'
 
 export function ValidatorInfo() {
   // const { address } = useAccount()
@@ -19,23 +20,28 @@ export function ValidatorInfo() {
     useValidatorState(bondState?.validator as AleoAddress)
 
   return (
-    <div className="flex items-center gap-8 rounded-xl mb-8 border p-6">
-      <div>
+    <div className="flex flex-col lg:flex-row items-start lg:items-center gap-4 lg:gap-8 rounded-xl mb-8 border p-6">
+      <div className="w-full lg:w-auto mb-4 lg:mb-0">
         <div className="text-sm font-medium mb-4">Your Validator</div>
         <div className="flex items-center">
           {!isLoadingBondState && bondState ? (
             <>
               <GradientsAvatar text={bondState.validator} size={40} />
-              <span className="ml-5 font-medium">{bondState?.validator}</span>
+              <span className="hidden lg:block ml-5 font-medium">
+                {bondState?.validator}
+              </span>
+              <span className="block lg:hidden ml-5 font-medium">
+                {shortenAddress(bondState.validator)}
+              </span>
             </>
           ) : (
-            <Skeleton className="w-[560px] h-10" />
+            <Skeleton className="max-w-full w-[560px] h-10" />
           )}
         </div>
       </div>
-      <div className="flex-1" />
-      <div>
-        <div className="text-sm font-medium mb-4">Staked</div>
+      <div className="hidden lg:block flex-1" />
+      <div className="w-full lg:w-auto flex flex-row lg:flex-col justify-between items-center lg:items-start lg:justify-normal">
+        <div className="text-sm font-medium mb-0 lg:mb-4">Staked</div>
         <div>
           {!isLoadingBondState && bondState ? (
             <>
@@ -49,12 +55,12 @@ export function ValidatorInfo() {
               <span className="text-muted-foreground text-sm">Credits</span>
             </>
           ) : (
-            <Skeleton className="w-[200px] h-10" />
+            <Skeleton className="max-w-full w-[200px] h-10" />
           )}
         </div>
       </div>
-      <div>
-        <div className="text-sm font-medium mb-4">Commission</div>
+      <div className="w-full lg:w-auto flex flex-row lg:flex-col justify-between items-center lg:items-end lg:justify-normal">
+        <div className="text-sm font-medium mb-0 lg:mb-4">Commission</div>
         <div className="text-end">
           {!isLoadingValidatorState && validatorState ? (
             <>

@@ -18,7 +18,7 @@ export function ValidatorsOverview() {
             Network Status
           </h3>
         </div>
-        <div className="py-4 flex justify-between items-center">
+        <div className="py-4 flex flex-col lg:flex-row justify-between items-start lg:items-center gap-8 lg:gap-0">
           <div>
             <h4 className="text-lg font-medium text-muted-foreground">Block</h4>
             <div className="">

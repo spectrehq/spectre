@@ -115,7 +115,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
   }, [isCopied])
 
   return (
-    <div className="w-screen max-w-4xl">
+    <div className="w-screen max-w-full lg:max-w-4xl">
       <Card>
         <CardHeader>
           <CardTitle className="flex items-center space-x-2">

@@ -15,7 +15,7 @@ export function MyBalance() {
 
   return (
     <section>
-      <div className="container pt-12">
+      <div className="container pt-4 lg:pt-12">
         <div className="pt-8 pb-5 flex items-center justify-between">
           <div>
             <h4 className="text-lg font-medium text-muted-foreground">
@@ -41,7 +41,7 @@ export function MyBalance() {
               Balance
             </h4>
             <div className="flex items-center justify-between">
-              <div className="flex items-center gap-8">
+              <div className="flex flex-col lg:flex-row items-start lg:items-center gap-0 lg:gap-8">
                 <div>
                   <span className="text-2xl font-semibold">
                     {dn.format([data ?? 0n, 6], {

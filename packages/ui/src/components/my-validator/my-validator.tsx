@@ -65,8 +65,8 @@ export function MyValidator() {
   return (
     <section>
       <div className="container">
-        <div className="pt-4 py-8 grid grid-cols-1 lg:grid-cols-6 items-start justify-between">
-          <div className="flex items-center justify-between flex-1 col-span-1 lg:col-span-3">
+        <div className="pt-4 py-8 grid grid-cols-1 lg:grid-cols-6 items-start justify-between gap-8 lg:gap-0">
+          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between flex-1 col-span-1 lg:col-span-3 gap-4 lg:gap-0">
             <div>
               <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
                 Staked
@@ -124,7 +124,7 @@ export function MyValidator() {
               </div>
             </div>
           </div>
-          <div className="col-span-1 lg:col-span-3 ml-20 pl-20 border-l">
+          <div className="col-span-1 lg:col-span-3 lg:ml-20 lg:pl-20 border-none lg:border-l">
             <div className="flex items-center justify-between">
               <div>
                 <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
