@@ -21,10 +21,6 @@ export function AleoStakingStatistics() {
             <span>100.123456 Credits</span>
           </li>
           <li className="flex items-center justify-between">
-            <span className="text-muted-foreground">Stakers</span>
-            <span>10,000</span>
-          </li>
-          <li className="flex items-center justify-between">
             <span className="text-muted-foreground">stCredits market cap</span>
             <span>-</span>
           </li>
