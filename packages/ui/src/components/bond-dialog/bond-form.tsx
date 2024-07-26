@@ -8,6 +8,7 @@ import Image from 'next/image'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import Aleo123Logo from '~/assets/aleo123-logo.png'
 import AleoscanLogo from '~/assets/aleoscan-logo.png'
@@ -22,21 +23,19 @@ import {
 } from '~/components/ui/card'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
-import { Separator } from '~/components/ui/separator'
 import { useStepper } from '~/components/ui/stepper'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
+import { useBondState } from '~/hooks/use-bond-state'
+import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard'
 import { useCreditsBond } from '~/hooks/use-credits-bond'
+import { useCreditsWithdrawAddress } from '~/hooks/use-credits-withdraw-address'
 import { useQueryValidator } from '~/hooks/use-query-validator'
 import { useValidatorState } from '~/hooks/use-validator-state'
 import { cn } from '~/lib/utils'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
-import { Skeleton } from '../ui/skeleton'
-import { useCopyToClipboard } from '~/hooks/use-copy-to-clipboard'
-import { toast } from 'sonner'
-import { useBondState } from '~/hooks/use-bond-state'
 
 export interface BondFormProps {
   validator: AleoAddress
@@ -60,6 +59,8 @@ export function BondForm({ validator }: BondFormProps) {
     () => dn.from([bondState?.microcredits ?? 0n, 6]),
     [bondState]
   )
+
+  const { data: creditsWithdrawAddress } = useCreditsWithdrawAddress(address)
 
   // TODO
   const isFirstBond = useMemo(
@@ -231,6 +232,14 @@ export function BondForm({ validator }: BondFormProps) {
                 </div>
               </div>
             </div> */}
+            {creditsWithdrawAddress && creditsWithdrawAddress !== address && (
+              <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+                Please note that your withdrawal address{' '}
+                {creditsWithdrawAddress} is not your current wallet address. If
+                you want to change it to your wallet address, you must unstake
+                all your Credits and then stake again.
+              </div>
+            )}
             <div className="rounded-xl bg-primary-foreground p-6">
               <Form {...form}>
                 <form
@@ -296,6 +305,8 @@ export function BondForm({ validator }: BondFormProps) {
                       size="xl"
                       disabled={
                         !data?.Info.IsOpen ||
+                        (creditsWithdrawAddress &&
+                          creditsWithdrawAddress !== address) ||
                         !form.formState.isValid ||
                         isPending
                       }

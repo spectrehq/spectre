@@ -3,6 +3,8 @@
 import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
+import { useCallback, useMemo } from 'react'
+import { BondDialog } from '~/components/bond-dialog'
 import { Button } from '~/components/ui/button'
 import {
   Tooltip,
@@ -10,18 +12,16 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
-import { BondDialog } from '~/components/bond-dialog'
-import { ValidatorInfo } from './validator-info'
 import { UnbondDialog } from '~/components/unbond-dialog'
+import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
-import { useCallback, useMemo } from 'react'
-import { useBondState } from '~/hooks/use-bond-state'
-import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
-import { Separator } from '~/components/ui/separator'
 import { useBlockHeight } from '~/hooks/use-block-height'
+import { useBondState } from '~/hooks/use-bond-state'
 import { useCreditsClaim } from '~/hooks/use-credits-claim'
-import { WalletConnectionChecker } from '../wallet-connection-checker'
+import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
 import { cn } from '~/lib/utils'
+import type { AleoAddress } from '~/types'
+import { ValidatorInfo } from './validator-info'
 
 export function MyValidator() {
   const { address } = useAccount()
@@ -96,7 +96,10 @@ export function MyValidator() {
               </div>
             </div>
             <div className="space-x-6 flex items-center">
-              <BondDialog>
+              <BondDialog
+                validator={bondState?.validator as AleoAddress}
+                step={bondState ? 2 : 0}
+              >
                 <Button variant="secondary">Stake</Button>
               </BondDialog>
               <UnbondDialog>

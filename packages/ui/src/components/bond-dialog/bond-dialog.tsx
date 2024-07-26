@@ -1,6 +1,6 @@
 'use client'
 
-import { type ReactNode, useCallback, useState } from 'react'
+import { type ReactNode, useCallback, useMemo, useState } from 'react'
 import {
   Dialog,
   DialogContent,
@@ -16,20 +16,36 @@ export interface BondDialogProps {
   open?: boolean
   step?: number
   validator?: AleoAddress | null
+  onClose?: () => void
   children?: ReactNode
 }
 
 export function BondDialog({
-  open: openProps = false,
+  open: openProps,
   step = 0,
   validator,
+  onClose,
   children,
 }: BondDialogProps) {
-  const [open, setOpen] = useState(() => openProps)
+  const [openInner, setOpen] = useState(() => Boolean(openProps))
 
-  const handleOpenChange = useCallback((open: boolean) => {
-    setOpen(open)
-  }, [])
+  const handleOpenChange = useCallback(
+    (open: boolean) => {
+      setOpen(open)
+      if (!open) {
+        onClose?.()
+      }
+    },
+    [onClose]
+  )
+
+  const open = useMemo(() => {
+    if (openProps === false || openProps === true) {
+      return openProps
+    }
+
+    return openInner
+  }, [openInner, openProps])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

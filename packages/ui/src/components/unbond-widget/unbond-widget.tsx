@@ -5,16 +5,16 @@ import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
-import { Separator } from '~/components/ui/separator'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
-import { useCreditsUnbond } from '~/hooks/use-credits-unbond'
 import { useBondState } from '~/hooks/use-bond-state'
+import { useCreditsUnbond } from '~/hooks/use-credits-unbond'
+import { useCreditsWithdrawAddress } from '~/hooks/use-credits-withdraw-address'
 import { cn } from '~/lib/utils'
 
 export function UnbondWidget() {
@@ -27,6 +27,8 @@ export function UnbondWidget() {
     () => dn.from([bondState?.microcredits ?? 0n, 6]),
     [bondState]
   )
+
+  const { data: creditsWithdrawAddress } = useCreditsWithdrawAddress(address)
 
   const formSchema = useMemo(
     () =>
@@ -59,6 +61,8 @@ export function UnbondWidget() {
   useEffect(() => {
     form.trigger()
   }, [form])
+
+  const amountValue = useWatch({ control: form.control, name: 'amount' })
 
   const { mutate, isPending } = useCreditsUnbond()
 
@@ -129,6 +133,19 @@ export function UnbondWidget() {
                 </FormItem>
               )}
             />
+            {creditsWithdrawAddress && creditsWithdrawAddress !== address && (
+              <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+                You cannot unstake because the withdrawal address is not your
+                current wallet address.
+              </div>
+            )}
+            {bondState &&
+              dn.lt(dn.mul(bondedCreditsDN, amountValue || 0), 10_000) && (
+                <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+                  After this unstaking your staked Credits will fall below
+                  10,000 so that all your staked Credits will be unstaked.
+                </div>
+              )}
             <WalletConnectionChecker
               className="w-full"
               variant="secondary"
@@ -139,7 +156,12 @@ export function UnbondWidget() {
                 variant="secondary"
                 type="submit"
                 size="xl"
-                disabled={!form.formState.isValid || isPending}
+                disabled={
+                  (creditsWithdrawAddress &&
+                    creditsWithdrawAddress !== address) ||
+                  !form.formState.isValid ||
+                  isPending
+                }
               >
                 {isPending && (
                   <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />

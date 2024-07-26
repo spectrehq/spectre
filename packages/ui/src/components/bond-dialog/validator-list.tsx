@@ -8,6 +8,9 @@ import {
 } from '@tanstack/react-table'
 import * as dn from 'dnum'
 import { useCallback } from 'react'
+import { toast } from 'sonner'
+import { GradientsAvatar } from '~/components/gradients-avatar'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useStepper } from '~/components/ui/stepper'
 import {
   Table,
@@ -17,11 +20,10 @@ import {
   TableHeader,
   TableRow,
 } from '~/components/ui/table'
-import { type Validator, useCommittee } from '~/hooks/use-committee'
+import { useCommittee, type Validator } from '~/hooks/use-committee'
+import { useNetworkClientStore } from '~/stores/network-client'
 import type { AleoAddress } from '~/types'
 import { shortenAddress } from '~/utils'
-import { GradientsAvatar } from '~/components/gradients-avatar'
-import { Skeleton } from '~/components/ui/skeleton'
 
 const columnHelper = createColumnHelper<Validator>()
 
@@ -74,22 +76,31 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
   const { data } = useCommittee()
 
   const table = useReactTable({
-    data: data?.validators ?? [],
+    data: data?.validators.filter((validator) => validator.isOpen) ?? [],
     columns,
     getCoreRowModel: getCoreRowModel(),
   })
 
+  const creditsProgram = useNetworkClientStore((store) => store.creditsProgram)
+
   const { nextStep } = useStepper()
 
   const handleNextStep = useCallback(
-    (address: AleoAddress) => {
+    async (address: AleoAddress) => {
+      const unbondingState = await creditsProgram.getUnbonding(address)
+      if (unbondingState) {
+        toast.warning(
+          'The validator currently is in the unbonding state so that you cannot stake to it.'
+        )
+
+        return
+      }
+
       onSelect(address)
       nextStep()
     },
-    [onSelect, nextStep]
+    [creditsProgram, onSelect, nextStep]
   )
-
-  const { currentStep } = useStepper()
 
   return (
     <div className="overflow-auto w-screen max-w-full md:max-w-4xl">
@@ -103,9 +114,9 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                          header.column.columnDef.header,
-                          header.getContext()
-                        )}
+                        header.column.columnDef.header,
+                        header.getContext()
+                      )}
                   </TableHead>
                 )
               })}
