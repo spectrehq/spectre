@@ -9,8 +9,8 @@ import {
   DialogTitle,
   DialogTrigger,
 } from '~/components/ui/dialog'
-import { BondWidget } from './bond-widget'
 import type { AleoAddress } from '~/types'
+import { BondWidget } from './bond-widget'
 
 export interface BondDialogProps {
   open?: boolean
@@ -27,25 +27,17 @@ export function BondDialog({
   onClose,
   children,
 }: BondDialogProps) {
-  const [openInner, setOpen] = useState(() => Boolean(openProps))
+  const [open, setOpen] = useState(() => openProps)
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
       setOpen(open)
-      if (!open) {
-        onClose?.()
+      if (!open && onClose) {
+        onClose()
       }
     },
     [onClose]
   )
-
-  const open = useMemo(() => {
-    if (openProps === false || openProps === true) {
-      return openProps
-    }
-
-    return openInner
-  }, [openInner, openProps])
 
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>

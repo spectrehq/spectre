@@ -6,7 +6,7 @@ import {
   getCoreRowModel,
   useReactTable,
 } from '@tanstack/react-table'
-import { useState } from 'react'
+import { useCallback, useState } from 'react'
 import { toast } from 'sonner'
 import { BondDialog } from '~/components/bond-dialog'
 import {
@@ -47,35 +47,52 @@ export function DataTable<TData, TValue>({
   const [validator, setValidator] = useState<AleoAddress>()
   const [open, setOpen] = useState(false)
 
-  const handleRowClick = async (validator: Validator) => {
-    if (
-      validator.isOpen !== undefined &&
-      validator.isOpen !== null &&
-      !validator.isOpen
-    ) {
-      toast.warning('The validator is closed so that you cannot stake to it.')
-      return
-    }
+  const onClose = useCallback(() => setOpen(false), [])
 
-    if (bondState && bondState.validator !== validator.address) {
-      toast.warning(
-        `You have staked to the validator ${bondState.validator}. If you want to stake to another validator, you must unstake from your current validator.`
-      )
-      return
-    }
+  const handleRowClick = useCallback(
+    async (validator: Validator) => {
+      if (
+        validator.isOpen !== undefined &&
+        validator.isOpen !== null &&
+        !validator.isOpen
+      ) {
+        toast.warning('The validator is closed so that you cannot stake to it.')
+        return
+      }
 
-    const unbondingState = await creditsProgram.getUnbonding(validator.address)
+      if (bondState && bondState.validator !== validator.address) {
+        toast.warning(
+          `You have staked to the validator ${bondState.validator}. If you want to stake to another validator, you must unstake from your current validator.`
+        )
+        return
+      }
 
-    if (unbondingState) {
-      toast.warning(
-        'The validator currently is in the unbonding state so that you cannot stake to it.'
-      )
-      return
-    }
+      const toastId = toast.loading('Loading...', { closeButton: false })
 
-    setValidator(validator.address)
-    setOpen(true)
-  }
+      try {
+        const unbondingState = await creditsProgram.getUnbonding(
+          validator.address
+        )
+
+        toast.dismiss(toastId)
+
+        if (unbondingState) {
+          toast.warning(
+            'The validator currently is in the unbonding state so that you cannot stake to it.'
+          )
+          return
+        }
+
+        setValidator(validator.address)
+        setOpen(true)
+      } catch (e) {
+        toast.dismiss(toastId)
+
+        toast.warning('Fetch data error')
+      }
+    },
+    [bondState, creditsProgram]
+  )
 
   return (
     <div className="overflow-hidden rounded-xl border">
@@ -124,12 +141,14 @@ export function DataTable<TData, TValue>({
         </TableBody>
       </Table>
 
-      <BondDialog
-        open={open}
-        step={1}
-        validator={validator}
-        onClose={() => setOpen(false)}
-      />
+      {open && (
+        <BondDialog
+          open={open}
+          step={1}
+          validator={validator}
+          onClose={onClose}
+        />
+      )}
     </div>
   )
 }

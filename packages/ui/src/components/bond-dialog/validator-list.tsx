@@ -87,17 +87,28 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
 
   const handleNextStep = useCallback(
     async (address: AleoAddress) => {
-      const unbondingState = await creditsProgram.getUnbonding(address)
-      if (unbondingState) {
-        toast.warning(
-          'The validator currently is in the unbonding state so that you cannot stake to it.'
-        )
+      const toastId = toast.loading('Loading...', { closeButton: false })
 
-        return
+      try {
+        const unbondingState = await creditsProgram.getUnbonding(address)
+
+        toast.dismiss(toastId)
+
+        if (unbondingState) {
+          toast.warning(
+            'The validator currently is in the unbonding state so that you cannot stake to it.'
+          )
+          return
+        }
+
+        onSelect(address)
+        nextStep()
+      } catch (e) {
+        console.log(e)
+        toast.dismiss(toastId)
+
+        toast.warning('Fetch data error')
       }
-
-      onSelect(address)
-      nextStep()
     },
     [creditsProgram, onSelect, nextStep]
   )
@@ -114,9 +125,9 @@ export function ValidatorList({ onSelect }: ValidatorListProps) {
                     {header.isPlaceholder
                       ? null
                       : flexRender(
-                        header.column.columnDef.header,
-                        header.getContext()
-                      )}
+                          header.column.columnDef.header,
+                          header.getContext()
+                        )}
                   </TableHead>
                 )
               })}

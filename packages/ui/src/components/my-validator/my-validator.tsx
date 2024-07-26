@@ -3,7 +3,7 @@
 import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useMemo, useState } from 'react'
 import { BondDialog } from '~/components/bond-dialog'
 import { Button } from '~/components/ui/button'
 import {
@@ -22,6 +22,8 @@ import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
 import { cn } from '~/lib/utils'
 import type { AleoAddress } from '~/types'
 import { ValidatorInfo } from './validator-info'
+import { useNetworkClientStore } from '~/stores/network-client'
+import { toast } from 'sonner'
 
 export function MyValidator() {
   const { address } = useAccount()
@@ -62,6 +64,45 @@ export function MyValidator() {
     mutate({ staker: address, fee })
   }, [address, mutate, unbonding])
 
+  const creditsProgram = useNetworkClientStore((store) => store.creditsProgram)
+
+  const [open, setOpen] = useState(false)
+  const [validator, setValidator] = useState<AleoAddress>()
+  const [step, setStep] = useState<number>()
+
+  const openStakeDialog = useCallback(async () => {
+    if (bondState) {
+      const toastId = toast.loading('Loading...', { closeButton: false })
+
+      try {
+        const unbondingState = await creditsProgram.getUnbonding(
+          bondState.validator as AleoAddress
+        )
+
+        toast.dismiss(toastId)
+        if (unbondingState) {
+          toast.warning(
+            'The validator currently is in the unbonding state so that you cannot stake to it.'
+          )
+
+          return
+        }
+
+        setValidator(bondState.validator as AleoAddress)
+        setStep(2)
+        setOpen(true)
+      } catch (error) {
+        toast.dismiss(toastId)
+
+        toast.warning('Fetch data error')
+      }
+    }
+
+    setOpen(true)
+  }, [bondState, creditsProgram])
+
+  const onClose = useCallback(() => setOpen(false), [])
+
   return (
     <section>
       <div className="container">
@@ -96,12 +137,9 @@ export function MyValidator() {
               </div>
             </div>
             <div className="space-x-6 flex items-center">
-              <BondDialog
-                validator={bondState?.validator as AleoAddress}
-                step={bondState ? 2 : 0}
-              >
-                <Button variant="secondary">Stake</Button>
-              </BondDialog>
+              <Button variant="secondary" onClick={openStakeDialog}>
+                Stake
+              </Button>
               <UnbondDialog>
                 <Button variant="secondary">Unstake</Button>
               </UnbondDialog>
@@ -198,6 +236,14 @@ export function MyValidator() {
 
         {/* {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />} */}
       </div>
+      {open && (
+        <BondDialog
+          open={open}
+          validator={validator}
+          step={step}
+          onClose={onClose}
+        />
+      )}
     </section>
   )
 }
