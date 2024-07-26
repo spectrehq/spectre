@@ -81,7 +81,7 @@ export function ClaimWidget() {
       <div className="rounded-xl bg-primary-foreground p-6">
         <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
           You will be able to claim your rewards after the withdraw request has
-          been processed. To unstake your amount go to
+          been processed. To unstake your amount go to{' '}
           <Button className="p-0 h-auto text-sky-400" variant="link" asChild>
             <Link className="" href="/liquid-staking/unstake">
               Unstake
