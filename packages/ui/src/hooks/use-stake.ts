@@ -14,7 +14,7 @@ import * as dn from 'dnum'
 import { toast } from 'sonner'
 import { WalletType } from '~/types'
 import { useAccount } from './use-account'
-import { STCREDITS_POINTS_PROGRAM_IDS } from '~/config'
+import { STCREDITS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
 
 export interface UseStakeParams {
@@ -39,14 +39,14 @@ export function useStake() {
     }) => {
       if (!address) return
 
-      const programId = STCREDITS_POINTS_PROGRAM_IDS[network]
+      const programId = STCREDITS_PROGRAM_IDS[network]
 
       if (walletType === WalletType.LeoWallet) {
         const tx = Transaction.createTransaction(
           address!,
           WalletAdapterNetwork.TestnetBeta,
           programId,
-          'apply',
+          'supply',
           [`${amount}u64`],
           fee,
           false
@@ -69,7 +69,7 @@ export function useStake() {
           address: address as string,
           type: EventType.Execute,
           programId,
-          functionId: 'apply',
+          functionId: 'supply',
           fee: puzzleFee,
           inputs: [`${amount}u64`],
         }

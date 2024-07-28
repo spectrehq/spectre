@@ -11,7 +11,7 @@ import {
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { toast } from 'sonner'
-import { STCREDITS_POINTS_PROGRAM_IDS } from '~/config'
+import { STCREDITS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
 import { WalletType } from '~/types'
 import { useAccount } from './use-account'
@@ -27,7 +27,7 @@ export function useClaim() {
     mutationFn: async ({ amount, fee }: { amount: bigint; fee: number }) => {
       if (!address) return
 
-      const programId = STCREDITS_POINTS_PROGRAM_IDS[network]
+      const programId = STCREDITS_PROGRAM_IDS[network]
 
       if (walletType === WalletType.LeoWallet) {
         const tx = Transaction.createTransaction(
