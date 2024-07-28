@@ -12,8 +12,16 @@ import { QueryClientProvider } from '@tanstack/react-query'
 import { ReactQueryDevtools } from '@tanstack/react-query-devtools'
 import { ReactQueryStreamedHydration } from '@tanstack/react-query-next-experimental'
 import { useMemo, type PropsWithChildren } from 'react'
+import {
+  CREDITS_PROGRAM_IDS,
+  STCREDITS_PROGRAM_IDS,
+  STCREDITS_POINTS_PROGRAM_IDS,
+} from '~/config'
 import { getQueryClient } from '~/lib/query'
-import { NetworkClientStoreProvider } from '~/stores/network-client'
+import {
+  NetworkClientStoreProvider,
+  useNetworkClientStore,
+} from '~/stores/network-client'
 
 export function Providers({ children }: PropsWithChildren) {
   const wallets = useMemo(
@@ -31,12 +39,21 @@ export function Providers({ children }: PropsWithChildren) {
   //       render if it suspends and there is no boundary
   const queryClient = getQueryClient()
 
+  const network = useNetworkClientStore((store) => store.network)
+  const creditsProgramId = CREDITS_PROGRAM_IDS[network]
+  const stCreditsProgramId = STCREDITS_PROGRAM_IDS[network]
+  const stCreditsPointsProgramId = STCREDITS_POINTS_PROGRAM_IDS[network]
+
   return (
     <WalletProvider
       wallets={wallets}
       network={WalletAdapterNetwork.TestnetBeta}
       decryptPermission={DecryptPermission.AutoDecrypt}
-      programs={['credits.aleo', 'spectre_stcredits_v1_001.aleo']}
+      programs={[
+        creditsProgramId,
+        stCreditsProgramId,
+        stCreditsPointsProgramId,
+      ]}
       autoConnect
     >
       <WalletModalProvider>
@@ -45,16 +62,14 @@ export function Providers({ children }: PropsWithChildren) {
           dAppDescription=""
           dAppIconURL=""
         >
-          <NetworkClientStoreProvider>
-            <QueryClientProvider client={queryClient}>
-              <ReactQueryStreamedHydration>
-                {children}
-              </ReactQueryStreamedHydration>
-              {process.env.NODE_ENV === 'development' && (
-                <ReactQueryDevtools initialIsOpen={false} />
-              )}
-            </QueryClientProvider>
-          </NetworkClientStoreProvider>
+          <QueryClientProvider client={queryClient}>
+            <ReactQueryStreamedHydration>
+              {children}
+            </ReactQueryStreamedHydration>
+            {process.env.NODE_ENV === 'development' && (
+              <ReactQueryDevtools initialIsOpen={false} />
+            )}
+          </QueryClientProvider>
         </PuzzleWalletProvider>
       </WalletModalProvider>
     </WalletProvider>

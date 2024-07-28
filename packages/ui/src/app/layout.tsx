@@ -9,6 +9,7 @@ import { Header } from '~/components/header'
 import { cn } from '~/lib/utils'
 import './globals.css'
 import { Providers } from './providers'
+import { NetworkClientStoreProvider } from '~/stores/network-client'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -46,11 +47,13 @@ export default async function RootLayout({
           disableTransitionOnChange
         >
           <NextIntlClientProvider messages={messages}>
-            <Providers>
-              <Header />
-              {children}
-              <Footer />
-            </Providers>
+            <NetworkClientStoreProvider>
+              <Providers>
+                <Header />
+                {children}
+                <Footer />
+              </Providers>
+            </NetworkClientStoreProvider>
             <Toaster richColors closeButton />
           </NextIntlClientProvider>
         </ThemeProvider>

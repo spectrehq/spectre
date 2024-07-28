@@ -1,6 +1,7 @@
 'use client'
 
 import * as dn from 'dnum'
+import { Loader2Icon } from 'lucide-react'
 import { useCallback, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
@@ -16,7 +17,8 @@ import {
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
-} from '../ui/tooltip'
+} from '~/components/ui/tooltip'
+import { cn } from '~/lib/utils'
 import { CircleHelpIcon } from 'lucide-react'
 import Link from 'next/link'
 
@@ -95,7 +97,10 @@ export function ClaimWidget() {
             <div className="text-sm text-muted-foreground">
               Withdrawal amount
             </div>
-            <div className="text-lg font-bold">1.123456 Credits</div>
+            <div className="text-lg font-bold">
+              {dn.format(userWithdrawAmountDN, { digits: 6, locale: 'en' })}{' '}
+              Credits
+            </div>
           </div>
           <div>
             <div className="text-sm text-muted-foreground flex items-center">
@@ -116,15 +121,9 @@ export function ClaimWidget() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            {/* TODO: remove */}
             <div className="text-lg">
-              {dn.format([userWithdraw?.height ?? 65401n, 0])}
+              {userWithdraw ? dn.format([userWithdraw?.height, 0]) : '-'}
             </div>
-            {/* <div className="text-lg">
-              {userWithdraw
-                ? dn.format([userWithdraw?.height, 0])
-                : '-'}
-            </div> */}
           </div>
         </div>
 
@@ -140,7 +139,10 @@ export function ClaimWidget() {
             disabled={!isClaimable || isPending}
             onClick={handleClaim}
           >
-            {action}
+            {isPending && (
+              <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
+            )}
+            {isPending ? 'Waiting for wallet confirmation' : 'Claim'}
           </Button>
         </WalletConnectionChecker>
       </div>

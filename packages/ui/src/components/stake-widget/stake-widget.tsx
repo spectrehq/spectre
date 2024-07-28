@@ -43,10 +43,7 @@ export function StakeWidget() {
             invalid_type_error: tPrompts('Enter an amount'),
           })
           .gt(0, { message: tPrompts('Enter an amount') })
-          .max(
-            balance ? dn.toNumber(balanceDN) : Number.MAX_SAFE_INTEGER,
-            tPrompts('Insufficient balance')
-          )
+          .max(dn.toNumber(balanceDN), tPrompts('Insufficient balance'))
           .default(0),
       }),
     [tPrompts, balance, balanceDN]
