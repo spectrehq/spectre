@@ -10,7 +10,7 @@ import { MobileNav } from './mobile-nav'
 export function Header() {
   return (
     <header>
-      <div className="mx-auto max-w-7xl px-6 lg:px-8 flex items-center justify-between gap-0 lg:gap-16 py-6">
+      <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 flex items-center justify-between gap-0 lg:gap-16 py-6">
         <div className="flex flex-none items-center gap-2">
           <Link
             href="/"

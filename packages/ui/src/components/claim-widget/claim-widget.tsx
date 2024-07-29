@@ -78,7 +78,7 @@ export function ClaimWidget() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
-        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+        <div className="bg-amber-100 rounded-xl text-primary-foreground text-xs md:text-sm p-5 mb-6">
           You will be able to claim your rewards after the withdraw request has
           been processed. To unstake your amount go to{' '}
           <Button className="p-0 h-auto text-sky-400" variant="link" asChild>
@@ -89,7 +89,7 @@ export function ClaimWidget() {
           tab.
         </div>
 
-        <div className="rounded-xl bg-muted grid grid-cols-2 p-5 mb-6">
+        <div className="rounded-xl bg-muted grid grid-cols-2 gap-2 p-5 mb-6">
           <div>
             <div className="text-sm text-muted-foreground">
               Withdrawal amount

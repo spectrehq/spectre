@@ -15,11 +15,16 @@ export const generateColours = (s: string): [string, string] => {
 }
 
 export interface GradientsAvatarProps {
+  id?: string
   text: string
   size?: number
 }
 
-export function GradientsAvatar({ text, size = 256 }: GradientsAvatarProps) {
+export function GradientsAvatar({
+  id,
+  text,
+  size = 256,
+}: GradientsAvatarProps) {
   const [c1, c2] = useMemo(() => generateColours(text), [text])
 
   return (
@@ -32,22 +37,22 @@ export function GradientsAvatar({ text, size = 256 }: GradientsAvatarProps) {
     >
       <title>{text}</title>
       <circle
-        cx={`${size / 2}`}
-        cy={`${size / 2}`}
-        r={`${size / 2}`}
-        fill={`url(#gradient-${text})`}
+        cx={size / 2}
+        cy={size / 2}
+        r={size / 2}
+        fill={id ? `url(#gradient-${text}-${id})` : `url(#gradient-${text}`}
       />
       <defs>
         <linearGradient
-          id={`gradient-${text}`}
+          id={id ? `gradient-${text}-${id}` : `gradient-${text}`}
           x1="0"
           y1="0"
-          x2={`${size}`}
-          y2={`${size}`}
+          x2={size}
+          y2={size}
           gradientUnits="userSpaceOnUse"
         >
-          <stop stopColor={`${c1}`} />
-          <stop offset="1" stopColor={`${c2}`} />
+          <stop stopColor={c1} />
+          <stop offset="1" stopColor={c2} />
         </linearGradient>
       </defs>
     </svg>

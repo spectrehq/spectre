@@ -38,7 +38,7 @@ export function Account() {
         variant="outline"
       >
         <DialogTrigger asChild>
-          <Button variant="secondary" className="hidden lg:inline-flex">
+          <Button variant="secondary">
             <Wallet2Icon className="h-5 w-5" />
             {address && (
               <>

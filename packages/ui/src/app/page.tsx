@@ -71,7 +71,7 @@ export default function HomePage() {
         </defs>
       </svg>
       <main className="flex-auto">
-        <div className="mx-auto mt-16 max-w-7xl px-6 sm:mt-24 md:mt-40 lg:px-8 mb-40">
+        <div className="mx-auto mt-16 max-w-7xl px-4 sm:px-6 sm:mt-24 md:mt-40 lg:px-8 mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="max-w-3xl">
               <h1 className="font-display text-4xl font-medium tracking-tight [text-wrap:balance] sm:text-7xl mb-16">
@@ -120,7 +120,7 @@ export default function HomePage() {
 
         <Separator />
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-0 lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
@@ -176,7 +176,7 @@ export default function HomePage() {
           </div>
         </div>
 
-        <div className="hidden mx-auto max-w-7xl px-6 lg:px-8 mt-24 mb-8 sm:mb-12 lg:mb-28">
+        <div className="hidden mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-24 mb-8 sm:mb-12 lg:mb-28">
           <div className="max-w-2xl lg:max-w-full mx-auto grid grid-cols-1 mt-16 items-center lg:grid-cols-5 gap-10 lg:gap-20">
             <div className="col-span-1 lg:col-span-3">
               <div className="mx-auto max-w-2xl lg:max-w-none">
@@ -234,7 +234,7 @@ export default function HomePage() {
 
         <Separator />
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-4 my-12 sm:my-32 lg:my-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-4 my-12 sm:my-32 lg:my-40">
           {/* <div className="grid grid-cols-1 gap-8 lg:grid-cols-3 md:max-w-lg lg:max-w-full mx-auto"> */}
 
           <div className="flex flex-col lg:flex-row justify-between relative">
@@ -453,7 +453,7 @@ export default function HomePage() {
           </div>
         </div> */}
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 mt-20 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-20 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 lg:grid-cols-11 gap-2 items-center lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
@@ -640,7 +640,7 @@ export default function HomePage() {
 
         <Separator />
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-24 sm:my-32 lg:my-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 lg:grid-cols-11 items-center gap-0 lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
@@ -809,7 +809,7 @@ export default function HomePage() {
 
         <Separator />
 
-        <div className="mx-auto max-w-7xl px-6 lg:px-8 my-12 sm:my-16 lg:my-20">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-12 sm:my-16 lg:my-20">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div
               className="-mx-6 rounded-3xl px-6 py-10 sm:mx-0 sm:px-0"

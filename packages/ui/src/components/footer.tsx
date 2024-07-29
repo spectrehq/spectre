@@ -5,7 +5,7 @@ import LogoDarkImage from '~/assets/logo-dark.png'
 
 export function Footer() {
   return (
-    <footer className="mx-auto mt-12 w-full max-w-7xl px-6 sm:mt-16 lg:mt-28 lg:px-8">
+    <footer className="mx-auto mt-12 w-full max-w-7xl px-4 sm:px-6 sm:mt-16 lg:mt-28 lg:px-8">
       <div className="mx-auto max-w-2xl lg:max-w-none">
         <div className="grid grid-cols-1 gap-x-8 gap-y-16 pb-20 lg:grid-cols-9">
           <div className="flex flex-col justify-between items-start col-span-1 lg:col-span-4">

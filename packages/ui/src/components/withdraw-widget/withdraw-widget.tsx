@@ -153,7 +153,7 @@ export function WithdrawWidget() {
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
-        <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+        <div className="bg-amber-100 rounded-xl text-primary-foreground text-xs md:text-sm p-5 mb-6">
           Default stCredits unstaking period takes around 18-60 minutes (360
           blocks) to process. After that you can claim your rewards in{' '}
           <Button className="p-0 h-auto text-sky-400" variant="link" asChild>

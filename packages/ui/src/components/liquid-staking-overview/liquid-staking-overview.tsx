@@ -40,29 +40,36 @@ export function LiquidStakingOverview() {
     <div className="p-6 pb-9 max-w-lg mx-auto rounded-t-xl bg-gradient-to-r from-[#28144A] to-[#512A96] -mb-3">
       <div className="grid grid-cols-2 items-center">
         <div>
-          <div className="font-medium text-lg/6 sm:text-sm/6">
+          <div className="font-medium text-xs sm:text-sm">
             Available to stake
           </div>
-          <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
+          <div className="mt-1 font-semibold text-lg sm:text-2xl">
             {dn.format(balanceDN, { digits: 2, trailingZeros: true })} Credits
           </div>
         </div>
         <div className="flex justify-end">
           {address && (
             <Button variant="secondary" size="sm">
-              <span className="mr-1">{shortenAddress(address)}</span>
-              <GradientsAvatar text={address} size={20} />
+              <span className="block lg:hidden mr-1">
+                {shortenAddress(address, 3)}
+              </span>
+              <span className="hidden lg:block mr-1">
+                {shortenAddress(address)}
+              </span>
+              <GradientsAvatar
+                id="liquid-staking-overview"
+                text={address}
+                size={20}
+              />
             </Button>
           )}
         </div>
       </div>
       <Separator className="my-6 bg-muted-foreground/50" />
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2">
+      <div className="grid grid-cols-2 gap-6">
         <div>
-          <div className="font-medium text-lg/6 sm:text-sm/6">
-            Staked amount
-          </div>
-          <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
+          <div className="font-medium text-xs sm:text-sm">Staked amount</div>
+          <div className="mt-1 font-semibold text-lg sm:text-2xl">
             {dn.format(stCreditsBalanceDN, {
               digits: 2,
               trailingZeros: true,
@@ -71,12 +78,12 @@ export function LiquidStakingOverview() {
           </div>
         </div>
         <div>
-          <div className="font-medium text-lg/6 sm:text-sm/6 flex items-center">
+          <div className="font-medium text-xs sm:text-sm flex items-center">
             <span>APR</span>
             <TooltipProvider>
               <Tooltip>
                 <TooltipTrigger>
-                  <CircleHelpIcon className="w-4 h-4 ml-1" />
+                  <CircleHelpIcon className="w-3 h-3 lg:w-4 lg:h-4 ml-1" />
                 </TooltipTrigger>
                 <TooltipContent>
                   <p>Moving average of APR for 7 days period</p>
@@ -84,7 +91,7 @@ export function LiquidStakingOverview() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
+          <div className="mt-1 font-semibold text-lg sm:text-2xl">
             {aprFormatted}%
           </div>
         </div>

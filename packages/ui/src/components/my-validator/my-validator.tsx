@@ -108,7 +108,7 @@ export function MyValidator() {
       <div className="container">
         <div className="pt-4 py-8 grid grid-cols-1 lg:grid-cols-6 items-start justify-between gap-8 lg:gap-0">
           <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between flex-1 col-span-1 lg:col-span-3 gap-4 lg:gap-0">
-            <div>
+            <div className="w-full lg:w-auto">
               <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
                 Staked
                 <TooltipProvider>
@@ -136,7 +136,7 @@ export function MyValidator() {
                 </div>
               </div>
             </div>
-            <div className="space-x-6 flex items-center">
+            <div className="space-x-6 flex items-center w-full lg:w-auto justify-between">
               <Button variant="secondary" onClick={openStakeDialog}>
                 Stake
               </Button>
