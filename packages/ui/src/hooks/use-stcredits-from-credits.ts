@@ -8,9 +8,18 @@ export function useStCreditsFromCredits(amount: bigint) {
     (store) => store.stCreditsProgram
   )
 
-  const { data: totalPooled = 0n } = useStCreditsTotalPooled()
+  let { data: totalPooled = 0n } = useStCreditsTotalPooled()
 
-  const { data: totalSupply = 0n } = useStCreditsTotalSupply()
+  let { data: totalSupply = 0n } = useStCreditsTotalSupply()
+
+  // TODO
+  if (totalPooled === 0n && totalSupply !== 0n) {
+    totalPooled = 1_000_000n
+  }
+
+  if (totalPooled !== 0n && totalSupply === 0n) {
+    totalSupply = 1_000_000n
+  }
 
   return useQuery({
     queryKey: [
