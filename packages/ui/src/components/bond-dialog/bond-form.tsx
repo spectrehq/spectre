@@ -322,34 +322,36 @@ export function BondForm({ validator }: BondFormProps) {
                           : 'Stake')}
                     </Button>
                   </WalletConnectionChecker>
-                  <div className="mt-2 bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-px w-full">
+                  <div className="grid grid-cols-2 items-center gap-4">
                     <Button
-                      className="rounded-xl border-muted-foreground border-none w-full"
-                      variant="outline"
+                      className="w-full border-none"
+                      variant="secondary"
+                      type="button"
                       size="xl"
-                      asChild
+                      disabled={isPending}
+                      onClick={prevStep}
                     >
-                      <Link href="/liquid-staking">
-                        <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                          Liquid
-                        </span>
-                        &nbsp;
-                        <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                          Staking
-                        </span>
-                      </Link>
+                      Back
                     </Button>
+                    <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-px w-full box-content">
+                      <Button
+                        className="rounded-xl border-muted-foreground border-none w-full h-[46px]"
+                        variant="outline"
+                        size="xl"
+                        asChild
+                      >
+                        <Link href="/liquid-staking">
+                          <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                            Liquid
+                          </span>
+                          &nbsp;
+                          <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                            Staking
+                          </span>
+                        </Link>
+                      </Button>
+                    </div>
                   </div>
-                  <Button
-                    className="w-full border-none"
-                    variant="secondary"
-                    type="button"
-                    size="xl"
-                    disabled={isPending}
-                    onClick={prevStep}
-                  >
-                    Back
-                  </Button>
                 </form>
               </Form>
             </div>
