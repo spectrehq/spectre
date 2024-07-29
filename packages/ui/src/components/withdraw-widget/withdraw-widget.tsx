@@ -23,6 +23,7 @@ import Link from 'next/link'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 import { cn } from '~/lib/utils'
 import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
+import { useQueryClient } from '@tanstack/react-query'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -105,7 +106,7 @@ export function WithdrawWidget() {
     form.trigger('amount')
   }, [form])
 
-  const { mutate, isPending } = useWithdraw()
+  const { mutate, isPending, isSuccess } = useWithdraw()
 
   const handleWithdraw = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -119,6 +120,15 @@ export function WithdrawWidget() {
     },
     [address, mutate]
   )
+
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset()
+      void queryClient.refetchQueries()
+    }
+  }, [isSuccess, form, queryClient])
 
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useCreditsFromStCredits(1_000_000n)

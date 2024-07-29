@@ -20,6 +20,7 @@ import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
 import { cn } from '~/lib/utils'
 import { useStCreditsFromCredits } from '~/hooks/use-stcredits-from-credits'
+import { useQueryClient } from '@tanstack/react-query'
 
 export function StakeWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -58,7 +59,7 @@ export function StakeWidget() {
     form.trigger('amount')
   }, [form])
 
-  const { mutate, isPending } = useStake()
+  const { mutate, isPending, isSuccess } = useStake()
 
   const handleStake = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -70,6 +71,15 @@ export function StakeWidget() {
     },
     [address, mutate]
   )
+
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset()
+      void queryClient.refetchQueries()
+    }
+  }, [isSuccess, form, queryClient])
 
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useStCreditsFromCredits(1_000_000n)

@@ -2,7 +2,7 @@
 
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
-import { useCallback, useMemo } from 'react'
+import { useCallback, useEffect, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
@@ -21,6 +21,7 @@ import {
 import { cn } from '~/lib/utils'
 import { CircleHelpIcon } from 'lucide-react'
 import Link from 'next/link'
+import { useQueryClient } from '@tanstack/react-query'
 
 export function ClaimWidget() {
   const { address } = useAccount()
@@ -56,19 +57,7 @@ export function ClaimWidget() {
     return userWithdraw.height <= BigInt(latestBlockHeight)
   }, [userWithdraw, latestBlockHeight])
 
-  const action = useMemo(() => {
-    if (!userWithdraw || !latestBlockHeight || userWithdraw.amount <= 0n) {
-      return 'Claim'
-    }
-
-    if (userWithdraw.height > BigInt(latestBlockHeight)) {
-      return `After ${userWithdraw.height - BigInt(latestBlockHeight)} blocks`
-    }
-
-    return 'Claim'
-  }, [latestBlockHeight, userWithdraw])
-
-  const { mutate, isPending } = useClaim()
+  const { mutate, isPending, isSuccess } = useClaim()
 
   const handleClaim = useCallback(async () => {
     if (!address || !userWithdraw) return
@@ -77,6 +66,14 @@ export function ClaimWidget() {
 
     mutate({ amount: userWithdraw.amount, fee })
   }, [address, mutate, userWithdraw])
+
+  const queryClient = useQueryClient()
+
+  useEffect(() => {
+    if (isSuccess) {
+      void queryClient.refetchQueries()
+    }
+  }, [isSuccess, queryClient])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -122,7 +119,9 @@ export function ClaimWidget() {
               </TooltipProvider>
             </div>
             <div className="text-lg">
-              {userWithdraw ? dn.format([userWithdraw?.height, 0]) : '-'}
+              {userWithdraw && latestBlockHeight
+                ? `${dn.format([userWithdraw?.height, 0])}/${dn.format([BigInt(latestBlockHeight), 0])}`
+                : '-'}
             </div>
           </div>
         </div>
