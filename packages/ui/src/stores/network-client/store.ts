@@ -1,5 +1,6 @@
 import {
   CreditsProgram,
+  initialize,
   StCreditsPointsProgram,
   StCreditsProgram,
 } from 'spectre'
@@ -30,38 +31,61 @@ export type NetworkClientActions = {
 
 export type NetworkClientStore = NetworkClientState & NetworkClientActions
 
-const defaultCreditsProgram = new CreditsProgram(
-  generateGetMappingValueString(
-    DEFAULT_HOST,
-    DEFAULT_NETWORK,
-    CREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
-  )
-)
+export const getDefaultNetworkClientState: () => NetworkClientState = () => {
+  try {
+    initialize({
+      programSuffix: '024',
+      delegatorNum: 3,
+      programs: {
+        credits: 'credits',
+        //@ts-ignore
+        multiTokenSupport: 'multi_token_support_program_v2',
+        spectre: {
+          accessControl: 'access_control',
+          aclManager: 'acl_manager',
+        },
+        staking: {
+          stcredits: 'stcredits',
+          stcreditsPoints: 'stcredits_points',
+          delegator: 'delegator',
+        },
+      },
+    })
+  } catch (error) {}
 
-export const defaultNetworkClientState: NetworkClientState = {
-  host: DEFAULT_HOST,
-  network: DEFAULT_NETWORK,
-
-  creditsProgram: defaultCreditsProgram,
-  stCreditsProgram: new StCreditsProgram(
+  const defaultCreditsProgram = new CreditsProgram(
     generateGetMappingValueString(
       DEFAULT_HOST,
       DEFAULT_NETWORK,
-      STCREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
-    ),
-    defaultCreditsProgram
-  ),
-  stCreditsPointsProgram: new StCreditsPointsProgram(
-    generateGetMappingValueString(
-      DEFAULT_HOST,
-      DEFAULT_NETWORK,
-      STCREDITS_POINTS_PROGRAM_IDS[DEFAULT_NETWORK]
+      CREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
     )
-  ),
+  )
+
+  return {
+    host: DEFAULT_HOST,
+    network: DEFAULT_NETWORK,
+
+    creditsProgram: defaultCreditsProgram,
+    stCreditsProgram: new StCreditsProgram(
+      generateGetMappingValueString(
+        DEFAULT_HOST,
+        DEFAULT_NETWORK,
+        STCREDITS_PROGRAM_IDS[DEFAULT_NETWORK]
+      ),
+      defaultCreditsProgram
+    ),
+    stCreditsPointsProgram: new StCreditsPointsProgram(
+      generateGetMappingValueString(
+        DEFAULT_HOST,
+        DEFAULT_NETWORK,
+        STCREDITS_POINTS_PROGRAM_IDS[DEFAULT_NETWORK]
+      )
+    ),
+  }
 }
 
 export const createNetworkClientStore = (
-  initState: NetworkClientState = defaultNetworkClientState
+  initState: NetworkClientState = getDefaultNetworkClientState()
 ) =>
   createStore<NetworkClientStore>()((set, get) => ({
     ...initState,

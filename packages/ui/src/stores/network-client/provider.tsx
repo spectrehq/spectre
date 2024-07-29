@@ -2,7 +2,11 @@
 
 import { type ReactNode, createContext, useContext, useRef } from 'react'
 import { useStore } from 'zustand'
-import { type NetworkClientStore, createNetworkClientStore } from './store'
+import {
+  type NetworkClientStore,
+  createNetworkClientStore,
+  getDefaultNetworkClientState,
+} from './store'
 
 export type NetworkClientStoreApi = ReturnType<typeof createNetworkClientStore>
 
@@ -20,7 +24,7 @@ export function NetworkClientStoreProvider({
   const storeRef = useRef<NetworkClientStoreApi>()
 
   if (!storeRef.current) {
-    storeRef.current = createNetworkClientStore()
+    storeRef.current = createNetworkClientStore(getDefaultNetworkClientState())
   }
 
   return (

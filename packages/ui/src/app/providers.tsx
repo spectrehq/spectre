@@ -18,10 +18,7 @@ import {
   STCREDITS_POINTS_PROGRAM_IDS,
 } from '~/config'
 import { getQueryClient } from '~/lib/query'
-import {
-  NetworkClientStoreProvider,
-  useNetworkClientStore,
-} from '~/stores/network-client'
+import { useNetworkClientStore } from '~/stores/network-client'
 
 export function Providers({ children }: PropsWithChildren) {
   const wallets = useMemo(
