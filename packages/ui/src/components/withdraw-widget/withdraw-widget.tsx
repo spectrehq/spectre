@@ -22,6 +22,7 @@ import { useWithdraw } from '~/hooks/use-withdraw'
 import Link from 'next/link'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 import { cn } from '~/lib/utils'
+import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -119,6 +120,26 @@ export function WithdrawWidget() {
     [address, mutate]
   )
 
+  const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
+    useCreditsFromStCredits(1_000_000n)
+
+  const exchangeRateFormatted = useMemo(
+    () => dn.format([exchangeRate ?? 0n, 6], { digits: 6 }),
+    [exchangeRate]
+  )
+
+  const creditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const { data: received, isLoading: isLoadingReceived } =
+    useCreditsFromStCredits(dn.from(creditsAmount || 0, 6)[0])
+  const receivedFormatted = useMemo(
+    () => dn.format([received ?? 0n, 6], { digits: 6 }),
+    [received]
+  )
+
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
@@ -205,11 +226,11 @@ export function WithdrawWidget() {
         <ul className="grid gap-3 text-sm mt-6">
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">You will receive</span>
-            <span>1.123456 Credits</span>
+            <span>{receivedFormatted} Credits</span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Exchange rate</span>
-            <span>1 stCredits = 1.123456 Credits</span>
+            <span>1 stCredits = {exchangeRateFormatted} Credits</span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Network fee</span>

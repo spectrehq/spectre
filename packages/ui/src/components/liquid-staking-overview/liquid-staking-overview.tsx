@@ -14,6 +14,7 @@ import {
 } from '~/components/ui/tooltip'
 import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
+import { useStakingAPR } from '~/hooks/use-staking-apr'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { shortenAddress } from '~/utils'
 
@@ -27,6 +28,12 @@ export function LiquidStakingOverview() {
   const stCreditsBalanceDN = useMemo(
     () => dn.from([stCreditsBalance ?? 0n, 6]),
     [stCreditsBalance]
+  )
+
+  const { data: apr } = useStakingAPR()
+  const aprFormatted = useMemo(
+    () => dn.format([apr ?? 0n, 2], { digits: 2, trailingZeros: true }),
+    [apr]
   )
 
   return (
@@ -78,7 +85,7 @@ export function LiquidStakingOverview() {
             </TooltipProvider>
           </div>
           <div className="mt-1 font-semibold text-3xl/8 sm:text-2xl/8">
-            13.23%
+            {aprFormatted}%
           </div>
         </div>
       </div>

@@ -6,7 +6,7 @@ import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
@@ -19,6 +19,7 @@ import { useStake } from '~/hooks/use-stake'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
 import { cn } from '~/lib/utils'
+import { useStCreditsFromCredits } from '~/hooks/use-stcredits-from-credits'
 
 export function StakeWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -26,13 +27,7 @@ export function StakeWidget() {
   const { address } = useAccount()
 
   const { data: balance } = useBalance(address)
-  const { data: stCreditsBalance } = useStCreditsBalance(address)
-
   const balanceDN = useMemo(() => dn.from([balance ?? 0n, 6]), [balance])
-  const stCreditsBalanceDN = useMemo(
-    () => dn.from([stCreditsBalance ?? 0n, 6]),
-    [stCreditsBalance]
-  )
 
   const formSchema = useMemo(
     () =>
@@ -46,7 +41,7 @@ export function StakeWidget() {
           .max(dn.toNumber(balanceDN), tPrompts('Insufficient balance'))
           .default(0),
       }),
-    [tPrompts, balance, balanceDN]
+    [tPrompts, balanceDN]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -74,6 +69,26 @@ export function StakeWidget() {
       mutate({ amount, fee: 250_000 })
     },
     [address, mutate]
+  )
+
+  const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
+    useStCreditsFromCredits(1_000_000n)
+
+  const exchangeRateFormatted = useMemo(
+    () => dn.format([exchangeRate ?? 0n, 6], { digits: 6 }),
+    [exchangeRate]
+  )
+
+  const creditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const { data: received, isLoading: isLoadingReceived } =
+    useStCreditsFromCredits(dn.from(creditsAmount || 0, 6)[0])
+  const receivedFormatted = useMemo(
+    () => dn.format([received ?? 0n, 6], { digits: 6 }),
+    [received]
   )
 
   return (
@@ -143,11 +158,11 @@ export function StakeWidget() {
         <ul className="grid gap-3 text-sm mt-6">
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">You will receive</span>
-            <span>0.923456 stCredits</span>
+            <span>{receivedFormatted} stCredits</span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Exchange rate</span>
-            <span>1 Credits = 0.923456 stCredits</span>
+            <span>1 Credits = {exchangeRateFormatted} stCredits</span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Network fee</span>
