@@ -4,18 +4,20 @@ import {
 } from '@demox-labs/aleo-wallet-adapter-base'
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react'
 import {
-  type CreateEventRequestData,
+  EventStatus,
   EventType,
   getEvent,
   requestCreateEvent,
+  type CreateEventRequestData,
 } from '@puzzlehq/sdk'
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { toast } from 'sonner'
-import { WalletType } from '~/types'
-import { useAccount } from './use-account'
 import { STCREDITS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
+import { WalletType } from '~/types'
+import { useAccount } from './use-account'
+import { useState } from 'react'
 
 export interface UseStakeParams {
   amount: number
@@ -25,7 +27,7 @@ export interface UseStakeParams {
 export function useStake() {
   const { address, walletType } = useAccount()
 
-  const { requestTransaction } = useWallet()
+  const { requestTransaction, transactionStatus } = useWallet()
 
   const network = useNetworkClientStore((store) => store.network)
 
@@ -54,8 +56,23 @@ export function useStake() {
 
         const id = await requestTransaction?.(tx)
         if (id) {
-          toast.success('Staking successful', {
-            description: 'Go to the wallet to check the transaction status',
+          const getTransactionStatus = async (id: string) => {
+            const status = await transactionStatus?.(id)
+
+            if (status === 'Finalized') {
+              return
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
+            return getTransactionStatus(id)
+          }
+
+          toast.promise(getTransactionStatus(id), {
+            loading: 'Waiting for transaction confirmation',
+            success: 'Staking successful',
+            error:
+              'Get transaction status failed! You can check the transaction details in your wallet.',
           })
         } else {
           toast.error('Failed to stake')
@@ -76,14 +93,34 @@ export function useStake() {
         const { eventId, error } = await requestCreateEvent(event)
 
         if (eventId) {
-          // TODO
-          const event = await getEvent({
-            id: eventId,
+          const getEventInner = async ({
+            id,
             address,
-          })
+          }: {
+            id: string
+            address: string
+          }) => {
+            const { event, error } = await getEvent({ id, address })
 
-          toast.success('Staking successful', {
-            description: 'Go to the wallet to check the transaction status',
+            if (error) {
+              // TODO
+              throw error
+            }
+
+            if (event && event.status === EventStatus.Settled) {
+              return event
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
+            return getEventInner({ id, address })
+          }
+
+          toast.promise(getEventInner({ id: eventId, address }), {
+            loading: 'Waiting for transaction confirmation',
+            success: 'Staking successful',
+            error:
+              'Get transaction status failed! You can check the transaction details in your wallet.',
           })
         }
 

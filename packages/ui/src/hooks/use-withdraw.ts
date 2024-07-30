@@ -5,7 +5,9 @@ import {
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react'
 import {
   type CreateEventRequestData,
+  EventStatus,
   EventType,
+  getEvent,
   requestCreateEvent,
 } from '@puzzlehq/sdk'
 import { useMutation } from '@tanstack/react-query'
@@ -19,7 +21,7 @@ import { useAccount } from './use-account'
 export function useWithdraw() {
   const { address, walletType } = useAccount()
 
-  const { requestTransaction } = useWallet()
+  const { requestTransaction, transactionStatus } = useWallet()
 
   const network = useNetworkClientStore((store) => store.network)
 
@@ -43,8 +45,23 @@ export function useWithdraw() {
         const id = await requestTransaction?.(tx)
 
         if (id) {
-          toast.success('Withdraw successful', {
-            description: 'Go to the wallet to check the transaction status',
+          const getTransactionStatus = async (id: string) => {
+            const status = await transactionStatus?.(id)
+
+            if (status === 'Finalized') {
+              return
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
+            return getTransactionStatus(id)
+          }
+
+          toast.promise(getTransactionStatus(id), {
+            loading: 'Waiting for transaction confirmation',
+            success: 'Unstake successful',
+            error:
+              'Get transaction status failed! You can check the transaction details in your wallet.',
           })
         } else {
           toast.error('Failed to request withdrawal')
@@ -65,8 +82,34 @@ export function useWithdraw() {
         const { eventId, error } = await requestCreateEvent(event)
 
         if (eventId) {
-          toast.success('Withdrawal successful', {
-            description: 'Go to the wallet to check the transaction status',
+          const getEventInner = async ({
+            id,
+            address,
+          }: {
+            id: string
+            address: string
+          }) => {
+            const { event, error } = await getEvent({ id, address })
+
+            if (error) {
+              // TODO
+              throw error
+            }
+
+            if (event && event.status === EventStatus.Settled) {
+              return event
+            }
+
+            await new Promise((resolve) => setTimeout(resolve, 500))
+
+            return getEventInner({ id, address })
+          }
+
+          toast.promise(getEventInner({ id: eventId, address }), {
+            loading: 'Waiting for transaction confirmation',
+            success: 'Unstake successful',
+            error:
+              'Get transaction status failed! You can check the transaction details in your wallet.',
           })
         }
 
