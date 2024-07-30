@@ -176,7 +176,7 @@ export function StakeWidget() {
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Network fee</span>
-            <span>0.02 Credits</span>
+            <span>0.25 Credits</span>
           </li>
         </ul>
       </div>

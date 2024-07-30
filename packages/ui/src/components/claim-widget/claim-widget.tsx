@@ -119,9 +119,17 @@ export function ClaimWidget() {
               </TooltipProvider>
             </div>
             <div className="text-lg">
-              {userWithdraw && latestBlockHeight
-                ? `${dn.format([userWithdraw?.height, 0])}/${dn.format([BigInt(latestBlockHeight), 0])}`
-                : '-'}
+              {userWithdraw && latestBlockHeight ? (
+                <>
+                  <span>{dn.format([userWithdraw?.height, 0])}</span>
+                  &nbsp;/ &nbsp;
+                  <span className="text-muted-foreground">
+                    {dn.format([BigInt(latestBlockHeight), 0])}
+                  </span>
+                </>
+              ) : (
+                '-'
+              )}
             </div>
           </div>
         </div>
