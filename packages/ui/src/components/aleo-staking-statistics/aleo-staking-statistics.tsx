@@ -3,9 +3,9 @@
 import * as dn from 'dnum'
 import { useTranslations } from 'next-intl'
 import { useMemo } from 'react'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useStakingAPR } from '~/hooks/use-staking-apr'
-import { useStCreditsState } from '~/hooks/use-stcredits-state'
-import { useStCreditsTotalSupply } from '~/hooks/use-stcredits-total-supply'
+import { useStCreditsTotalPooled } from '~/hooks/use-stcredits-total-pooled'
 
 export function AleoStakingStatistics() {
   const t = useTranslations('AleoStakingStatistics')
@@ -16,16 +16,11 @@ export function AleoStakingStatistics() {
     [apr]
   )
 
-  const { data: state } = useStCreditsState()
+  const { data: totalPooled, isLoading: isLoadingTotalPooled } =
+    useStCreditsTotalPooled()
   const totalStakedFormatted = useMemo(
-    () => dn.format([state?.bonded ?? 0n, 6], { digits: 6 }),
-    [state]
-  )
-
-  const { data: totalSupply } = useStCreditsTotalSupply()
-  const totalSupplyFormatted = useMemo(
-    () => dn.format([totalSupply ?? 0n, 6], { digits: 6 }),
-    [totalSupply]
+    () => dn.format([totalPooled ?? 0n, 6], { digits: 6 }),
+    [totalPooled]
   )
 
   return (
@@ -43,15 +38,18 @@ export function AleoStakingStatistics() {
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Total staked</span>
-            <span>{totalStakedFormatted} Credits</span>
+            <span>
+              {isLoadingTotalPooled ? (
+                <Skeleton className="w-40 h-5" />
+              ) : (
+                `${totalStakedFormatted} Credits`
+              )}
+            </span>
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">stCredits market cap</span>
-            <span>
-              {totalSupply && dn.gt(totalSupplyFormatted, 0)
-                ? `${totalSupplyFormatted}`
-                : '-'}
-            </span>
+            {/* TODO */}
+            <span>-</span>
           </li>
         </ul>
       </div>

@@ -1,29 +1,28 @@
 'use client'
 
-import { Loader2Icon } from 'lucide-react'
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
-import Image from 'next/image'
+import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
+import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
-import { Separator } from '~/components/ui/separator'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
+import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
 import { useLiquidity } from '~/hooks/use-liquidity'
 import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { useWithdraw } from '~/hooks/use-withdraw'
-import Link from 'next/link'
-import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 import { cn } from '~/lib/utils'
-import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
-import { useQueryClient } from '@tanstack/react-query'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -244,7 +243,7 @@ export function WithdrawWidget() {
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Network fee</span>
-            <span>0.25 Credits</span>
+            <span>~ 0.25 Credits</span>
           </li>
         </ul>
       </div>

@@ -1,27 +1,26 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
+import { CircleHelpIcon } from 'lucide-react'
+import Link from 'next/link'
 import { useCallback, useEffect, useMemo } from 'react'
 import { Button } from '~/components/ui/button'
-import { Separator } from '~/components/ui/separator'
-import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
-import { useAccount } from '~/hooks/use-account'
-import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
-import { useUserWithdraw } from '~/hooks/use-user-withdraw'
-import { useClaim } from '~/hooks/use-claim'
-import { useBlockHeight } from '~/hooks/use-block-height'
 import {
   Tooltip,
   TooltipContent,
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
+import { useAccount } from '~/hooks/use-account'
+import { useBlockHeight } from '~/hooks/use-block-height'
+import { useClaim } from '~/hooks/use-claim'
+import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
+import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
+import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { cn } from '~/lib/utils'
-import { CircleHelpIcon } from 'lucide-react'
-import Link from 'next/link'
-import { useQueryClient } from '@tanstack/react-query'
 
 export function ClaimWidget() {
   const { address } = useAccount()
@@ -121,11 +120,12 @@ export function ClaimWidget() {
             <div className="text-lg">
               {userWithdraw && latestBlockHeight ? (
                 <>
-                  <span>{dn.format([userWithdraw?.height, 0])}</span>
-                  &nbsp;/ &nbsp;
-                  <span className="text-muted-foreground">
-                    {dn.format([BigInt(latestBlockHeight), 0])}
-                  </span>
+                  <p className="text-lg">
+                    {dn.format([userWithdraw.height, 0])}
+                  </p>
+                  <p className="text-xs text-muted-foreground">
+                    Current height: {dn.format([BigInt(latestBlockHeight), 0])}
+                  </p>
                 </>
               ) : (
                 '-'

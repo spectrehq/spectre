@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -8,19 +9,16 @@ import Image from 'next/image'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
+import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
-import { Separator } from '~/components/ui/separator'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
 import { useBalance } from '~/hooks/use-balance'
 import { useStake } from '~/hooks/use-stake'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
-import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
-import { cn } from '~/lib/utils'
 import { useStCreditsFromCredits } from '~/hooks/use-stcredits-from-credits'
-import { useQueryClient } from '@tanstack/react-query'
+import { cn } from '~/lib/utils'
 
 export function StakeWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -176,7 +174,7 @@ export function StakeWidget() {
           </li>
           <li className="flex items-center justify-between">
             <span className="text-muted-foreground">Network fee</span>
-            <span>0.25 Credits</span>
+            <span>~ 0.25 Credits</span>
           </li>
         </ul>
       </div>
