@@ -125,9 +125,11 @@ export function WithdrawWidget() {
   useEffect(() => {
     if (isSuccess) {
       form.reset()
-      void queryClient.refetchQueries()
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
     }
-  }, [isSuccess, form, queryClient])
+  }, [isSuccess, form, queryClient, address])
 
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useCreditsFromStCredits(1_000_000n)

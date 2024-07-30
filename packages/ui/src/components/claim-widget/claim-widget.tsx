@@ -70,9 +70,11 @@ export function ClaimWidget() {
 
   useEffect(() => {
     if (isSuccess) {
-      void queryClient.refetchQueries()
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
     }
-  }, [isSuccess, queryClient])
+  }, [isSuccess, queryClient, address])
 
   return (
     <div className="max-w-lg mx-auto">
