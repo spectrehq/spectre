@@ -4,8 +4,10 @@ import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useMemo, useState } from 'react'
+import { toast } from 'sonner'
 import { BondDialog } from '~/components/bond-dialog'
 import { Button } from '~/components/ui/button'
+import { Separator } from '~/components/ui/separator'
 import {
   Tooltip,
   TooltipContent,
@@ -20,10 +22,9 @@ import { useBondState } from '~/hooks/use-bond-state'
 import { useCreditsClaim } from '~/hooks/use-credits-claim'
 import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
 import { cn } from '~/lib/utils'
+import { useNetworkClientStore } from '~/stores/network-client'
 import type { AleoAddress } from '~/types'
 import { ValidatorInfo } from './validator-info'
-import { useNetworkClientStore } from '~/stores/network-client'
-import { toast } from 'sonner'
 
 export function MyValidator() {
   const { address } = useAccount()
@@ -232,9 +233,7 @@ export function MyValidator() {
           </div>
         </div>
 
-        <ValidatorInfo />
-
-        {/* {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />} */}
+        {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />}
       </div>
       {open && (
         <BondDialog

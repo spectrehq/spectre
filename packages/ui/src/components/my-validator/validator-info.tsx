@@ -2,18 +2,15 @@
 
 import * as dn from 'dnum'
 import { GradientsAvatar } from '~/components/gradients-avatar'
+import { Skeleton } from '~/components/ui/skeleton'
 import { useAccount } from '~/hooks/use-account'
 import { useBondState } from '~/hooks/use-bond-state'
 import { useValidatorState } from '~/hooks/use-validator-state'
 import type { AleoAddress } from '~/types'
-import { Skeleton } from '../ui/skeleton'
 import { shortenAddress } from '~/utils'
 
 export function ValidatorInfo() {
-  // const { address } = useAccount()
-  // TODO: remove
-  const address =
-    'aleo1anfd8kst08fw9ehxatp3f2s98tm4cq3mawq8tt5wv5hstmdmgygsva0tmf'
+  const { address } = useAccount()
   const { data: bondState, isLoading: isLoadingBondState } =
     useBondState(address)
   const { data: validatorState, isLoading: isLoadingValidatorState } =
