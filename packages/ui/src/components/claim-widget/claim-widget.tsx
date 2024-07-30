@@ -6,6 +6,7 @@ import { Loader2Icon } from 'lucide-react'
 import { CircleHelpIcon } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo } from 'react'
+import { toast } from 'sonner'
 import { Button } from '~/components/ui/button'
 import {
   Tooltip,
@@ -56,7 +57,7 @@ export function ClaimWidget() {
     return userWithdraw.height <= BigInt(latestBlockHeight)
   }, [userWithdraw, latestBlockHeight])
 
-  const { mutate, isPending, isSuccess } = useClaim()
+  const { mutate, isPending, isSuccess, error } = useClaim()
 
   const handleClaim = useCallback(async () => {
     if (!address || !userWithdraw) return
@@ -75,6 +76,13 @@ export function ClaimWidget() {
       })
     }
   }, [isSuccess, queryClient, address])
+
+  useEffect(() => {
+    if (!error) return
+
+    // TODO
+    toast.error('Send Transaction error')
+  }, [error])
 
   return (
     <div className="max-w-lg mx-auto">

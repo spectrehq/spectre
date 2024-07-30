@@ -8,6 +8,7 @@ import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
+import { toast } from 'sonner'
 import { z } from 'zod'
 import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
 import { Button } from '~/components/ui/button'
@@ -57,7 +58,7 @@ export function StakeWidget() {
     form.trigger('amount')
   }, [form])
 
-  const { mutate, isPending, isSuccess } = useStake()
+  const { mutate, isPending, isSuccess, error } = useStake()
 
   const handleStake = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -80,6 +81,13 @@ export function StakeWidget() {
       })
     }
   }, [isSuccess, form, queryClient, address])
+
+  useEffect(() => {
+    if (!error) return
+
+    // TODO
+    toast.error('Send Transaction error')
+  }, [error])
 
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useStCreditsFromCredits(1_000_000n)
