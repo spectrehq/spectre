@@ -150,7 +150,7 @@ export function MyValidator() {
                   variant="outline"
                   asChild
                 >
-                  <Link href="/liquid-staking">
+                  <Link href="/liquid-staking" target="_blank" rel="noreferrer">
                     <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
                       Liquid
                     </span>
@@ -215,10 +215,6 @@ export function MyValidator() {
                   </Button>
                 </WalletConnectionChecker>
               </div>
-            </div>
-
-            <div className="text-sm text-muted-foreground mt-1">
-              <span>Claim Height: {dn.format(dn.from(618409n))}</span>{' '}
             </div>
 
             {!dn.eq(unbondingCreditsDN, 0) && (

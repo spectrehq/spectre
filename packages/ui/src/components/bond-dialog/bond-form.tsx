@@ -340,7 +340,11 @@ export function BondForm({ validator }: BondFormProps) {
                         size="xl"
                         asChild
                       >
-                        <Link href="/liquid-staking">
+                        <Link
+                          href="/liquid-staking"
+                          target="_blank"
+                          rel="noreferrer"
+                        >
                           <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
                             Liquid
                           </span>
