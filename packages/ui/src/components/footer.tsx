@@ -214,7 +214,7 @@ export function Footer() {
                   </li>
                   <li className="mt-4">
                     <Link
-                      className="transition hover:text-neutral-950"
+                      className="transition hover:text-foreground"
                       href="https://docs.spectre.guru/spectre/governance"
                       target="_blank"
                       rel="noreferrer"
