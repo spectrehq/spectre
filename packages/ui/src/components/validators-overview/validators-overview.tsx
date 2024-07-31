@@ -47,7 +47,7 @@ export function ValidatorsOverview() {
             <div className="">
               <span className="text-2xl font-semibold">
                 {dn.format([BigInt(committee?.totalStake ?? 0), 6], {
-                  digits: 6,
+                  digits: 2,
                 })}
               </span>
               &nbsp;

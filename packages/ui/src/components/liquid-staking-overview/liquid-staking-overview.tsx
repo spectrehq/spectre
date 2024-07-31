@@ -6,6 +6,7 @@ import { useMemo } from 'react'
 import { GradientsAvatar } from '~/components/gradients-avatar'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
+import { Skeleton } from '~/components/ui/skeleton'
 import {
   Tooltip,
   TooltipContent,
@@ -21,8 +22,9 @@ import { shortenAddress } from '~/utils'
 export function LiquidStakingOverview() {
   const { address } = useAccount()
 
-  const { data: balance } = useBalance(address)
-  const { data: stCreditsBalance } = useStCreditsBalance(address)
+  const { data: balance, isLoading: isLoadingBalance } = useBalance(address)
+  const { data: stCreditsBalance, isLoading: isLoadingStCreditsBalance } =
+    useStCreditsBalance(address)
 
   const balanceDN = useMemo(() => dn.from([balance ?? 0n, 6]), [balance])
   const stCreditsBalanceDN = useMemo(
@@ -30,7 +32,7 @@ export function LiquidStakingOverview() {
     [stCreditsBalance]
   )
 
-  const { data: apr } = useStakingAPR()
+  const { data: apr, isLoading: isLoadingAPR } = useStakingAPR()
   const aprFormatted = useMemo(
     () => dn.format([apr ?? 0n, 2], { digits: 2, trailingZeros: true }),
     [apr]
@@ -43,8 +45,12 @@ export function LiquidStakingOverview() {
           <div className="font-medium text-xs sm:text-sm">
             Available to stake
           </div>
-          <div className="mt-1 font-semibold text-lg sm:text-2xl">
-            {dn.format(balanceDN, { digits: 2, trailingZeros: true })} Credits
+          <div className="mt-1 font-semibold text-lg sm:text-xl">
+            {isLoadingBalance ? (
+              <Skeleton className="w-48">&nbsp;</Skeleton>
+            ) : (
+              <span>{dn.format(balanceDN, 6)} Credits</span>
+            )}
           </div>
         </div>
         <div className="flex justify-end">
@@ -69,12 +75,12 @@ export function LiquidStakingOverview() {
       <div className="grid grid-cols-2 gap-6">
         <div>
           <div className="font-medium text-xs sm:text-sm">Staked amount</div>
-          <div className="mt-1 font-semibold text-lg sm:text-2xl">
-            {dn.format(stCreditsBalanceDN, {
-              digits: 2,
-              trailingZeros: true,
-            })}{' '}
-            stCredits
+          <div className="mt-1 font-semibold text-lg sm:text-xl">
+            {isLoadingStCreditsBalance ? (
+              <Skeleton className="w-40">&nbsp;</Skeleton>
+            ) : (
+              <span>{dn.format(stCreditsBalanceDN, 6)} stCredits</span>
+            )}
           </div>
         </div>
         <div>
@@ -91,8 +97,12 @@ export function LiquidStakingOverview() {
               </Tooltip>
             </TooltipProvider>
           </div>
-          <div className="mt-1 font-semibold text-lg sm:text-2xl">
-            {aprFormatted}%
+          <div className="mt-1 font-semibold text-lg sm:text-xl">
+            {isLoadingAPR ? (
+              <Skeleton className="w-32">&nbsp;</Skeleton>
+            ) : (
+              <span>{aprFormatted}%</span>
+            )}
           </div>
         </div>
       </div>
