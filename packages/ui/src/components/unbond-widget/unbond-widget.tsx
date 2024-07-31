@@ -81,9 +81,12 @@ export function UnbondWidget() {
     <div className="rounded-xl w-full mx-auto">
       <div className="p-10 pt-0">
         <div className="grid text-center">
+          <div className="text-lg font-medium text-muted-foreground">
+            Staked amount
+          </div>
           <div className="">
             <span className="mt-1 font-semibold text-3xl sm:text-2xl">
-              {dn.format(bondedCreditsDN, { digits: 2, trailingZeros: true })}
+              {dn.format(bondedCreditsDN, { digits: 6 })}
             </span>
             &nbsp;
             <span className="font-medium sm:text-sm text-muted-foreground">
