@@ -93,6 +93,7 @@ export function useWithdraw() {
 
             if (error) {
               // TODO
+              console.log(error)
               throw error
             }
 

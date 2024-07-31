@@ -93,6 +93,7 @@ export function useClaim() {
 
             if (error) {
               // TODO
+              console.log(error)
               throw error
             }
 
