@@ -83,6 +83,7 @@ export function WithdrawWidget() {
   useEffect(() => {
     if (isSuccess) {
       form.reset()
+      form.trigger()
       void queryClient.refetchQueries({
         predicate: ({ queryKey }) => queryKey.includes(address),
       })
@@ -200,7 +201,7 @@ export function WithdrawWidget() {
                   <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
                 )}
                 {form.formState.errors.amount?.message ||
-                  (isPending ? 'Waiting for wallet confirmation' : 'Withdraw')}
+                  (isPending ? 'Waiting for wallet confirmation' : 'Unstake')}
               </Button>
             </WalletConnectionChecker>
           </form>

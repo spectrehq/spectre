@@ -82,6 +82,7 @@ export function StakeWidget() {
   useEffect(() => {
     if (isSuccess) {
       form.reset()
+      form.trigger()
       void queryClient.refetchQueries({
         predicate: ({ queryKey }) => queryKey.includes(address),
       })
