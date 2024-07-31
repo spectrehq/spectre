@@ -72,6 +72,9 @@ export function useStake() {
             success: 'Staking succeeded',
             error:
               'Getting transaction status failed! You can check the transaction details in your wallet.',
+            classNames: {
+              closeButton: 'bg-[#F8F8F8]',
+            },
           })
         } else {
           toast.error('Failed to stake')
@@ -123,6 +126,9 @@ export function useStake() {
             success: 'Staking succeeded',
             error:
               'Getting transaction status failed! You can check the transaction details in your wallet.',
+            classNames: {
+              closeButton: 'bg-[#F8F8F8]',
+            },
           })
         }
 

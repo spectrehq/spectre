@@ -62,6 +62,9 @@ export function useClaim() {
             success: 'Claim succeeded',
             error:
               'Getting transaction status failed! You can check the transaction details in your wallet.',
+            classNames: {
+              closeButton: 'bg-[#F8F8F8]',
+            },
           })
         } else {
           toast.error('Failed to claim')
@@ -113,6 +116,9 @@ export function useClaim() {
             success: 'Claim succeeded',
             error:
               'Getting transaction status failed! You can check the transaction details in your wallet.',
+            classNames: {
+              closeButton: 'bg-[#F8F8F8]',
+            },
           })
         }
 
