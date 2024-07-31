@@ -162,10 +162,13 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
               <li className="flex items-center justify-between">
                 <span className="text-muted-foreground">Total Earning</span>
                 <span>
-                  {dn.format([BigInt(data?.Info.TotalProfit ?? 0), 6], {
-                    digits: 2,
-                    trailingZeros: true,
-                  })}
+                  {dn.format(
+                    [BigInt(data?.Info.ValidatorTotalProfit ?? 0), 6],
+                    {
+                      digits: 2,
+                      trailingZeros: true,
+                    }
+                  )}
                 </span>
               </li>
               <li className="flex items-center justify-between">
