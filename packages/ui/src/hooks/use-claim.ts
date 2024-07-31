@@ -59,9 +59,9 @@ export function useClaim() {
 
           toast.promise(getTransactionStatus(id), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Claim successful',
+            success: 'Claim succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         } else {
           toast.error('Failed to claim')
@@ -94,7 +94,9 @@ export function useClaim() {
             if (error) {
               // TODO
               console.log(error)
-              throw error
+              if (!error.includes('Internal server error')) {
+                throw error
+              }
             }
 
             if (event && event.status === EventStatus.Settled) {
@@ -108,9 +110,9 @@ export function useClaim() {
 
           toast.promise(getEventInner({ id: eventId, address }), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Claim successful',
+            success: 'Claim succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         }
 

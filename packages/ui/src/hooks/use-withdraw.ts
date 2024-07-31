@@ -59,9 +59,9 @@ export function useWithdraw() {
 
           toast.promise(getTransactionStatus(id), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Unstake successful',
+            success: 'Unstaking succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         } else {
           toast.error('Failed to request withdrawal')
@@ -94,7 +94,9 @@ export function useWithdraw() {
             if (error) {
               // TODO
               console.log(error)
-              throw error
+              if (!error.includes('Internal server error')) {
+                throw error
+              }
             }
 
             if (event && event.status === EventStatus.Settled) {
@@ -108,9 +110,9 @@ export function useWithdraw() {
 
           toast.promise(getEventInner({ id: eventId, address }), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Unstake successful',
+            success: 'Unstaking succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         }
 

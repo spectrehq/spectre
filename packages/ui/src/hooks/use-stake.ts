@@ -17,7 +17,6 @@ import { STCREDITS_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
 import { WalletType } from '~/types'
 import { useAccount } from './use-account'
-import { useState } from 'react'
 
 export interface UseStakeParams {
   amount: number
@@ -70,9 +69,9 @@ export function useStake() {
 
           toast.promise(getTransactionStatus(id), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Staking successful',
+            success: 'Staking succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         } else {
           toast.error('Failed to stake')
@@ -105,7 +104,9 @@ export function useStake() {
             if (error) {
               // TODO
               console.log(error)
-              throw error
+              if (!error.includes('Internal server error')) {
+                throw error
+              }
             }
 
             if (event && event.status === EventStatus.Settled) {
@@ -119,9 +120,9 @@ export function useStake() {
 
           toast.promise(getEventInner({ id: eventId, address }), {
             loading: 'Waiting for transaction confirmation',
-            success: 'Staking successful',
+            success: 'Staking succeeded',
             error:
-              'Get transaction status failed! You can check the transaction details in your wallet.',
+              'Getting transaction status failed! You can check the transaction details in your wallet.',
           })
         }
 
