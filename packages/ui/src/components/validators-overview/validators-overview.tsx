@@ -61,7 +61,7 @@ export function ValidatorsOverview() {
             </h4>
             <div className="">
               <span className="text-2xl font-semibold">
-                {committee?.validators.length}
+                {committee?.validators.length ?? 0}
               </span>
             </div>
           </div>
