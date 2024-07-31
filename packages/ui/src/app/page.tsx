@@ -453,7 +453,7 @@ export default function HomePage() {
           </div>
         </div> */}
 
-        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-20 sm:mt-12 lg:mt-16 mb-24 sm:mb-32 lg:mb-40">
+        <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 mt-20 sm:mt-32 lg:mt-40 mb-24 sm:mb-32 lg:mb-40">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div className="grid grid-cols-1 lg:grid-cols-11 gap-2 items-center lg:gap-12">
               <div className="col-span-1 lg:col-span-6">
