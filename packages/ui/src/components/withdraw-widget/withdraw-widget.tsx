@@ -18,10 +18,7 @@ import { NumberInput } from '~/components/ui/number-input'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
 import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
-import { useLiquidity } from '~/hooks/use-liquidity'
-import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
-import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { useWithdraw } from '~/hooks/use-withdraw'
 import { cn } from '~/lib/utils'
 
@@ -36,44 +33,6 @@ export function WithdrawWidget() {
     () => dn.from([stCreditsBalance ?? 0n, 6]),
     [stCreditsBalance]
   )
-
-  const { data: userWithdraw } = useUserWithdraw(address)
-
-  const { data: pendingWithdraw } = usePendingWithdraw(address)
-
-  const totalWithdrawAmount = useMemo(() => {
-    let total = 0n
-
-    if (userWithdraw) {
-      total += userWithdraw.amount
-    }
-
-    if (pendingWithdraw) {
-      total += pendingWithdraw.amount
-    }
-
-    return total
-  }, [userWithdraw, pendingWithdraw])
-
-  const totalWithdrawAmountDN = useMemo(
-    () => dn.from([totalWithdrawAmount, 6]),
-    [totalWithdrawAmount]
-  )
-
-  const claimHeightPrompt = useMemo(() => {
-    if (pendingWithdraw) {
-      return 'Queuing'
-    }
-
-    if (!userWithdraw) {
-      return '-'
-    }
-
-    return dn.format(dn.from(userWithdraw.height), { digits: 0 })
-  }, [pendingWithdraw, userWithdraw])
-
-  const { data: liquidity } = useLiquidity()
-  const liquidityDN = useMemo(() => dn.from([liquidity ?? 0n, 6]), [liquidity])
 
   const formSchema = useMemo(
     () =>
@@ -99,8 +58,6 @@ export function WithdrawWidget() {
       amount: '',
     },
   })
-
-  const amountValue = useWatch({ control: form.control, name: 'amount' })
 
   useEffect(() => {
     form.trigger('amount')
@@ -138,6 +95,12 @@ export function WithdrawWidget() {
     // TODO
     toast.error('Send Transaction error')
   }, [error])
+
+  useEffect(() => {
+    if (stCreditsBalance !== undefined) {
+      form.trigger('amount')
+    }
+  }, [stCreditsBalance, form])
 
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useCreditsFromStCredits(1_000_000n)

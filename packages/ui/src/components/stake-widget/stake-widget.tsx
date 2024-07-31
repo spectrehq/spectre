@@ -74,6 +74,12 @@ export function StakeWidget() {
   const queryClient = useQueryClient()
 
   useEffect(() => {
+    if (balance !== undefined) {
+      form.trigger('amount')
+    }
+  }, [balance, form])
+
+  useEffect(() => {
     if (isSuccess) {
       form.reset()
       void queryClient.refetchQueries({
