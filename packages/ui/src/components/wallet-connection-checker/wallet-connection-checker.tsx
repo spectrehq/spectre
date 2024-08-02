@@ -1,6 +1,5 @@
 'use client'
 
-import { WalletReadyState } from '@demox-labs/aleo-wallet-adapter-base'
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react'
 import { useConnect } from '@puzzlehq/sdk'
 import { DialogTitle } from '@radix-ui/react-dialog'
@@ -15,10 +14,11 @@ import {
   DialogTrigger,
 } from '~/components/ui/dialog'
 import { useAccount } from '~/hooks/use-account'
-import WalletConnectLogo from '~/assets/wallet-connect-logo.svg'
+// import WalletConnectLogo from '~/assets/wallet-connect-logo.svg'
 import PuzzleWalletLogoIcon from '~/assets/puzzle-logo-icon.png'
 import AvailWalletLogoIcon from '~/assets/avail-wallet-logo-icon.svg'
 import { WalletItem } from './wallet-item'
+import { useAccountStore } from '~/stores/account'
 
 export interface WalletConnectionCheckerProps extends ButtonProps {
   open?: boolean
@@ -31,6 +31,7 @@ export function WalletConnectionChecker({
   label = 'Connect Wallet',
   ...props
 }: WalletConnectionCheckerProps) {
+  const setIsConnecting = useAccountStore((store) => store.setIsConnecting)
   const [open, setOpen] = useState(openProps ?? false)
 
   const { wallets } = useWallet()
@@ -47,12 +48,13 @@ export function WalletConnectionChecker({
   }, [])
 
   const handleConnect = useCallback(async () => {
+    setOpen(false)
+    setIsConnecting(true)
     try {
       await connect()
     } catch (error) {}
-
-    setOpen(false)
-  }, [connect])
+    setIsConnecting(false)
+  }, [connect, setIsConnecting])
 
   if (isConnected && address) return <>{children}</>
 

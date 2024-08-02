@@ -10,6 +10,8 @@ import { cn } from '~/lib/utils'
 import './globals.css'
 import { Providers } from './providers'
 import { NetworkClientStoreProvider } from '~/stores/network-client'
+import { ConnectingWalletDialog } from '~/components/connecting-wallet-dialog'
+import { AccountStoreProvider } from '~/stores/account'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -49,9 +51,12 @@ export default async function RootLayout({
           <NextIntlClientProvider messages={messages}>
             <NetworkClientStoreProvider>
               <Providers>
-                <Header />
-                {children}
-                <Footer />
+                <AccountStoreProvider>
+                  <Header />
+                  {children}
+                  <Footer />
+                  <ConnectingWalletDialog />
+                </AccountStoreProvider>
               </Providers>
             </NetworkClientStoreProvider>
             <Toaster richColors closeButton />
