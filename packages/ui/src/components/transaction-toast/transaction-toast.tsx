@@ -1,14 +1,20 @@
 'use client'
 
-import { CircleCheckBigIcon, CircleXIcon, Loader2Icon } from 'lucide-react'
+import { Cancel as AlertDialogCancel } from '@radix-ui/react-alert-dialog'
+import {
+  CircleCheckBigIcon,
+  CircleXIcon,
+  Loader2Icon,
+  XIcon,
+} from 'lucide-react'
 import { useEffect, useMemo, useState } from 'react'
 import {
-  Dialog,
-  DialogContent,
-  DialogDescription,
-  DialogHeader,
-  DialogTitle,
-} from '~/components/ui/dialog'
+  AlertDialog,
+  AlertDialogContent,
+  AlertDialogDescription,
+  AlertDialogHeader,
+  AlertDialogTitle,
+} from '~/components/ui/alert-dialog'
 import { TransactionStatus } from '~/types'
 
 export interface TransactionToastProps {
@@ -51,12 +57,16 @@ export function TransactionToast({
   }, [transactionStatus])
 
   return (
-    <Dialog open={open} onOpenChange={setOpen}>
-      <DialogContent className="sm:max-w-[425px]">
-        <DialogHeader>
-          <DialogTitle />
-          <DialogDescription />
-        </DialogHeader>
+    <AlertDialog open={open} onOpenChange={setOpen}>
+      <AlertDialogContent className="sm:max-w-[425px]">
+        <AlertDialogCancel className="absolute right-4 top-4 rounded-sm opacity-70 ring-offset-background transition-opacity hover:opacity-100 focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:pointer-events-none data-[state=open]:bg-accent data-[state=open]:text-muted-foreground">
+          <XIcon className="h-4 w-4" />
+          <span className="sr-only">Close</span>
+        </AlertDialogCancel>
+        <AlertDialogHeader>
+          <AlertDialogTitle />
+          <AlertDialogDescription />
+        </AlertDialogHeader>
         <div className="text-center space-y-8">
           <div className="flex justify-center items-center">
             {transactionStatus === TransactionStatus.Pending && (
@@ -87,7 +97,7 @@ export function TransactionToast({
             </p>
           )}
         </div>
-      </DialogContent>
-    </Dialog>
+      </AlertDialogContent>
+    </AlertDialog>
   )
 }
