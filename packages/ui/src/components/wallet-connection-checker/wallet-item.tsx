@@ -1,12 +1,15 @@
 import {
   DecryptPermission,
   WalletAdapterNetwork,
+  type WalletConnectionError,
+  WalletReadyState,
   type WalletAdapter,
 } from '@demox-labs/aleo-wallet-adapter-base'
 import { useWallet } from '@demox-labs/aleo-wallet-adapter-react'
 import Image from 'next/image'
 import { useCallback } from 'react'
 import { Button } from '~/components/ui/button'
+import { useAccountStore } from '~/stores/account'
 
 export interface WalletItemProps {
   wallet: WalletAdapter
@@ -14,21 +17,52 @@ export interface WalletItemProps {
 }
 
 export function WalletItem({ wallet, onConnected }: WalletItemProps) {
-  const { connect, select } = useWallet()
+  const setIsConnecting = useAccountStore((store) => store.setIsConnecting)
+  const { connect, select, wallets } = useWallet()
 
   const handleConnectWallet = useCallback(async () => {
     try {
       select(wallet.name)
-      await connect(
-        DecryptPermission.AutoDecrypt,
-        WalletAdapterNetwork.TestnetBeta
-      )
-    } catch (error) {
-      console.log(error)
+      // await connect(
+      //   DecryptPermission.AutoDecrypt,
+      //   WalletAdapterNetwork.TestnetBeta
+      // )
+
+      const walletAdapter = wallets.find(
+        (w) => w.adapter.name === wallet.name
+      )?.adapter
+
+      if (walletAdapter?.readyState === WalletReadyState.NotDetected) {
+        // TODO
+        if (wallet.name === 'LeoWallet') {
+          open('https://www.leo.app/download', '_blank', 'noreferrer')
+        }
+      }
+
+      if (walletAdapter?.readyState === WalletReadyState.Installed) {
+        setIsConnecting(true)
+        await walletAdapter?.connect(
+          DecryptPermission.AutoDecrypt,
+          WalletAdapterNetwork.TestnetBeta
+        )
+      }
+    } catch (e) {
+      console.log(e)
+      if ((e as Error).name === 'WalletConnectionError') {
+        const error = e as WalletConnectionError
+        if (error.message === 'Permission Not Granted') {
+          setIsConnecting(false)
+        }
+
+        // if (error.message === 'The wallet is not available') {
+        //   setIsConnecting(false)
+        // }
+      }
+
       // TODO: WalletNotSelectedError
     }
     onConnected?.()
-  }, [wallet.name, select, connect, onConnected])
+  }, [setIsConnecting, onConnected, select, wallet.name, wallets])
 
   return (
     <Button
