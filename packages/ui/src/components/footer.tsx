@@ -55,7 +55,7 @@ export function Footer() {
                 </Link>
                 <Link
                   className=""
-                  href="https://discord.gg/UqFNZuEj"
+                  href="https://discord.gg/g2eZU6JA"
                   target="_blank"
                   rel="noreferrer"
                 >
@@ -245,7 +245,7 @@ export function Footer() {
             </Link>
             <Link
               className=""
-              href="https://discord.gg/TTjeZkdqzW"
+              href="https://discord.gg/g2eZU6JA"
               target="_blank"
               rel="noreferrer"
             >
