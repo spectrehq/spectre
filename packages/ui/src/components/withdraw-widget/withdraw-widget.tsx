@@ -7,11 +7,11 @@ import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
+import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -21,6 +21,7 @@ import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useWithdraw } from '~/hooks/use-withdraw'
 import { cn } from '~/lib/utils'
+import { TransactionStatus } from '~/types'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -63,7 +64,22 @@ export function WithdrawWidget() {
     form.trigger('amount')
   }, [form])
 
-  const { mutate, isPending, isSuccess, error } = useWithdraw()
+  const stCreditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const { data: received, isLoading: isLoadingReceived } =
+    useCreditsFromStCredits(dn.from(stCreditsAmount || 0, 6)[0])
+  const receivedFormatted = useMemo(
+    () => dn.format([received ?? 0n, 6], { digits: 6 }),
+    [received]
+  )
+
+  const { withdraw, isSuccess, error, transactionStatus } = useWithdraw()
+
+  const [stCreditsAmountCache, setStCreditsAmountCache] = useState(0)
+  const [receivedFormattedCache, setReceivedFormattedCache] = useState('')
 
   const handleWithdraw = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -71,11 +87,17 @@ export function WithdrawWidget() {
 
       const amount = dn.from(data.amount, 6)[0]
 
-      const fee = 250_000 // TODO
+      withdraw(amount)
 
-      mutate({ amount, fee })
+      setStCreditsAmountCache(stCreditsAmount)
+      setReceivedFormattedCache(receivedFormatted)
     },
-    [address, mutate]
+    [address, receivedFormatted, stCreditsAmount, withdraw]
+  )
+
+  const isPending = useMemo(
+    () => transactionStatus === TransactionStatus.Creating,
+    [transactionStatus]
   )
 
   const queryClient = useQueryClient()
@@ -91,13 +113,6 @@ export function WithdrawWidget() {
   }, [isSuccess, form, queryClient, address])
 
   useEffect(() => {
-    if (!error) return
-
-    // TODO
-    toast.error('Send Transaction error')
-  }, [error])
-
-  useEffect(() => {
     if (stCreditsBalance !== undefined) {
       form.trigger('amount')
     }
@@ -109,18 +124,6 @@ export function WithdrawWidget() {
   const exchangeRateFormatted = useMemo(
     () => dn.format([exchangeRate ?? 0n, 6], { digits: 6 }),
     [exchangeRate]
-  )
-
-  const creditsAmount = useWatch({
-    control: form.control,
-    name: 'amount',
-  })
-
-  const { data: received, isLoading: isLoadingReceived } =
-    useCreditsFromStCredits(dn.from(creditsAmount || 0, 6)[0])
-  const receivedFormatted = useMemo(
-    () => dn.format([received ?? 0n, 6], { digits: 6 }),
-    [received]
   )
 
   return (
@@ -221,6 +224,19 @@ export function WithdrawWidget() {
           </li>
         </ul>
       </div>
+      {transactionStatus &&
+        transactionStatus !== TransactionStatus.Creating && (
+          <TransactionToast
+            title={{
+              Creating: '',
+              Pending: `You are now unstaking ${stCreditsAmountCache || 0} stCredits`,
+              Settled: `You have unstaked ${stCreditsAmountCache || 0} stCredits`,
+              Failed: 'Transaction failed',
+            }}
+            description={`Unstaking ${stCreditsAmountCache || 0} stCredits, you will receive ${receivedFormattedCache} Credits`}
+            transactionStatus={transactionStatus}
+          />
+        )}
     </div>
   )
 }

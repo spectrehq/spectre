@@ -9,3 +9,10 @@ export enum Network {
   // Mainnet = 'mainnet',
   Testnet = 'testnet',
 }
+
+export enum TransactionStatus {
+  Creating = 'Creating',
+  Pending = 'Pending',
+  Settled = 'Settled',
+  Failed = 'Failed',
+}

@@ -2,11 +2,10 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
-import { Loader2Icon } from 'lucide-react'
-import { CircleHelpIcon } from 'lucide-react'
+import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo } from 'react'
-import { toast } from 'sonner'
+import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import {
   Tooltip,
@@ -22,6 +21,7 @@ import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { cn } from '~/lib/utils'
+import { TransactionStatus } from '~/types'
 
 export function ClaimWidget() {
   const { address } = useAccount()
@@ -57,15 +57,18 @@ export function ClaimWidget() {
     return userWithdraw.height <= BigInt(latestBlockHeight)
   }, [userWithdraw, latestBlockHeight])
 
-  const { mutate, isPending, isSuccess, error } = useClaim()
+  const { claim, isSuccess, error, transactionStatus } = useClaim()
 
   const handleClaim = useCallback(async () => {
     if (!address || !userWithdraw) return
 
-    const fee = 250_000 // TODO
+    claim(userWithdraw.amount)
+  }, [address, claim, userWithdraw])
 
-    mutate({ amount: userWithdraw.amount, fee })
-  }, [address, mutate, userWithdraw])
+  const isPending = useMemo(
+    () => transactionStatus === TransactionStatus.Creating,
+    [transactionStatus]
+  )
 
   const queryClient = useQueryClient()
 
@@ -76,13 +79,6 @@ export function ClaimWidget() {
       })
     }
   }, [isSuccess, queryClient, address])
-
-  useEffect(() => {
-    if (!error) return
-
-    // TODO
-    toast.error('Send Transaction error')
-  }, [error])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -163,6 +159,18 @@ export function ClaimWidget() {
           </Button>
         </WalletConnectionChecker>
       </div>
+      {transactionStatus &&
+        transactionStatus !== TransactionStatus.Creating && (
+          <TransactionToast
+            title={{
+              Creating: '',
+              Pending: `You are claiming for ${dn.format(userWithdrawAmountDN, 6)} Credits`,
+              Settled: `You have claimed ${dn.format(userWithdrawAmountDN, 6)} Credits`,
+              Failed: 'Transaction failed',
+            }}
+            transactionStatus={transactionStatus}
+          />
+        )}
     </div>
   )
 }
