@@ -120,6 +120,13 @@ export function StakeWidget() {
     [exchangeRate]
   )
 
+  const isShowTransactionToast = useMemo(
+    () =>
+      Boolean(transactionStatus) &&
+      transactionStatus !== TransactionStatus.Creating,
+    [transactionStatus]
+  )
+
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
@@ -199,18 +206,17 @@ export function StakeWidget() {
           </li>
         </ul>
       </div>
-      {transactionStatus &&
-        transactionStatus !== TransactionStatus.Creating && (
-          <TransactionToast
-            title={{
-              Creating: '',
-              Pending: `You are staking ${dn.format([BigInt(creditsAmountCache || 0), 0], 6)} Credits`,
-              Settled: `You have staked ${dn.format([BigInt(creditsAmountCache || 0), 0], 6)} Credits`,
-              Failed: 'Transaction failed',
-            }}
-            transactionStatus={transactionStatus}
-          />
-        )}
+      {isShowTransactionToast && (
+        <TransactionToast
+          title={{
+            Creating: '',
+            Pending: `You are staking ${dn.format([BigInt(creditsAmountCache || 0), 0], 6)} Credits`,
+            Settled: `You have staked ${dn.format([BigInt(creditsAmountCache || 0), 0], 6)} Credits`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+        />
+      )}
     </div>
   )
 }

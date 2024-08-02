@@ -15,6 +15,7 @@ import {
   AlertDialogHeader,
   AlertDialogTitle,
 } from '~/components/ui/alert-dialog'
+import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
 
 export interface TransactionToastProps {
@@ -28,9 +29,7 @@ export function TransactionToast({
   description: descriptionProps,
   transactionStatus,
 }: TransactionToastProps) {
-  const [open, setOpen] = useState(
-    transactionStatus && transactionStatus !== TransactionStatus.Creating
-  )
+  const [open, setOpen] = useState(true)
 
   const title: string = useMemo(() => {
     if (!transactionStatus) return ''
@@ -82,7 +81,12 @@ export function TransactionToast({
               <CircleXIcon className="w-20 h-20 text-red-500" strokeWidth="1" />
             )}
           </div>
-          <div>
+          <div
+            className={cn(
+              transactionStatus === TransactionStatus.Settled ||
+                (transactionStatus === TransactionStatus.Failed && 'pb-4')
+            )}
+          >
             <h4 className="scroll-m-20 text-lg font-semibold tracking-tight">
               {title}
             </h4>
