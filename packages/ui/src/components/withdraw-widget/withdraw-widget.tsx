@@ -126,6 +126,13 @@ export function WithdrawWidget() {
     [exchangeRate]
   )
 
+  const isShowTransactionToast = useMemo(
+    () =>
+      Boolean(transactionStatus) &&
+      transactionStatus !== TransactionStatus.Creating,
+    [transactionStatus]
+  )
+
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
@@ -224,18 +231,17 @@ export function WithdrawWidget() {
           </li>
         </ul>
       </div>
-      {transactionStatus &&
-        transactionStatus !== TransactionStatus.Creating && (
-          <TransactionToast
-            title={{
-              Creating: '',
-              Pending: `You are unstaking ${dn.format([BigInt(stCreditsAmountCache || 0), 0], 6)} stCredits`,
-              Settled: `You have unstaked ${dn.format([BigInt(stCreditsAmountCache || 0), 0], 6)} stCredits`,
-              Failed: 'Transaction failed',
-            }}
-            transactionStatus={transactionStatus}
-          />
-        )}
+      {isShowTransactionToast && (
+        <TransactionToast
+          title={{
+            Creating: '',
+            Pending: `You are unstaking ${dn.format([BigInt(stCreditsAmountCache || 0), 0], 6)} stCredits`,
+            Settled: `You have unstaked ${dn.format([BigInt(stCreditsAmountCache || 0), 0], 6)} stCredits`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+        />
+      )}
     </div>
   )
 }

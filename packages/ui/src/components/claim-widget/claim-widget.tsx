@@ -4,7 +4,7 @@ import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import {
@@ -59,11 +59,15 @@ export function ClaimWidget() {
 
   const { claim, isSuccess, error, transactionStatus } = useClaim()
 
+  const [userWithdrawAmountDNCache, setUserWithdrawAmountDNCache] =
+    useState<dn.Dnum>([0n, 6])
+
   const handleClaim = useCallback(async () => {
     if (!address || !userWithdraw) return
 
+    setUserWithdrawAmountDNCache(userWithdrawAmountDN)
     claim(userWithdraw.amount)
-  }, [address, claim, userWithdraw])
+  }, [address, claim, userWithdraw, userWithdrawAmountDN])
 
   const isPending = useMemo(
     () => transactionStatus === TransactionStatus.Creating,
@@ -79,6 +83,13 @@ export function ClaimWidget() {
       })
     }
   }, [isSuccess, queryClient, address])
+
+  const isShowTransactionToast = useMemo(
+    () =>
+      Boolean(transactionStatus) &&
+      transactionStatus !== TransactionStatus.Creating,
+    [transactionStatus]
+  )
 
   return (
     <div className="max-w-lg mx-auto">
@@ -159,18 +170,17 @@ export function ClaimWidget() {
           </Button>
         </WalletConnectionChecker>
       </div>
-      {transactionStatus &&
-        transactionStatus !== TransactionStatus.Creating && (
-          <TransactionToast
-            title={{
-              Creating: '',
-              Pending: `You are claiming for ${dn.format(userWithdrawAmountDN, 6)} Credits`,
-              Settled: `You have claimed ${dn.format(userWithdrawAmountDN, 6)} Credits`,
-              Failed: 'Transaction failed',
-            }}
-            transactionStatus={transactionStatus}
-          />
-        )}
+      {isShowTransactionToast && (
+        <TransactionToast
+          title={{
+            Creating: '',
+            Pending: `You are claiming for ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
+            Settled: `You have claimed ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+        />
+      )}
     </div>
   )
 }
