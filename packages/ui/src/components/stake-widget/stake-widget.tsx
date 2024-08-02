@@ -6,11 +6,11 @@ import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
-import { toast } from 'sonner'
 import { z } from 'zod'
 import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
+import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -20,6 +20,7 @@ import { useBalance } from '~/hooks/use-balance'
 import { useStake } from '~/hooks/use-stake'
 import { useStCreditsFromCredits } from '~/hooks/use-stcredits-from-credits'
 import { cn } from '~/lib/utils'
+import { TransactionStatus } from '~/types'
 
 export function StakeWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -58,7 +59,22 @@ export function StakeWidget() {
     form.trigger('amount')
   }, [form])
 
-  const { mutate, isPending, isSuccess, error } = useStake()
+  const creditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const { data: received, isLoading: isLoadingReceived } =
+    useStCreditsFromCredits(dn.from(creditsAmount || 0, 6)[0])
+  const receivedFormatted = useMemo(
+    () => dn.format([received ?? 0n, 6], { digits: 6 }),
+    [received]
+  )
+
+  const [creditsAmountCache, setCreditsAmountCache] = useState(0)
+  const [receivedFormattedCache, setReceivedFormattedCache] = useState('')
+
+  const { stake, isSuccess, error, transactionStatus } = useStake()
 
   const handleStake = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -66,9 +82,16 @@ export function StakeWidget() {
 
       const amount = dn.from(data.amount, 6)[0]
 
-      mutate({ amount, fee: 250_000 })
+      stake(amount, 250_000)
+      setCreditsAmountCache(creditsAmount)
+      setReceivedFormattedCache(receivedFormatted)
     },
-    [address, mutate]
+    [address, creditsAmount, receivedFormatted, stake]
+  )
+
+  const isPending = useMemo(
+    () => transactionStatus === TransactionStatus.Creating,
+    [transactionStatus]
   )
 
   const queryClient = useQueryClient()
@@ -89,31 +112,12 @@ export function StakeWidget() {
     }
   }, [isSuccess, form, queryClient, address])
 
-  useEffect(() => {
-    if (!error) return
-
-    // TODO
-    toast.error('Send Transaction error')
-  }, [error])
-
   const { data: exchangeRate, isLoading: isLoadingExchangeRate } =
     useStCreditsFromCredits(1_000_000n)
 
   const exchangeRateFormatted = useMemo(
     () => dn.format([exchangeRate ?? 0n, 6], { digits: 6 }),
     [exchangeRate]
-  )
-
-  const creditsAmount = useWatch({
-    control: form.control,
-    name: 'amount',
-  })
-
-  const { data: received, isLoading: isLoadingReceived } =
-    useStCreditsFromCredits(dn.from(creditsAmount || 0, 6)[0])
-  const receivedFormatted = useMemo(
-    () => dn.format([received ?? 0n, 6], { digits: 6 }),
-    [received]
   )
 
   return (
@@ -195,6 +199,19 @@ export function StakeWidget() {
           </li>
         </ul>
       </div>
+      {transactionStatus &&
+        transactionStatus !== TransactionStatus.Creating && (
+          <TransactionToast
+            title={{
+              Creating: '',
+              Pending: `You are now staking ${creditsAmountCache || 0} Credits`,
+              Settled: `You have staked ${creditsAmountCache || 0} Credits`,
+              Failed: 'Transaction failed',
+            }}
+            description={`Staking ${creditsAmountCache || 0} Credits, you will receive ${receivedFormattedCache} stCredits`}
+            transactionStatus={transactionStatus}
+          />
+        )}
     </div>
   )
 }
