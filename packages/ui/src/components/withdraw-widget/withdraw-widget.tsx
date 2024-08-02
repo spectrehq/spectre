@@ -229,11 +229,10 @@ export function WithdrawWidget() {
           <TransactionToast
             title={{
               Creating: '',
-              Pending: `You are now unstaking ${stCreditsAmountCache || 0} stCredits`,
-              Settled: `You have unstaked ${stCreditsAmountCache || 0} stCredits`,
+              Pending: `You are unstaking ${dn.format([BigInt(stCreditsAmountCache || 0), 6], 6)} stCredits`,
+              Settled: `You have unstaked ${dn.format([BigInt(stCreditsAmountCache || 0), 6], 6)} stCredits`,
               Failed: 'Transaction failed',
             }}
-            description={`Unstaking ${stCreditsAmountCache || 0} stCredits, you will receive ${receivedFormattedCache} Credits`}
             transactionStatus={transactionStatus}
           />
         )}

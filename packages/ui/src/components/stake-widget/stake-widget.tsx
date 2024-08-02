@@ -204,11 +204,10 @@ export function StakeWidget() {
           <TransactionToast
             title={{
               Creating: '',
-              Pending: `You are now staking ${creditsAmountCache || 0} Credits`,
-              Settled: `You have staked ${creditsAmountCache || 0} Credits`,
+              Pending: `You are staking ${dn.format([BigInt(creditsAmountCache || 0), 6], 6)} Credits`,
+              Settled: `You have staked ${dn.format([BigInt(creditsAmountCache || 0), 6], 6)} Credits`,
               Failed: 'Transaction failed',
             }}
-            description={`Staking ${creditsAmountCache || 0} Credits, you will receive ${receivedFormattedCache} stCredits`}
             transactionStatus={transactionStatus}
           />
         )}
