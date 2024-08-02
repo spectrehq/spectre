@@ -46,7 +46,7 @@ export function TransactionToast({
     if (transactionStatus === TransactionStatus.Settled) {
       setTimeout(() => {
         setOpen(false)
-      }, 2000)
+      }, 3000)
     }
   }, [transactionStatus])
 
@@ -60,17 +60,20 @@ export function TransactionToast({
         <div className="text-center space-y-8">
           <div className="flex justify-center items-center">
             {transactionStatus === TransactionStatus.Pending && (
-              <Loader2Icon className="animate-spin w-20 h-20" />
+              <Loader2Icon className="animate-spin w-20 h-20" strokeWidth="1" />
             )}
             {transactionStatus === TransactionStatus.Settled && (
-              <CircleCheckBigIcon className="w-20 h-20 text-green-500" />
+              <CircleCheckBigIcon
+                className="w-20 h-20 text-green-500"
+                strokeWidth="1"
+              />
             )}
             {transactionStatus === TransactionStatus.Failed && (
-              <CircleXIcon className="w-20 h-20 text-red-500" />
+              <CircleXIcon className="w-20 h-20 text-red-500" strokeWidth="1" />
             )}
           </div>
           <div>
-            <h4 className="scroll-m-20 text-xl font-semibold tracking-tight">
+            <h4 className="scroll-m-20 text-lg font-semibold tracking-tight">
               {title}
             </h4>
             {transactionStatus === TransactionStatus.Pending && (
