@@ -42,7 +42,7 @@ export function BondDialog({
   return (
     <Dialog open={open} onOpenChange={handleOpenChange}>
       {children && <DialogTrigger asChild>{children}</DialogTrigger>}
-      <DialogContent className="max-w-full md:max-w-fit max-h-[90%] flex flex-col">
+      <DialogContent className="max-w-full md:max-w-fit max-h-[calc(100vh-72px)] flex flex-col">
         <DialogHeader className="flex-none">
           <DialogTitle>Stake</DialogTitle>
           <DialogDescription />
