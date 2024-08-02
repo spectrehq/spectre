@@ -1,10 +1,10 @@
-import { useQuery } from "@tanstack/react-query";
-import type { AleoAddress } from "~/types";
+import { useQuery } from '@tanstack/react-query'
+import type { AleoAddress } from '~/types'
 
 export interface QueryValidatorResponse {
   Info: ValidatorInfo
   count: number
-  message: string,
+  message: string
   success: boolean
 }
 
@@ -22,8 +22,8 @@ export interface ValidatorInfo {
   Unbonding: number
   Votes: number
 
-  StakeTrend: { Timestamp: number, Value: number }[]
-  ProfitTrend: { Timestamp: number, Value: number }[]
+  StakeTrend: { Timestamp: number; Value: number }[]
+  ProfitTrend: { Timestamp: number; Value: number }[]
 }
 
 export function useQueryValidator(address?: AleoAddress | null) {
@@ -43,6 +43,6 @@ export function useQueryValidator(address?: AleoAddress | null) {
       const data = await res.json()
       return data as QueryValidatorResponse
     },
-    enabled: Boolean(address)
+    enabled: Boolean(address),
   })
 }

@@ -73,7 +73,6 @@ export function useSendTransaction({
           }
         }
 
-
         if (!transactionId) {
           setTransactionStatus(TransactionStatus.Failed)
           // TODO
@@ -84,9 +83,12 @@ export function useSendTransaction({
 
         let isTimeout = false
 
-        setTimeout(() => {
-          isTimeout = true
-        }, 5 * 60 * 1000)
+        setTimeout(
+          () => {
+            isTimeout = true
+          },
+          5 * 60 * 1000
+        )
 
         while (true) {
           if (isTimeout) {
@@ -132,9 +134,12 @@ export function useSendTransaction({
 
           let isTimeout = false
 
-          setTimeout(() => {
-            isTimeout = true
-          }, 5 * 60 * 1000)
+          setTimeout(
+            () => {
+              isTimeout = true
+            },
+            5 * 60 * 1000
+          )
 
           while (true) {
             if (isTimeout) {
@@ -164,7 +169,10 @@ export function useSendTransaction({
               setTransactionStatus(event.status as unknown as TransactionStatus)
             }
 
-            if (event.status === EventStatus.Settled || event.status === EventStatus.Failed) {
+            if (
+              event.status === EventStatus.Settled ||
+              event.status === EventStatus.Failed
+            ) {
               break
             }
 
