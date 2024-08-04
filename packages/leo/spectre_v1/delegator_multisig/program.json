@@ -1,0 +1,18 @@
+{
+  "program": "staking_delegator_multisig_v1.aleo",
+  "version": "0.0.0",
+  "description": "",
+  "license": "MIT",
+  "dependencies": [
+    {
+      "name": "staking_delegator_v1.aleo",
+      "location": "local",
+      "path": "../delegator"
+    },
+    {
+      "name": "spectre_multisig_v1.aleo",
+      "location": "local",
+      "path": "../multisig"
+    }
+  ]
+}
