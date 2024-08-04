@@ -331,14 +331,10 @@ program staking_stcredits_v1.aleo {
     }
 
     /**
-     * This function will be called by the delegator program to register itself as one delegator of the validator.
+     * This function will be called by the admin to register the delegator and the validator.
      */
     async transition register_delegator(public delegator: address, public validator: address) -> Future {
-        // Ensure the delegator is the caller.
-        assert_eq(delegator, self.caller);
-
-        // Check `self.signer` to ensure the delegator is called by the signer.
-        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.signer);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
 
         return finalize_register_delegator(f, delegator, validator);
     }
@@ -375,7 +371,7 @@ program staking_stcredits_v1.aleo {
     }
 
     /**
-     * This function will be called by the operator to unregister the delegator.
+     * This function will be called by the admin to unregister the delegator.
      */
     async transition unregister_delegator(public delegator: address) -> Future {
         let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
@@ -420,18 +416,18 @@ program staking_stcredits_v1.aleo {
         // Ensure the delegator is the caller.
         assert_eq(delegator, self.caller);
 
-        // Check `self.signer` to ensure the delegator is called by the signer.
-        let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.signer);
+        // Note: we do not check the role of the caller here,
+        // because the caller/delegator will be checked that
+        // it's really one of the registered delegator programs
+        // in the `finalize_bond` function.
 
         // Transfer `amount` credits to the `delegator` program.
-        let f2: Future = credits.aleo/transfer_public(delegator, amount);
+        let f: Future = credits.aleo/transfer_public(delegator, amount);
 
-        return finalize_bond(f1, f2, delegator, validator, amount);
+        return finalize_bond(f, delegator, validator, amount);
     }
 
-    async function finalize_bond(f1: Future, f2: Future, delegator: address, validator: address, amount: u64) {
-        f1.await();
-
+    async function finalize_bond(f: Future, delegator: address, validator: address, amount: u64) {
         // Check whether paused.
         let cfg: Config = Mapping::get(config, 0u8);
         assert(!cfg.paused);
@@ -452,7 +448,7 @@ program staking_stcredits_v1.aleo {
         assert(total_buffered + total_unbonding >= total_withdraw + total_pending_withdraw + amount);
 
         // Transfer `amount` credits to the `delegator` program.
-        f2.await();
+        f.await();
 
         let index: u32 = Mapping::get(delegator_pos, delegator);
         let del: Delegator = Mapping::get(delegators, index);
@@ -503,7 +499,7 @@ program staking_stcredits_v1.aleo {
      * It will serve either for the users to withdraw credits or for rebalancing bonding between the validators.
      * The `amount` should be calculated offline.
      */
-    async transition unbond(delegator: address, public amount: u64) -> Future {
+    async transition unbond(public delegator: address, public amount: u64) -> Future {
         // Check the caller is the operator.
         let f1: Future = spectre_acl_manager_v1.aleo/only_staking_operator(self.caller);
 

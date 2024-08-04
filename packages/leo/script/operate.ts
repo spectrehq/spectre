@@ -248,7 +248,7 @@ program
       return
     }
 
-    await execute(programPath(config.programs.staking.delegator, delegatorIndex + 1), "register", [validator], STAKING_ADMIN_PRIVATE_KEY)
+    await execute(programPath(config.programs.staking.stcredits), "register_delegator", [delegator, validator], STAKING_ADMIN_PRIVATE_KEY)
   })
 
 const roles = {
