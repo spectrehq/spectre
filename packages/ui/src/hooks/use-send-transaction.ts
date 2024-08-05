@@ -152,6 +152,7 @@ export function useSendTransaction({
               console.log(error)
 
               if (error.includes('Internal server error')) {
+                await new Promise((resolve) => setTimeout(resolve, 1000))
                 continue
               }
 
