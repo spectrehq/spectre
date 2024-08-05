@@ -174,7 +174,7 @@ export function ClaimWidget() {
         <TransactionToast
           title={{
             Creating: '',
-            Pending: `You are claiming for ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
+            Pending: `You are claiming ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
             Settled: `You have claimed ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
             Failed: 'Transaction failed',
           }}
