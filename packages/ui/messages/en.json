@@ -19,8 +19,43 @@
     "description": "Stake Credits and receive stCredits while staking."
   },
 
+  "PointsPage": {
+    "title": "Points",
+    "description": "Lock stCredits and get points while locking."
+  },
+
+  "PointsOverview": {
+    "title": "Points Overview",
+
+    "LockedPoints": {
+      "title": "Locked amount"
+    },
+
+    "UserPoints": {
+      "title": "Points",
+      "description": "Settled points plus unsettled points"
+    },
+
+    "AccumulatedPoints": {
+      "title": "Accumulated points per block"
+    }
+  },
+
   "AleoStakingStatistics": {
     "title": "AleoStaking Statistics"
+  },
+
+  "PointsStatistics": {
+    "title": "AleoStaking Statistics",
+
+    "TotalLocked": {
+      "title": "Total locked"
+    },
+
+    "TotalPoints": {
+      "title": "Total points",
+      "description": "The total points earned by all the locked stCredits"
+    }
   },
 
   "StakePage": {
