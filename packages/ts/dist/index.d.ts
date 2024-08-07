@@ -26,6 +26,7 @@ export interface Configuration {
 	programSuffix: string;
 	programs: {
 		credits: string;
+		multiTokenSupport: string;
 		spectre: {
 			accessControl: string;
 			aclManager: string;
@@ -231,9 +232,16 @@ export declare class StCreditsProgram extends ProgramBase {
 }
 export interface StCreditsPointsState {
 	stcredits: bigint;
+	points: bigint;
 	height: bigint;
 	inviter: string;
 	inviter_of_inviter: string;
+	invite_points: bigint;
+	invite_of_invite_points: bigint;
+}
+export interface StCreditsPointsStats {
+	stcredits: bigint;
+	points: bigint;
 }
 export declare class StCreditsPointsProgram extends ProgramBase {
 	/**
@@ -241,25 +249,20 @@ export declare class StCreditsPointsProgram extends ProgramBase {
 	 */
 	isPaused(): Promise<boolean>;
 	/**
-	 * Get the total supply of points.
-	 */
-	getTotalSupply(): Promise<bigint>;
-	/**
-	 * Get the balance of points for an account.
-	 * @param account
-	 */
-	getBalance(account: string): Promise<bigint>;
-	/**
-	 * Get the balance of points for an account, including the unsettled points.
+	 * Get the points for an account, including the unsettled points.
 	 * @param account
 	 * @param currentHeight
 	 */
-	getEstimatedBalance(account: string, currentHeight: bigint): Promise<bigint>;
+	getEstimatedPoints(account: string, currentHeight: bigint): Promise<bigint>;
 	/**
 	 * Get the state of an account.
 	 * @param account
 	 */
 	getState(account: string): Promise<StCreditsPointsState | null>;
+	/**
+	 * Get the stats of the program.
+	 */
+	getStats(): Promise<StCreditsPointsStats>;
 	/**
 	 * Get the inviter by the invite code.
 	 * @param code
