@@ -1,17 +1,19 @@
 import type { Metadata } from 'next'
-import { Inter as FontSans } from 'next/font/google'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
+import { Inter as FontSans } from 'next/font/google'
 import { Toaster } from 'sonner'
-import { ThemeProvider } from '~/components/theme-provider'
+import { ConnectingWalletDialog } from '~/components/connecting-wallet-dialog'
 import { Footer } from '~/components/footer'
 import { Header } from '~/components/header'
+import { InviteCodeChecker } from '~/components/invite-code-checker'
+import { ThemeProvider } from '~/components/theme-provider'
 import { cn } from '~/lib/utils'
-import './globals.css'
-import { Providers } from './providers'
-import { NetworkClientStoreProvider } from '~/stores/network-client'
-import { ConnectingWalletDialog } from '~/components/connecting-wallet-dialog'
 import { AccountStoreProvider } from '~/stores/account'
+import { NetworkClientStoreProvider } from '~/stores/network-client'
+import { Providers } from './providers'
+
+import './globals.css'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -55,6 +57,7 @@ export default async function RootLayout({
                   <Header />
                   {children}
                   <Footer />
+                  <InviteCodeChecker />
                   <ConnectingWalletDialog />
                 </AccountStoreProvider>
               </Providers>
