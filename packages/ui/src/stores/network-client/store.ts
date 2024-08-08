@@ -36,6 +36,7 @@ export const getDefaultNetworkClientState: () => NetworkClientState = () => {
   try {
     initialize({
       programSuffix: '001',
+      // @ts-ignore
       delegatorNum: 3,
       programs: {
         credits: 'credits',
