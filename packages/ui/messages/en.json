@@ -5,7 +5,8 @@
     "withdrawals": "Withdrawals",
     "documentation": "Docs",
     "staking": "Staking",
-    "liquidStaking": "Liquid Staking"
+    "liquidStaking": "Liquid Staking",
+    "points": "Points"
   },
 
   "ModeToggle": {
