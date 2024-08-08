@@ -10,12 +10,13 @@ import {
   RISK_ADMIN_ROLE,
   STAKING_ADMIN_ROLE,
   STAKING_OPERATOR_ROLE,
-  StCreditsProgram,
   u8Str,
   importAleo,
   CacheStatus,
   initialize,
-  CreditsProgram
+  CreditsProgram,
+  StCreditsProgram,
+  StCreditsPointsProgram
 } from "spectre"
 import {
   ADMIN_PRIVATE_KEY,
@@ -38,6 +39,9 @@ const credits = new CreditsProgram(async (mapping: string, key: string) => {
 const stcredits = new StCreditsProgram(async (mapping: string, key: string) => {
   return await queryMappingValueFromPath(programPath(config.programs.staking.stcredits), mapping, key)
 }, credits)
+const stcreditsPoints = new StCreditsPointsProgram(async (mapping: string, key: string) => {
+  return await queryMappingValueFromPath(programPath(config.programs.staking.stcreditsPoints), mapping, key)
+})
 
 const program = new Command()
 program.name("operate").description("CLI to spectre operations").version("0.0.1")
@@ -259,6 +263,28 @@ const roles = {
   RISK_ADMIN_ROLE,
   ASSET_LISTING_ADMIN_ROLE
 }
+
+program
+  .command("stcredits-points-unpause")
+  .description("unpause the stcredits_points program")
+  .action(async () => {
+    if (await stcreditsPoints.isPaused()) {
+      await execute(programPath(config.programs.staking.stcreditsPoints), "unpause", [], STAKING_ADMIN_PRIVATE_KEY)
+    } else {
+      console.warn("The stcredits_points program is not paused")
+    }
+  })
+
+program
+  .command("stcredits-points-pause")
+  .description("pause the stcredits_points program")
+  .action(async () => {
+    if (!(await stcreditsPoints.isPaused())) {
+      await execute(programPath(config.programs.staking.stcreditsPoints), "pause", [], STAKING_ADMIN_PRIVATE_KEY)
+    } else {
+      console.warn("The stcredits_points program is already paused")
+    }
+  })
 
 const roleStrings = new Map([
   [STAKING_ADMIN_ROLE, "STAKING_ADMIN_ROLE"],
