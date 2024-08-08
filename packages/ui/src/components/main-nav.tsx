@@ -56,6 +56,20 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
+          <Link href="/points" legacyBehavior passHref>
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                'text-base',
+                pathname.startsWith('/points') &&
+                  'bg-accent text-accent-foreground outline-none'
+              )}
+            >
+              {t('points')}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem className="relative">
           <Link href="https://docs.spectre.guru" legacyBehavior passHref>
             <NavigationMenuLink
               className={cn(navigationMenuTriggerStyle(), 'text-base')}
