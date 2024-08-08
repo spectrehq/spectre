@@ -812,7 +812,7 @@ export default function HomePage() {
         <div className="mx-auto max-w-7xl px-4 sm:px-6 lg:px-8 my-12 sm:my-16 lg:my-20">
           <div className="mx-auto max-w-2xl lg:max-w-none">
             <div
-              className="-mx-6 rounded-3xl px-6 py-10 sm:mx-0 sm:px-0"
+              className="rounded-3xl py-10"
               style={{ opacity: 1, transform: 'none' }}
             >
               <ul className="flex flex-wrap justify-between gap-x-8 gap-y-10 items-center">

@@ -21,7 +21,7 @@ export function useWithdraw() {
       mutate({
         programId,
         functionName: 'withdraw',
-        inputs: [`${amount}u64`],
+        inputs: [`${amount}u64`, String(false)],
         fee,
       })
     },
@@ -33,7 +33,7 @@ export function useWithdraw() {
       mutateAsync({
         programId,
         functionName: 'withdraw',
-        inputs: [`${amount}u64`],
+        inputs: [`${amount}u64`, String(false)],
         fee,
       }),
     [mutateAsync, programId]

@@ -35,12 +35,13 @@ export type NetworkClientStore = NetworkClientState & NetworkClientActions
 export const getDefaultNetworkClientState: () => NetworkClientState = () => {
   try {
     initialize({
-      programSuffix: '024',
+      programSuffix: '001',
+      // @ts-ignore
       delegatorNum: 3,
       programs: {
         credits: 'credits',
-        //@ts-ignore
-        multiTokenSupport: 'multi_token_support_program_v2',
+        // @ts-ignore
+        multiTokenSupport: 'multi_token_support_program',
         spectre: {
           accessControl: 'access_control',
           aclManager: 'acl_manager',

@@ -216,6 +216,7 @@ program staking_stcredits_v1.aleo {
         paused: bool,
         treasury: address,
         protocol_fee: u8,
+        instant_withdraw_fee: u8,
     }
 
     mapping config: u8 => Config; // 0u8 => config
@@ -307,6 +308,7 @@ program staking_stcredits_v1.aleo {
             paused: true,
             treasury: admin,
             protocol_fee: 0u8, // 0%
+            instant_withdraw_fee: 1u8, // 1%
         });
         // Initialize the state.
         Mapping::set(state, 0u8, State {
@@ -711,13 +713,14 @@ program staking_stcredits_v1.aleo {
     /**
      * Withdraw credits by user, to burn stcredits.
      */
-    async transition withdraw(public stcredits: u64) -> Future {
-        return finalize_withdraw(self.caller, stcredits);
+    async transition withdraw(public stcredits: u64, public instant: bool) -> Future {
+        return finalize_withdraw(self.caller, stcredits, instant);
     }
 
-    async function finalize_withdraw(user: address, stcredits: u64) {
+    async function finalize_withdraw(user: address, stcredits: u64, instant: bool) {
         // Check whether paused.
-        assert(!Mapping::get(config, 0u8).paused);
+        let c: Config = Mapping::get(config, 0u8);
+        assert(!c.paused);
 
         // Check cache is finished and valid.
         assert_eq(Mapping::get(cache_state, 0u8).status, CACHE_STATUS_VALID);
@@ -742,10 +745,22 @@ program staking_stcredits_v1.aleo {
         Mapping::set(account, user, Mapping::get_or_use(account, user, 0u64) - stcredits);
         Mapping::set(total_supply, 0u8, total_stcredits_supply - stcredits);
 
-        // Update total withdraw and total pending withdraw.
         let liquidity: u64 = total_buffered > (total_withdraw + total_pending_withdraw) ? total_buffered.sub_wrapped(total_withdraw + total_pending_withdraw) : 0u64;
         let withdraw_credits: u64 = liquidity >= credits ? credits : liquidity;
         let pending_credits: u64 = credits - withdraw_credits;
+
+        if (instant) {
+            // Instant withdrawal only allows a new withdrawal and no pending portion.
+            assert(!Mapping::contains(withdraws, user));
+            assert(pending_credits == 0u64);
+        }
+        // Calculate instant withdrawal fee.
+        let instant_withdraw_fee: u64 = credits * (c.instant_withdraw_fee as u64) / 100u64;
+        // If instant withdrawal, the fee will be deducted from the withdraw credits.
+        // The deducted fee will belong to all stcredits holders.
+        withdraw_credits = instant ? withdraw_credits - instant_withdraw_fee : withdraw_credits;
+
+        // Update total withdraw and total pending withdraw.
         Mapping::set(state, 0u8, State {
             withdraw: total_withdraw + withdraw_credits,
             pending_withdraw: total_pending_withdraw + pending_credits,
@@ -757,24 +772,25 @@ program staking_stcredits_v1.aleo {
         // Update user withdraw.
         let withdraw: Withdraw = Mapping::get_or_use(withdraws, user, Withdraw {amount: 0u64, pending: false, height: 0u32});
         Mapping::set(withdraws, user, Withdraw {
-            amount: withdraw.amount + credits,
+            amount: withdraw.amount + withdraw_credits + pending_credits,
             pending: withdraw.pending || pending_credits > 0u64,
-            // <withdraw.height> == <withdraw created height> + WITHDRAW_DELAY
-            height: block.height + WITHDRAW_DELAY,
+            // If instant withdrawal, <withdraw.height> == <current block height>
+            // Otherwise, <withdraw.height> == <withdraw created height> + WITHDRAW_DELAY
+            height: instant ? block.height : block.height + WITHDRAW_DELAY,
         });
     }
 
     /**
      * Claim credits by user.
      */
-    async transition claim(public amount: u64) -> Future {
-        // Transfer `amount` credits to the user.
-        let f: Future = credits.aleo/transfer_public(self.caller, amount);
+    async transition claim(public credits: u64) -> Future {
+        // Transfer `credits` credits to the user.
+        let f: Future = credits.aleo/transfer_public(self.caller, credits);
 
-        return finalize_claim(f, self.caller, amount);
+        return finalize_claim(f, self.caller, credits);
     }
 
-    async function finalize_claim(f: Future, user: address, amount: u64) {
+    async function finalize_claim(f: Future, user: address, credits: u64) {
         // Check whether paused.
         assert(!Mapping::get(config, 0u8).paused);
 
@@ -783,21 +799,21 @@ program staking_stcredits_v1.aleo {
         let resolved_height: u32 = state_.resolved_height;
 
         let withdraw: Withdraw = Mapping::get(withdraws, user);
+        assert_eq(withdraw.amount, credits);
         // For non-pending withdraw, <withdraw.height> == <withdraw created height> + WITHDRAW_DELAY <= <current block height>.
         // For pending withdraw, <withdraw.height> - WITHDRAW_DELAY == <withdraw created height> <= <pending resolved height>
         assert(withdraw.height <= (!withdraw.pending ? block.height : resolved_height + WITHDRAW_DELAY));
-        assert_eq(withdraw.amount, amount);
 
         Mapping::remove(withdraws, user);
         Mapping::set(state, 0u8, State {
-            withdraw: state_.withdraw - amount, // may fail if overflow
+            withdraw: state_.withdraw - credits, // may fail if overflow
             pending_withdraw: state_.pending_withdraw,
             bonded: state_.bonded,
             unbonding: state_.unbonding,
             resolved_height,
         });
 
-        // Transfer `amount` credits to the user.
+        // Transfer `credits` credits to the user.
         f.await();
     }
 
@@ -949,7 +965,7 @@ program staking_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { paused: c.paused, treasury, protocol_fee: c.protocol_fee });
+        Mapping::set(config, 0u8, Config { paused: c.paused, treasury, protocol_fee: c.protocol_fee, instant_withdraw_fee: c.instant_withdraw_fee });
     }
 
     async transition set_protocol_fee(public fee: u8) -> Future {
@@ -962,7 +978,20 @@ program staking_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { paused: c.paused, treasury: c.treasury, protocol_fee: fee });
+        Mapping::set(config, 0u8, Config { paused: c.paused, treasury: c.treasury, protocol_fee: fee, instant_withdraw_fee: c.instant_withdraw_fee });
+    }
+
+    async transition set_instant_withdraw_fee(public fee: u8) -> Future {
+        assert(fee >= 0u8 && fee <= 100u8);
+        let f: Future = spectre_acl_manager_v1.aleo/only_staking_admin(self.caller);
+        return finalize_set_instant_withdraw_fee(f, fee);
+    }
+
+    async function finalize_set_instant_withdraw_fee(f: Future, fee: u8) {
+        f.await();
+
+        let c: Config = Mapping::get(config, 0u8);
+        Mapping::set(config, 0u8, Config { paused: c.paused, treasury: c.treasury, protocol_fee: c.protocol_fee, instant_withdraw_fee: fee });
     }
 
     async transition pause() -> Future {
@@ -975,7 +1004,7 @@ program staking_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { paused: true, treasury: c.treasury, protocol_fee: c.protocol_fee });
+        Mapping::set(config, 0u8, Config { paused: true, treasury: c.treasury, protocol_fee: c.protocol_fee, instant_withdraw_fee: c.instant_withdraw_fee });
     }
 
     async transition unpause() -> Future {
@@ -988,7 +1017,7 @@ program staking_stcredits_v1.aleo {
         f.await();
 
         let c: Config = Mapping::get(config, 0u8);
-        Mapping::set(config, 0u8, Config { paused: false, treasury: c.treasury, protocol_fee: c.protocol_fee });
+        Mapping::set(config, 0u8, Config { paused: false, treasury: c.treasury, protocol_fee: c.protocol_fee, instant_withdraw_fee: c.instant_withdraw_fee });
     }
 
     async transition rescue_tokens(public receiver: address, public amount: u64) -> Future {
