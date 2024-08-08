@@ -43,7 +43,7 @@ export default async function RootLayout({
           fontSans.variable
         )}
       >
-        <div className="bg-amber-600">
+        {/* <div className="bg-amber-600">
           <div className="container py-3 text-white sm:text-center">
             <p className="font-medium">
               Since Aleo&apos;s Testnet Beta has been reset, we are redeploying
@@ -51,7 +51,7 @@ export default async function RootLayout({
               Please stay tuned.
             </p>
           </div>
-        </div>
+        </div> */}
         <ThemeProvider
           attribute="class"
           defaultTheme="dark"
