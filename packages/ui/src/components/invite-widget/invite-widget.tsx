@@ -91,7 +91,7 @@ export function InviteWidget() {
 
         <div className="rounded-xl bg-muted grid grid-cols-2 gap-2 p-5 mb-6">
           <div>
-            <div className="text-sm text-muted-foreground">Invite Code</div>
+            <div className="text-sm text-muted-foreground">Invite code</div>
             <div className="text-lg font-bold">
               {isLoadingInviteCode ? (
                 <Skeleton className="w-20 bg-primary-foreground">
@@ -106,7 +106,7 @@ export function InviteWidget() {
           </div>
           <div>
             <div className="text-sm text-muted-foreground flex items-center">
-              Invitation Bonus Points
+              Invitation bonus points
             </div>
             <div className="text-lg">{dn.format([65401n, 0])}</div>
           </div>

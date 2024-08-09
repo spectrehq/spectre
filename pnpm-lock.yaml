@@ -164,6 +164,12 @@ importers:
 
   packages/ui:
     dependencies:
+      '@aleohq/sdk':
+        specifier: ^0.6.9
+        version: 0.6.9(patch_hash=iyvjg3z3yuo3xu256xfhvhla4q)
+      '@aleohq/wasm':
+        specifier: ^0.6.9
+        version: 0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)
       '@demox-labs/aleo-wallet-adapter-base':
         specifier: ^0.0.22
         version: 0.0.22
@@ -180,7 +186,7 @@ importers:
         specifier: ^3.7.0
         version: 3.7.0(react-hook-form@7.52.1(react@18.3.1))
       '@puzzlehq/sdk':
-        specifier: ^0.4.3
+        specifier: 0.4.3
         version: 0.4.3(patch_hash=yqxbynoencxja7vs3e4oidwxpq)(@types/react@18.3.3)(buffer@6.0.3)(react-dom@18.3.1(react@18.3.1))(react@18.3.1)
       '@radix-ui/react-alert-dialog':
         specifier: ^1.1.1

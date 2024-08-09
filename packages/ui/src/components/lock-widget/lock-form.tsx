@@ -16,10 +16,12 @@ import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
+import { useApprove } from '~/hooks/use-approve'
 import { useLock } from '~/hooks/use-lock'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
+import { TokenAllowanceChecker } from '../token-allowance-checker'
 
 export function LockForm() {
   const tPrompts = useTranslations('Prompts')
@@ -88,7 +90,7 @@ export function LockForm() {
   const inviteCode = useReadLocalStorage<number>('aleostaking_invite_code')
 
   const handleLock = useCallback(
-    (data: FormData) => {
+    async (data: FormData) => {
       const amount = dn.from(data.amount || 0, 6)[0]
       setStCreditsAmountCache(Number(data.amount))
       lock(amount, inviteCode ?? 0)
@@ -141,6 +143,11 @@ export function LockForm() {
                     </Button>
                   </div>
                 </FormControl>
+                <div className="flex justify-end text-sm">
+                  <span>
+                    Balance: {dn.format(stCreditsBalanceDN, 6)} stCredits
+                  </span>
+                </div>
               </FormItem>
             )}
           />
@@ -149,18 +156,25 @@ export function LockForm() {
             variant="secondary"
             size="xl"
           >
-            <Button
+            <TokenAllowanceChecker
               className="w-full"
               variant="secondary"
-              type="submit"
               size="xl"
-              disabled={!form.formState.isValid || isPending}
             >
-              {isPending && (
-                <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
-              )}
-              {form.formState.errors.amount?.message || 'Lock'}
-            </Button>
+              <Button
+                className="w-full"
+                variant="secondary"
+                type="submit"
+                size="xl"
+                disabled={!form.formState.isValid || isPending}
+              >
+                {isPending && (
+                  <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
+                )}
+                {form.formState.errors.amount?.message ||
+                  (isPending ? 'Waiting for wallet confirmation' : 'Lock')}
+              </Button>
+            </TokenAllowanceChecker>
           </WalletConnectionChecker>
         </form>
       </Form>
