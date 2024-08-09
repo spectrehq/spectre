@@ -14,6 +14,7 @@ import { NetworkClientStoreProvider } from '~/stores/network-client'
 import { Providers } from './providers'
 
 import './globals.css'
+import { Suspense } from 'react'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -66,7 +67,9 @@ export default async function RootLayout({
                   <Header />
                   {children}
                   <Footer />
-                  <InviteCodeChecker />
+                  <Suspense>
+                    <InviteCodeChecker />
+                  </Suspense>
                   <ConnectingWalletDialog />
                 </AccountStoreProvider>
               </Providers>
