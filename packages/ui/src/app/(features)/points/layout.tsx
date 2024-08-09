@@ -13,7 +13,7 @@ export default function PointsLayout({ children }: PropsWithChildren) {
     <>
       <section>
         <div className="container py-6">
-          <div className="text-center mb-8">
+          <div className="text-center">
             <h3 className="scroll-m-20 font-semibold text-2xl tracking-tight mb-1">
               {t('title')}
             </h3>

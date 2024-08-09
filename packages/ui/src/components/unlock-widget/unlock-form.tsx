@@ -6,36 +6,34 @@ import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
-import { useReadLocalStorage } from 'usehooks-ts'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TokenAllowanceChecker } from '~/components/token-allowance-checker'
 import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
-import { useLock } from '~/hooks/use-lock'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
+import { useUnlock } from '~/hooks/use-unlock'
+import { useUserPoints } from '~/hooks/use-user-points'
 import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
 
-export function LockForm() {
+export function UnlockForm() {
   const tPrompts = useTranslations('Prompts')
 
   const { address } = useAccount()
 
-  const { data: stCreditsBalance, isFetched: isFetchedStCreditsBalance } =
-    useStCreditsBalance(address)
-  const stCreditsBalanceDN = useMemo(
-    () => dn.from([stCreditsBalance ?? 0n, 6]),
-    [stCreditsBalance]
+  const { data: userPoints, isFetched: isFetchedUserPoints } =
+    useUserPoints(address)
+  const userPointsDN = useMemo(
+    () => dn.from([userPoints ?? 0n, 6]),
+    [userPoints]
   )
-  const stCreditsBalanceNumber = useMemo(
-    () => dn.toNumber(stCreditsBalanceDN),
-    [stCreditsBalanceDN]
+  const userPointsNumber = useMemo(
+    () => dn.toNumber(userPointsDN),
+    [userPointsDN]
   )
 
   const formSchema = useMemo(
@@ -47,10 +45,10 @@ export function LockForm() {
             invalid_type_error: tPrompts('Enter an amount'),
           })
           .gt(0, { message: tPrompts('Enter an amount') })
-          .max(stCreditsBalanceNumber, tPrompts('Insufficient balance'))
+          .max(userPointsNumber, tPrompts('Insufficient balance'))
           .transform((v) => String(v)),
       }),
-    [stCreditsBalanceNumber, tPrompts]
+    [userPointsNumber, tPrompts]
   )
 
   type FormData = z.infer<typeof formSchema>
@@ -67,12 +65,12 @@ export function LockForm() {
   }, [form])
 
   useEffect(() => {
-    if (isFetchedStCreditsBalance) {
+    if (isFetchedUserPoints) {
       form.trigger('amount')
     }
-  }, [form, isFetchedStCreditsBalance])
+  }, [form, isFetchedUserPoints])
 
-  const { lock, transactionStatus } = useLock()
+  const { unlock, transactionStatus } = useUnlock()
   const isPending = useMemo(
     () => transactionStatus === TransactionStatus.Creating,
     [transactionStatus]
@@ -84,23 +82,31 @@ export function LockForm() {
       transactionStatus !== TransactionStatus.Creating,
     [transactionStatus]
   )
-  const [stCreditsAmountCache, setStCreditsAmountCache] = useState<number>(0)
+  const [pointsAmountCache, setPointsAmountCache] = useState<number>(0)
 
-  const inviteCode = useReadLocalStorage<number>('aleostaking_invite_code')
-
-  const handleLock = useCallback(
-    async (data: FormData) => {
+  const handleUnlock = useCallback(
+    (data: FormData) => {
       const amount = dn.from(data.amount || 0, 6)[0]
-      setStCreditsAmountCache(Number(data.amount))
-      lock(amount, inviteCode ?? 0)
+      setPointsAmountCache(Number(data.amount))
+      unlock(amount)
     },
-    [lock, inviteCode]
+    [unlock]
+  )
+
+  const stCreditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const receivedFormatted = useMemo(
+    () => dn.format(dn.from(stCreditsAmount || 0), { digits: 6 }),
+    [stCreditsAmount]
   )
 
   return (
     <>
       <Form {...form}>
-        <form onSubmit={form.handleSubmit(handleLock)} className="space-y-6">
+        <form onSubmit={form.handleSubmit(handleUnlock)} className="space-y-6">
           <FormField
             control={form.control}
             name="amount"
@@ -135,18 +141,13 @@ export function LockForm() {
                       type="button"
                       size="sm"
                       onClick={() => {
-                        field.onChange(stCreditsBalanceNumber)
+                        field.onChange(userPointsNumber)
                       }}
                     >
                       MAX
                     </Button>
                   </div>
                 </FormControl>
-                <div className="flex justify-end text-sm">
-                  <span>
-                    Balance: {dn.format(stCreditsBalanceDN, 6)} stCredits
-                  </span>
-                </div>
               </FormItem>
             )}
           />
@@ -155,34 +156,38 @@ export function LockForm() {
             variant="secondary"
             size="xl"
           >
-            <TokenAllowanceChecker
+            <Button
               className="w-full"
               variant="secondary"
+              type="submit"
               size="xl"
+              disabled={!form.formState.isValid || isPending}
             >
-              <Button
-                className="w-full"
-                variant="secondary"
-                type="submit"
-                size="xl"
-                disabled={!form.formState.isValid || isPending}
-              >
-                {isPending && (
-                  <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
-                )}
-                {form.formState.errors.amount?.message ||
-                  (isPending ? 'Waiting for wallet confirmation' : 'Lock')}
-              </Button>
-            </TokenAllowanceChecker>
+              {isPending && (
+                <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
+              )}
+              {form.formState.errors.amount?.message || 'Lock'}
+            </Button>
           </WalletConnectionChecker>
         </form>
       </Form>
+
+      <ul className="grid gap-3 text-sm mt-6">
+        <li className="flex items-center justify-between">
+          <span className="text-muted-foreground">You will receive</span>
+          <span>{receivedFormatted} stCredits</span>
+        </li>
+        <li className="flex items-center justify-between">
+          <span className="text-muted-foreground">Network fee</span>
+          <span>~ 0.25 Credits</span>
+        </li>
+      </ul>
       {isShowTransactionToast && (
         <TransactionToast
           title={{
             Creating: '',
-            Pending: `You are locking ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} Credits`,
-            Settled: `You have locked ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} Credits`,
+            Pending: `You are unlocking ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
+            Settled: `You have unlocked ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}

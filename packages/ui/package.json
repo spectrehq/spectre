@@ -11,6 +11,8 @@
     "format": "biome format --write ."
   },
   "dependencies": {
+    "@aleohq/sdk": "^0.6.9",
+    "@aleohq/wasm": "^0.6.9",
     "@demox-labs/aleo-wallet-adapter-base": "^0.0.22",
     "@demox-labs/aleo-wallet-adapter-leo": "^0.0.22",
     "@demox-labs/aleo-wallet-adapter-react": "^0.0.21",

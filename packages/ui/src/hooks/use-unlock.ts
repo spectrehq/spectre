@@ -4,7 +4,7 @@ import { useNetworkClientStore } from '~/stores/network-client'
 import { useAccount } from './use-account'
 import { useSendTransaction } from './use-send-transaction'
 
-export function useLock() {
+export function useUnlock() {
   const { address, walletType } = useAccount()
 
   const { mutate, mutateAsync, ...rest } = useSendTransaction({
@@ -18,29 +18,29 @@ export function useLock() {
     [network]
   )
 
-  const lock = useCallback(
-    (amount: bigint, inviteCode = 0, fee?: number) => {
+  const unlock = useCallback(
+    (amount: bigint, fee?: number) => {
       mutate({
         programId,
-        functionName: 'lock',
-        inputs: [`${amount}u64`, `${inviteCode}u32`],
+        functionName: 'unlock',
+        inputs: [`${amount}u64`],
         fee,
       })
     },
     [mutate, programId]
   )
 
-  const lockAsync = useCallback(
-    (amount: bigint, inviteCode = 0, fee?: number) => {
+  const unlockAsync = useCallback(
+    (amount: bigint, fee?: number) => {
       mutateAsync({
         programId,
-        functionName: 'lock',
-        inputs: [`${amount}u64`, `${inviteCode}u32`],
+        functionName: 'unlock',
+        inputs: [`${amount}u64`],
         fee,
       })
     },
     [mutateAsync, programId]
   )
 
-  return { lock, lockAsync, ...rest }
+  return { unlock, unlockAsync, ...rest }
 }
