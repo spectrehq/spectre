@@ -215,8 +215,8 @@ program staking_stcredits_v1.aleo {
     struct Config {
         paused: bool,
         treasury: address,
-        protocol_fee: u8,
-        instant_withdraw_fee: u8,
+        protocol_fee: u8, // the protocol fee
+        instant_withdraw_fee: u8, // the fee for instant withdrawal, which belongs to all stcredits holders.
     }
 
     mapping config: u8 => Config; // 0u8 => config
