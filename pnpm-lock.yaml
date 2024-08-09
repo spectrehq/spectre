@@ -164,6 +164,12 @@ importers:
 
   packages/ui:
     dependencies:
+      '@aleohq/sdk':
+        specifier: ^0.6.9
+        version: 0.6.9(patch_hash=iyvjg3z3yuo3xu256xfhvhla4q)
+      '@aleohq/wasm':
+        specifier: ^0.6.9
+        version: 0.6.9(patch_hash=il2rgvounjk5vwck5un5suowxm)
       '@demox-labs/aleo-wallet-adapter-base':
         specifier: ^0.0.22
         version: 0.0.22

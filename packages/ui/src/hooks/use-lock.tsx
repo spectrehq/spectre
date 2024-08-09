@@ -22,7 +22,7 @@ export function useLock() {
     (amount: bigint, inviteCode = 0, fee?: number) => {
       mutate({
         programId,
-        functionName: '',
+        functionName: 'lock',
         inputs: [`${amount}u64`, `${inviteCode}u32`],
         fee,
       })
@@ -34,7 +34,7 @@ export function useLock() {
     (amount: bigint, inviteCode = 0, fee?: number) => {
       mutateAsync({
         programId,
-        functionName: '',
+        functionName: 'lock',
         inputs: [`${amount}u64`, `${inviteCode}u32`],
         fee,
       })
