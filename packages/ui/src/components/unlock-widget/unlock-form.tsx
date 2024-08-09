@@ -4,9 +4,11 @@ import { zodResolver } from '@hookform/resolvers/zod'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
+import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
+import AleoStakingLogoIcon from '~/assets/logo-dark.png'
 import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
@@ -91,6 +93,16 @@ export function UnlockForm() {
     [unlock]
   )
 
+  const stCreditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
+
+  const receivedFormatted = useMemo(
+    () => dn.format(dn.from(stCreditsAmount || 0), { digits: 6 }),
+    [stCreditsAmount]
+  )
+
   return (
     <>
       <Form {...form}>
@@ -102,10 +114,17 @@ export function UnlockForm() {
               <FormItem>
                 <FormControl>
                   <div className="flex items-center border rounded-xl p-3 bg-background">
+                    <div className="w-9 flex items-center justify-center">
+                      <Image
+                        src={AleoStakingLogoIcon}
+                        alt="AleoStaking Logo"
+                        width={22}
+                      />
+                    </div>
                     <NumberInput
                       {...field}
                       className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                      placeholder="Points"
+                      placeholder="stCredits amount"
                       onChange={(event) => {
                         const value = event.currentTarget.value ?? ''
                         if (
@@ -152,12 +171,23 @@ export function UnlockForm() {
           </WalletConnectionChecker>
         </form>
       </Form>
+
+      <ul className="grid gap-3 text-sm mt-6">
+        <li className="flex items-center justify-between">
+          <span className="text-muted-foreground">You will receive</span>
+          <span>{receivedFormatted} stCredits</span>
+        </li>
+        <li className="flex items-center justify-between">
+          <span className="text-muted-foreground">Network fee</span>
+          <span>~ 0.25 Credits</span>
+        </li>
+      </ul>
       {isShowTransactionToast && (
         <TransactionToast
           title={{
             Creating: '',
-            Pending: `You are unlocking ${dn.format(dn.from(pointsAmountCache, 6), 6)} Credits`,
-            Settled: `You have unlocked ${dn.format(dn.from(pointsAmountCache, 6), 6)} Credits`,
+            Pending: `You are unlocking ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
+            Settled: `You have unlocked ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
