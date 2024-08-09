@@ -19,7 +19,8 @@
     "test": "pnpm recursive run test",
     "lint": "pnpm prettier:check && eslint . --ext .ts --ext .tsx",
     "prettier": "prettier --write '**/*.{ts,tsx,css,md,mdx}'",
-    "prettier:check": "prettier --check '**/*.{ts,tsx,css,md,mdx}'"
+    "prettier:check": "prettier --check '**/*.{ts,tsx,css,md,mdx}'",
+    "postinstall": "cp packages/ui/assets/aleo_wasm.wasm packages/ui/node_modules/@aleohq/wasm/dist/assets/aleo_wasm.wasm"
   },
   "devDependencies": {
     "@types/debug": "4.1.7",
