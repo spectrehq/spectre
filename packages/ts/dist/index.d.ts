@@ -92,6 +92,8 @@ export declare function parsePlaintext(plaintext: string): Plaintext;
 export declare function importAleo(): Promise<typeof import("@aleohq/sdk")>;
 export declare function bhp256HashToField(plaintext: string): Promise<string>;
 export declare function programAddress(programId: string): Promise<string>;
+export declare function addressToField(address: string): Promise<string>;
+export declare function fieldToAddress(field: string): Promise<string>;
 export interface CommitteeState {
 	is_open: boolean;
 	commission: bigint;
@@ -277,6 +279,29 @@ export declare class StCreditsPointsProgram extends ProgramBase {
 	 * Get the invite code counter.
 	 */
 	getInviteCodeCounter(): Promise<bigint>;
+}
+export interface TokenMetadata {
+	token_id: string;
+	name: bigint;
+	symbol: bigint;
+	decimals: bigint;
+	supply: bigint;
+	max_supply: bigint;
+	admin: string;
+	external_authorization_required: boolean;
+	external_authorization_party: string;
+}
+export interface Balance {
+	token_id: bigint;
+	account: string;
+	balance: bigint;
+	authorized_until: bigint;
+}
+export declare class MtspProgram extends ProgramBase {
+	getRegisteredTokens(tokenId: bigint): Promise<TokenMetadata | null>;
+	getBalance(tokenId: bigint, address: string): Promise<Balance>;
+	getAuthorizedBalances(tokenId: bigint, address: string): Promise<Balance>;
+	getAllowance(tokenId: bigint, address: string, spender: string): Promise<bigint>;
 }
 
 export {};

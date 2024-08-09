@@ -833,27 +833,6 @@ export default function HomePage() {
 
                 <li className="">
                   <Link
-                    href="https://www.leo.app/"
-                    target="_blank"
-                    rel="noreferrer"
-                  >
-                    <Image
-                      src={LeoWalletLogoLight}
-                      alt=""
-                      className="hidden dark:block object-cover mx-auto lg:mx-0"
-                      width={140}
-                    />
-                    <Image
-                      src={LeoWalletLogoDark}
-                      alt=""
-                      className="block dark:hidden object-cover mx-auto lg:mx-0"
-                      width={140}
-                    />
-                  </Link>
-                </li>
-
-                <li className="">
-                  <Link
                     href="https://puzzle.online/"
                     target="_blank"
                     rel="noreferrer"
@@ -869,6 +848,27 @@ export default function HomePage() {
                       alt=""
                       className="block dark:hidden object-cover mx-auto lg:mx-0"
                       width={90}
+                    />
+                  </Link>
+                </li>
+
+                <li className="">
+                  <Link
+                    href="https://www.leo.app/"
+                    target="_blank"
+                    rel="noreferrer"
+                  >
+                    <Image
+                      src={LeoWalletLogoLight}
+                      alt=""
+                      className="hidden dark:block object-cover mx-auto lg:mx-0"
+                      width={140}
+                    />
+                    <Image
+                      src={LeoWalletLogoDark}
+                      alt=""
+                      className="block dark:hidden object-cover mx-auto lg:mx-0"
+                      width={140}
                     />
                   </Link>
                 </li>

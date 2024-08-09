@@ -81,20 +81,7 @@ export function useSendTransaction({
 
         setTransactionStatus(TransactionStatus.Pending)
 
-        let isTimeout = false
-
-        setTimeout(
-          () => {
-            isTimeout = true
-          },
-          5 * 60 * 1000
-        )
-
         while (true) {
-          if (isTimeout) {
-            throw new Error('get transaction status timeout')
-          }
-
           const transactionStatus = await getTransactionStatus?.(transactionId)
 
           if (transactionStatus === 'Finalized') {
@@ -132,20 +119,7 @@ export function useSendTransaction({
         if (eventId) {
           setTransactionStatus(TransactionStatus.Pending)
 
-          let isTimeout = false
-
-          setTimeout(
-            () => {
-              isTimeout = true
-            },
-            5 * 60 * 1000
-          )
-
           while (true) {
-            if (isTimeout) {
-              throw new Error('get transaction status timeout')
-            }
-
             const { event, error } = await getEvent({ id: eventId, address })
 
             if (error) {
