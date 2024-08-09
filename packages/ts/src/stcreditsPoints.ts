@@ -1,5 +1,5 @@
-import { ProgramBase, u8Str, parsePlaintext, u32Str, u32, bool } from "./types"
-import { EMPTY_INVITE_CODE, START_INVITE_CODE } from "./const"
+import { ProgramBase, u8Str, parsePlaintext, u32Str, u32, bool } from './types'
+import { EMPTY_INVITE_CODE, START_INVITE_CODE } from './const'
 
 export interface StCreditsPointsState {
   // The total locked stcredits of user
@@ -30,7 +30,7 @@ export class StCreditsPointsProgram extends ProgramBase {
    * Whether the program is paused.
    */
   async isPaused() {
-    return bool(await this.getMappingValueOrDefault("paused", u8Str(0), "true"))
+    return bool(await this.getMappingValueOrDefault('paused', u8Str(0), 'true'))
   }
 
   /**
@@ -52,7 +52,7 @@ export class StCreditsPointsProgram extends ProgramBase {
    * @param account
    */
   async getState(account: string) {
-    const state = await this.getMappingValueOrNull("state", account)
+    const state = await this.getMappingValueOrNull('state', account)
     return state === null ? null : (parsePlaintext(state) as unknown as StCreditsPointsState)
   }
 
@@ -60,11 +60,13 @@ export class StCreditsPointsProgram extends ProgramBase {
    * Get the stats of the program.
    */
   async getStats() {
-    const state = await this.getMappingValueOrNull("stats", u8Str(0))
-    return state === null ? {
-      stcredits: 0n,
-      points: 0n
-    } as StCreditsPointsStats : (parsePlaintext(state) as unknown as StCreditsPointsStats)
+    const state = await this.getMappingValueOrNull('stats', u8Str(0))
+    return state === null
+      ? ({
+          stcredits: 0n,
+          points: 0n,
+        } as StCreditsPointsStats)
+      : (parsePlaintext(state) as unknown as StCreditsPointsStats)
   }
 
   /**
@@ -72,7 +74,7 @@ export class StCreditsPointsProgram extends ProgramBase {
    * @param code
    */
   async getInviterByCode(code: number | bigint) {
-    return await this.getMappingValueOrNull("inviters", u32Str(code))
+    return await this.getMappingValueOrNull('inviters', u32Str(code))
   }
 
   /**
@@ -80,13 +82,13 @@ export class StCreditsPointsProgram extends ProgramBase {
    * @param inviter
    */
   async getInviteCode(inviter: string) {
-    return u32(await this.getMappingValueOrDefault("invite_codes", inviter, String(EMPTY_INVITE_CODE)))
+    return u32(await this.getMappingValueOrDefault('invite_codes', inviter, String(EMPTY_INVITE_CODE)))
   }
 
   /**
    * Get the invite code counter.
    */
   async getInviteCodeCounter() {
-    return u32(await this.getMappingValueOrDefault("invite_code_counter", u8Str(0), String(START_INVITE_CODE)))
+    return u32(await this.getMappingValueOrDefault('invite_code_counter', u8Str(0), String(START_INVITE_CODE)))
   }
 }

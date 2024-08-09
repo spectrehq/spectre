@@ -1,6 +1,6 @@
-import assert from "assert"
+import assert from 'assert'
 
-export const ZERO_ADDRESS = "aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc"
+export const ZERO_ADDRESS = 'aleo1qqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqqq3ljyzc'
 
 export const DEFAULT_ADMIN_ROLE = 0
 
@@ -19,12 +19,12 @@ export const EMPTY_INVITE_CODE = 0n
 export const INVITER_REWARD = 16n
 export const INVITER_OF_INVITER_REWARD = 8n
 
-export const VERSION = "v1"
-export const SPECTRE = "spectre"
-export const STAKING = "staking"
+export const VERSION = 'v1'
+export const SPECTRE = 'spectre'
+export const STAKING = 'staking'
 
 function programName(program: string, prefix: string, cloneNo?: string) {
-  return `${prefix}_${program}_${VERSION}${config!.programSuffix ? "_" + config!.programSuffix : ""}${cloneNo ? "_" + cloneNo : ""}.aleo`
+  return `${prefix}_${program}_${VERSION}${config!.programSuffix ? '_' + config!.programSuffix : ''}${cloneNo ? '_' + cloneNo : ''}.aleo`
 }
 
 function spectreProgramName(program: string) {
@@ -41,7 +41,7 @@ export const STCREDITS_PROGRAM = () => stakingProgramName(config!.programs.staki
 export const STCREDITS_POINTS_PROGRAM = () => stakingProgramName(config!.programs.staking.stcreditsPoints)
 
 export function delegatorProgramName(index: number) {
-  const cloneNo = (index + 1).toString().padStart(3, "0")
+  const cloneNo = (index + 1).toString().padStart(3, '0')
   return programName(config!.programs.staking.delegator, STAKING, cloneNo)
 }
 
