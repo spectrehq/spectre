@@ -39,7 +39,7 @@
 
     "AccumulatedPoints": {
       "title": "Accumulated points per block",
-      "description": "It does not include your earned points on top of your invites and your invites' invites."
+      "description": "It does not include your earned points on top of your invites and your invites' invites"
     }
   },
 
