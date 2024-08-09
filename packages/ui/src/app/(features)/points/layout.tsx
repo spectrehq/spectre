@@ -10,9 +10,9 @@ export default function PointsLayout({ children }: PropsWithChildren) {
   const t = useTranslations('PointsPage')
 
   return (
-    <>
+    <div className="py-16">
       <section>
-        <div className="container py-6">
+        <div className="container mb-8">
           <div className="text-center">
             <h3 className="scroll-m-20 font-semibold text-2xl tracking-tight mb-1">
               {t('title')}
@@ -53,6 +53,6 @@ export default function PointsLayout({ children }: PropsWithChildren) {
           <PointsStatistics />
         </div>
       </section>
-    </>
+    </div>
   )
 }
