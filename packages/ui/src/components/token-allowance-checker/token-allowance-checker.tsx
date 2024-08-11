@@ -40,7 +40,7 @@ export function TokenAllowanceChecker({
     )
   }, [stCreditsPointsProgramId])
 
-  const { data: allowance = 0n, isLoading: isLoadingAllowance } =
+  const { data: allowance = 0n, isLoading: isLoadingAllowance, refetch: refetchAllowance } =
     useStCreditsAllowance(address, stCreditsPointsProgramAddress)
 
   const { approve, transactionStatus } = useApprove()
@@ -66,6 +66,12 @@ export function TokenAllowanceChecker({
     () => !stCreditsPointsProgramAddress || isLoadingAllowance,
     [stCreditsPointsProgramAddress, isLoadingAllowance]
   )
+
+  useEffect(() => {
+    if (transactionStatus === TransactionStatus.Settled) {
+      refetchAllowance()
+    }
+  }, [transactionStatus])
 
   if (allowance >= MAX_U64) return <>{children}</>
 
