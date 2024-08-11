@@ -50,8 +50,6 @@ export function TokenAllowanceChecker({
     approve(stCreditsPointsProgramAddress, MAX_U64)
   }, [approve, stCreditsPointsProgramAddress])
 
-  console.log('allowance', allowance)
-
   const isPending = useMemo(
     () => transactionStatus === TransactionStatus.Creating,
     [transactionStatus]
