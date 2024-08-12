@@ -181,8 +181,8 @@ export function LockForm() {
         <TransactionToast
           title={{
             Creating: '',
-            Pending: `You are locking ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} Credits`,
-            Settled: `You have locked ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} Credits`,
+            Pending: `You are locking ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
+            Settled: `You have locked ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
