@@ -7,7 +7,7 @@ import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
 import Image from 'next/image'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { useForm } from 'react-hook-form'
+import { useForm, useWatch } from 'react-hook-form'
 import { useReadLocalStorage } from 'usehooks-ts'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
@@ -94,7 +94,7 @@ export function LockForm() {
     async (data: FormData) => {
       const amount = dn.from(data.amount || 0, 6)[0]
       setStCreditsAmountCache(Number(data.amount))
-      lock(amount, inviteCode ?? 0)
+      lock(amount, inviteCode ?? 0, 500_000)
     },
     [lock, inviteCode]
   )
@@ -102,11 +102,17 @@ export function LockForm() {
   const queryClient = useQueryClient()
   useEffect(() => {
     if (isSuccess) {
+      form.reset()
       void queryClient.refetchQueries({
         predicate: ({ queryKey }) => queryKey.includes(address),
       })
     }
-  }, [address, isSuccess, queryClient])
+  }, [address, form, isSuccess, queryClient])
+
+  const stCreditsAmount = useWatch({
+    control: form.control,
+    name: 'amount',
+  })
 
   return (
     <>
@@ -170,6 +176,7 @@ export function LockForm() {
               className="w-full"
               variant="secondary"
               size="xl"
+              amount={dn.from(stCreditsAmount || 0, 6)[0]}
             >
               <Button
                 className="w-full"

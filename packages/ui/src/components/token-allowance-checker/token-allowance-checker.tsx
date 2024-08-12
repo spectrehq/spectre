@@ -15,11 +15,13 @@ import { TransactionStatus } from '~/types'
 
 export interface TokenAllowanceCheckerProps extends ButtonProps {
   label?: string
+  amount?: bigint
 }
 
 export function TokenAllowanceChecker({
   children,
   label = 'Approve',
+  amount = MAX_U64,
   ...props
 }: TokenAllowanceCheckerProps) {
   const { address } = useAccount()
@@ -46,12 +48,12 @@ export function TokenAllowanceChecker({
     refetch: refetchAllowance,
   } = useStCreditsAllowance(address, stCreditsPointsProgramAddress)
 
-  const { approve, transactionStatus } = useApprove()
+  const { approve, isSuccess, transactionStatus } = useApprove()
 
   const handleApprove = useCallback(() => {
     if (!stCreditsPointsProgramAddress) return
-    approve(stCreditsPointsProgramAddress, MAX_U64)
-  }, [approve, stCreditsPointsProgramAddress])
+    approve(stCreditsPointsProgramAddress, MAX_U64 - allowance)
+  }, [allowance, approve, stCreditsPointsProgramAddress])
 
   const isPending = useMemo(
     () => transactionStatus === TransactionStatus.Creating,
@@ -71,12 +73,12 @@ export function TokenAllowanceChecker({
   )
 
   useEffect(() => {
-    if (transactionStatus === TransactionStatus.Settled) {
+    if (isSuccess) {
       refetchAllowance()
     }
-  }, [transactionStatus, refetchAllowance])
+  }, [refetchAllowance, isSuccess])
 
-  if (allowance >= MAX_U64) return <>{children}</>
+  if (allowance !== 0n && allowance >= amount) return <>{children}</>
 
   return (
     <>

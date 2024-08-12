@@ -10,7 +10,7 @@ export function useEstimatedPoints(address?: string | null) {
   const { data } = useBlockHeight()
 
   return useQuery({
-    queryKey: ['stCreditsPoints', 'estimatedPoints', address],
+    queryKey: ['stCreditsPoints', 'estimatedPoints', address, data],
     queryFn: () =>
       stCreditsPointsProgram.getEstimatedPoints(address!, BigInt(data!)),
     enabled: Boolean(address && data),
