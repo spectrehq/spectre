@@ -89,7 +89,7 @@ export function UnlockForm() {
     (data: FormData) => {
       const amount = dn.from(data.amount || 0, 6)[0]
       setPointsAmountCache(Number(data.amount))
-      unlock(amount)
+      unlock(amount, 500_000)
     },
     [unlock]
   )
@@ -107,11 +107,12 @@ export function UnlockForm() {
   const queryClient = useQueryClient()
   useEffect(() => {
     if (isSuccess) {
+      form.reset()
       void queryClient.refetchQueries({
         predicate: ({ queryKey }) => queryKey.includes(address),
       })
     }
-  }, [address, isSuccess, queryClient])
+  }, [address, form, isSuccess, queryClient])
 
   return (
     <>
@@ -176,7 +177,7 @@ export function UnlockForm() {
               {isPending && (
                 <Loader2Icon className={cn('mr-2 h-4 w-4 animate-spin')} />
               )}
-              {form.formState.errors.amount?.message || 'Lock'}
+              {form.formState.errors.amount?.message || 'Unlock'}
             </Button>
           </WalletConnectionChecker>
         </form>

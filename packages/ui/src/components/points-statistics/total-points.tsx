@@ -19,7 +19,7 @@ export function TotalPoints() {
   const { data, isLoading } = usePointsStats()
 
   const pointsFormatted = useMemo(
-    () => dn.format([data?.points ?? 0n, 6], 6),
+    () => dn.format([data?.points ?? 0n, 6], 0),
     [data]
   )
 
