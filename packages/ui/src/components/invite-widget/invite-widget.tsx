@@ -2,14 +2,10 @@
 
 import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
-import {
-  CircleCheckIcon,
-  CircleHelpIcon,
-  CopyIcon,
-  Loader2Icon,
-} from 'lucide-react'
+import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
+import { ZERO_ADDRESS } from 'spectre'
 import { useCopyToClipboard } from 'usehooks-ts'
 import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
@@ -23,12 +19,16 @@ import {
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
 import { useGenerateInviteCode } from '~/hooks/use-generate-invite-code'
+import { usePointsState } from '~/hooks/use-points-state'
 import { useUserInviteCode } from '~/hooks/use-user-invite-code'
 import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
 
 export function InviteWidget() {
   const { address } = useAccount()
+
+  const { data: userPointsState, isLoading: isLoadingUserPointsState } =
+    usePointsState(address)
 
   const { data: inviteCode, isLoading: isLoadingInviteCode } =
     useUserInviteCode(address)
@@ -40,7 +40,9 @@ export function InviteWidget() {
 
   const inviteLink = useMemo(
     () =>
-      inviteCode ? `https://aleostaking.org?invite_code=${inviteCode}` : null,
+      inviteCode
+        ? `${window.location.protocol}//${window.location.host}?invite_code=${inviteCode}`
+        : null,
     [inviteCode]
   )
 
@@ -118,7 +120,25 @@ export function InviteWidget() {
             <div className="text-sm text-muted-foreground flex items-center">
               Invitation bonus points
             </div>
-            <div className="text-lg">{dn.format([65401n, 0])}</div>
+            <div className="text-lg">
+              {isLoadingUserPointsState ? (
+                <Skeleton className="w-24">&nbsp;</Skeleton>
+              ) : userPointsState &&
+                userPointsState.invite_points +
+                  userPointsState.invite_of_invite_points >
+                  0 ? (
+                dn.format(
+                  [
+                    (userPointsState?.invite_points ?? 0n) +
+                      (userPointsState?.invite_of_invite_points ?? 0n),
+                    6,
+                  ],
+                  6
+                )
+              ) : (
+                '-'
+              )}
+            </div>
           </div>
         </div>
 
@@ -173,7 +193,17 @@ export function InviteWidget() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <span>-</span>
+            <div>
+              {isLoadingUserPointsState ? (
+                <Skeleton className="w-24">&nbsp;</Skeleton>
+              ) : (
+                <span>
+                  {userPointsState && userPointsState.invite_points > 0n
+                    ? dn.format([userPointsState.invite_points, 6], 6)
+                    : '-'}
+                </span>
+              )}
+            </div>
           </li>
           <li className="flex items-center justify-between">
             <div className="flex items-center">
@@ -193,7 +223,18 @@ export function InviteWidget() {
                 </Tooltip>
               </TooltipProvider>
             </div>
-            <span>-</span>
+            <div>
+              {isLoadingUserPointsState ? (
+                <Skeleton className="w-20">&nbsp;</Skeleton>
+              ) : (
+                <span>
+                  {userPointsState &&
+                  userPointsState.invite_of_invite_points > 0n
+                    ? dn.format([userPointsState.invite_of_invite_points, 6], 6)
+                    : '-'}
+                </span>
+              )}
+            </div>
           </li>
         </ul>
       </div>
