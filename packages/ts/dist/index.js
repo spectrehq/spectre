@@ -9362,7 +9362,7 @@ class YA extends Mn {
    * @param account
    */
   async getState(e) {
-    const n = await this.getMappingValueOrNull("state", e);
+    const n = await this.getMappingValueOrNull("states", e);
     return n === null ? null : xe(n);
   }
   /**

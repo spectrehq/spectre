@@ -52,7 +52,7 @@ export class StCreditsPointsProgram extends ProgramBase {
    * @param account
    */
   async getState(account: string) {
-    const state = await this.getMappingValueOrNull('state', account)
+    const state = await this.getMappingValueOrNull('states', account)
     return state === null ? null : (parsePlaintext(state) as unknown as StCreditsPointsState)
   }
 
