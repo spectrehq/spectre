@@ -15,8 +15,8 @@ import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
 import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
 import { useAccount } from '~/hooks/use-account'
+import { usePointsState } from '~/hooks/use-points-state'
 import { useUnlock } from '~/hooks/use-unlock'
-import { useUserPoints } from '~/hooks/use-user-points'
 import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
 
@@ -25,11 +25,11 @@ export function UnlockForm() {
 
   const { address } = useAccount()
 
-  const { data: userPoints, isFetched: isFetchedUserPoints } =
-    useUserPoints(address)
+  const { data: userPointsState, isFetched: isFetchedUserPoints } =
+    usePointsState(address)
   const userPointsDN = useMemo(
-    () => dn.from([userPoints ?? 0n, 6]),
-    [userPoints]
+    () => dn.from([userPointsState?.stcredits ?? 0n, 6]),
+    [userPointsState]
   )
   const userPointsNumber = useMemo(
     () => dn.toNumber(userPointsDN),

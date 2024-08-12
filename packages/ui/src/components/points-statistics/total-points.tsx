@@ -1,3 +1,5 @@
+'use client'
+
 import * as dn from 'dnum'
 import { CircleHelpIcon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -9,12 +11,17 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { usePointsStats } from '~/hooks/use-points-stats'
 
 export function TotalPoints() {
   const t = useTranslations('PointsStatistics.TotalPoints')
-  const isLoading = false
 
-  const pointsFormatted = useMemo(() => dn.format([1000n, 6], 6), [])
+  const { data, isLoading } = usePointsStats()
+
+  const pointsFormatted = useMemo(
+    () => dn.format([data?.points ?? 0n, 6], 6),
+    [data]
+  )
 
   return (
     <div className="flex justify-between items-center">
@@ -33,7 +40,7 @@ export function TotalPoints() {
       </span>
       <div>
         {isLoading ? (
-          <Skeleton className="w-24">&nbsp;</Skeleton>
+          <Skeleton className="w-28">&nbsp;</Skeleton>
         ) : (
           <span>{pointsFormatted}</span>
         )}
