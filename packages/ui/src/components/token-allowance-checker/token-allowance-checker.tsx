@@ -40,8 +40,11 @@ export function TokenAllowanceChecker({
     )
   }, [stCreditsPointsProgramId])
 
-  const { data: allowance = 0n, isLoading: isLoadingAllowance, refetch: refetchAllowance } =
-    useStCreditsAllowance(address, stCreditsPointsProgramAddress)
+  const {
+    data: allowance = 0n,
+    isLoading: isLoadingAllowance,
+    refetch: refetchAllowance,
+  } = useStCreditsAllowance(address, stCreditsPointsProgramAddress)
 
   const { approve, transactionStatus } = useApprove()
 
@@ -71,7 +74,7 @@ export function TokenAllowanceChecker({
     if (transactionStatus === TransactionStatus.Settled) {
       refetchAllowance()
     }
-  }, [transactionStatus])
+  }, [transactionStatus, refetchAllowance])
 
   if (allowance >= MAX_U64) return <>{children}</>
 
@@ -95,10 +98,8 @@ export function TokenAllowanceChecker({
         <TransactionToast
           title={{
             Creating: '',
-            Pending:
-              'You are approving AleoStaking points program to access your stCredits',
-            Settled:
-              'You have approved AleoStaking points program to access your stCredits',
+            Pending: 'Allow the points program to use your stCredits',
+            Settled: 'Allow the points program to use your stCredits', // TODO
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
