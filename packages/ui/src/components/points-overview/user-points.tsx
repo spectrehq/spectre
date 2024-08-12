@@ -16,7 +16,7 @@ import { useEstimatedPoints } from '~/hooks/use-estimated-points'
 export function UserPoints() {
   const t = useTranslations('PointsOverview.UserPoints')
   const { address } = useAccount()
-  const { data, isLoading } = useEstimatedPoints(address)
+  const { data = 0n, isLoading } = useEstimatedPoints(address)
 
   return (
     <div>
@@ -37,7 +37,7 @@ export function UserPoints() {
         {isLoading ? (
           <Skeleton className="w-24">&nbsp;</Skeleton>
         ) : (
-          <span>{dn.format([data ?? 0n, 6], 0)}</span>
+          <span>{dn.format([data < 0n ? 0n : data, 6], 0)}</span>
         )}
       </div>
     </div>
