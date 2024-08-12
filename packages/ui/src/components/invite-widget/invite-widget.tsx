@@ -1,5 +1,6 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import {
   CircleCheckIcon,
@@ -63,7 +64,7 @@ export function InviteWidget() {
     }
   }, [isCopied])
 
-  const { generate, transactionStatus } = useGenerateInviteCode()
+  const { generate, isSuccess, transactionStatus } = useGenerateInviteCode()
 
   const handleGenerate = useCallback(() => {
     generate()
@@ -80,6 +81,15 @@ export function InviteWidget() {
       transactionStatus !== TransactionStatus.Creating,
     [transactionStatus]
   )
+
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (isSuccess) {
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
+    }
+  }, [address, isSuccess, queryClient])
 
   return (
     <div className="max-w-lg mx-auto">

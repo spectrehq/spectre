@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -70,7 +71,7 @@ export function UnlockForm() {
     }
   }, [form, isFetchedUserPoints])
 
-  const { unlock, transactionStatus } = useUnlock()
+  const { unlock, isSuccess, transactionStatus } = useUnlock()
   const isPending = useMemo(
     () => transactionStatus === TransactionStatus.Creating,
     [transactionStatus]
@@ -102,6 +103,15 @@ export function UnlockForm() {
     () => dn.format(dn.from(stCreditsAmount || 0), { digits: 6 }),
     [stCreditsAmount]
   )
+
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (isSuccess) {
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
+    }
+  }, [address, isSuccess, queryClient])
 
   return (
     <>
