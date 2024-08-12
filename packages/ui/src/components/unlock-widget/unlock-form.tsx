@@ -190,7 +190,7 @@ export function UnlockForm() {
         </li>
         <li className="flex items-center justify-between">
           <span className="text-muted-foreground">Network fee</span>
-          <span>~ 0.25 Credits</span>
+          <span>~ 0.5 Credits</span>
         </li>
       </ul>
       {isShowTransactionToast && (
