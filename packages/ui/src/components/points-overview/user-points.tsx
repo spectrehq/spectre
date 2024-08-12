@@ -10,10 +10,13 @@ import {
   TooltipProvider,
   TooltipTrigger,
 } from '~/components/ui/tooltip'
+import { useAccount } from '~/hooks/use-account'
+import { useEstimatedPoints } from '~/hooks/use-estimated-points'
 
 export function UserPoints() {
   const t = useTranslations('PointsOverview.UserPoints')
-  const isLoading = false
+  const { address } = useAccount()
+  const { data, isLoading } = useEstimatedPoints(address)
 
   return (
     <div>
@@ -32,9 +35,9 @@ export function UserPoints() {
       </div>
       <div className="mt-1 font-semibold text-lg sm:text-xl">
         {isLoading ? (
-          <Skeleton className="w-40">&nbsp;</Skeleton>
+          <Skeleton className="w-24">&nbsp;</Skeleton>
         ) : (
-          <span>{dn.format([123456789n, 6], 0)}</span>
+          <span>{dn.format([data ?? 0n, 6], 0)}</span>
         )}
       </div>
     </div>

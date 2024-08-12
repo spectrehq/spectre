@@ -10,10 +10,14 @@ import {
 } from '~/components/ui/tooltip'
 import { Skeleton } from '~/components/ui/skeleton'
 import { CircleHelpIcon } from 'lucide-react'
+import { usePointsState } from '~/hooks/use-points-state'
+import { useAccount } from '~/hooks/use-account'
 
 export function AccumulatedPoints() {
   const t = useTranslations('PointsOverview.AccumulatedPoints')
-  const isLoading = false
+
+  const { address } = useAccount()
+  const { data, isLoading } = usePointsState(address)
 
   return (
     <div>
@@ -32,9 +36,9 @@ export function AccumulatedPoints() {
       </div>
       <div className="mt-1 font-semibold text-lg sm:text-xl">
         {isLoading ? (
-          <Skeleton className="w-40">&nbsp;</Skeleton>
+          <Skeleton className="w-36">&nbsp;</Skeleton>
         ) : (
-          <span>{dn.format([987654321n, 6], 0)}</span>
+          <span>{dn.format([data?.stcredits ?? 0n, 6], 6)}</span>
         )}
       </div>
     </div>

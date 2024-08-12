@@ -3,10 +3,14 @@
 import * as dn from 'dnum'
 import { useTranslations } from 'next-intl'
 import { Skeleton } from '~/components/ui/skeleton'
+import { useAccount } from '~/hooks/use-account'
+import { usePointsState } from '~/hooks/use-points-state'
 
 export function LockedAmount() {
   const t = useTranslations('PointsOverview.LockedPoints')
-  const isLoading = false
+
+  const { address } = useAccount()
+  const { data, isLoading } = usePointsState(address)
 
   return (
     <div>
@@ -15,7 +19,7 @@ export function LockedAmount() {
         {isLoading ? (
           <Skeleton className="w-48">&nbsp;</Skeleton>
         ) : (
-          <span>{dn.format([100_000_000n, 6], 6)} stCredits</span>
+          <span>{dn.format([data?.stcredits ?? 0n, 6], 6)} stCredits</span>
         )}
       </div>
     </div>
