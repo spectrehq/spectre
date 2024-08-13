@@ -48,7 +48,7 @@ export function TokenAllowanceChecker({
     refetch: refetchAllowance,
   } = useStCreditsAllowance(address, stCreditsPointsProgramAddress)
 
-  const { approve, isSuccess, transactionStatus } = useApprove()
+  const { approve, isSuccess, transactionStatus, reset } = useApprove()
 
   const handleApprove = useCallback(() => {
     if (!stCreditsPointsProgramAddress) return
@@ -78,6 +78,10 @@ export function TokenAllowanceChecker({
     }
   }, [refetchAllowance, isSuccess])
 
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
+
   if (allowance !== 0n && allowance >= amount) return <>{children}</>
 
   return (
@@ -105,6 +109,7 @@ export function TokenAllowanceChecker({
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>
