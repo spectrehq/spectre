@@ -5,7 +5,6 @@ import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
-import { ZERO_ADDRESS } from 'spectre'
 import { useCopyToClipboard } from 'usehooks-ts'
 import { TransactionToast } from '~/components/transaction-toast'
 import { Button } from '~/components/ui/button'
@@ -121,22 +120,19 @@ export function InviteWidget() {
               Invitation bonus points
             </div>
             <div className="text-lg">
-              {isLoadingUserPointsState ? (
+              {isLoadingUserPointsState || userPointsState === undefined ? (
                 <Skeleton className="w-24">&nbsp;</Skeleton>
-              ) : userPointsState &&
-                userPointsState.invite_points +
-                  userPointsState.invite_of_invite_points >
-                  0 ? (
+              ) : userPointsState === null ? (
+                '-'
+              ) : (
                 dn.format(
                   [
-                    (userPointsState?.invite_points ?? 0n) +
-                      (userPointsState?.invite_of_invite_points ?? 0n),
+                    userPointsState.invite_points +
+                      userPointsState.invite_of_invite_points,
                     6,
                   ],
                   6
                 )
-              ) : (
-                '-'
               )}
             </div>
           </div>
@@ -194,13 +190,13 @@ export function InviteWidget() {
               </TooltipProvider>
             </div>
             <div>
-              {isLoadingUserPointsState ? (
+              {isLoadingUserPointsState || userPointsState === undefined ? (
                 <Skeleton className="w-24">&nbsp;</Skeleton>
               ) : (
                 <span>
-                  {userPointsState && userPointsState.invite_points > 0n
-                    ? dn.format([userPointsState.invite_points, 6], 6)
-                    : '-'}
+                  {userPointsState === null
+                    ? '-'
+                    : dn.format([userPointsState.invite_points, 6], 6)}
                 </span>
               )}
             </div>
@@ -224,14 +220,16 @@ export function InviteWidget() {
               </TooltipProvider>
             </div>
             <div>
-              {isLoadingUserPointsState ? (
+              {isLoadingUserPointsState || userPointsState === undefined ? (
                 <Skeleton className="w-20">&nbsp;</Skeleton>
               ) : (
                 <span>
-                  {userPointsState &&
-                  userPointsState.invite_of_invite_points > 0n
-                    ? dn.format([userPointsState.invite_of_invite_points, 6], 6)
-                    : '-'}
+                  {userPointsState === null
+                    ? '-'
+                    : dn.format(
+                        [userPointsState.invite_of_invite_points, 6],
+                        6
+                      )}
                 </span>
               )}
             </div>

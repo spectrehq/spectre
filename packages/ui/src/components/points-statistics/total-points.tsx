@@ -30,7 +30,7 @@ export function TotalPoints() {
         <TooltipProvider>
           <Tooltip>
             <TooltipTrigger>
-              <CircleHelpIcon className="w-3 h-3 lg:w-4 lg:h-4 ml-1" />
+              <CircleHelpIcon className="w-3 h-3 lg:w-3.5 lg:h-3.5 ml-1" />
             </TooltipTrigger>
             <TooltipContent>
               <p>{t('description')}</p>
