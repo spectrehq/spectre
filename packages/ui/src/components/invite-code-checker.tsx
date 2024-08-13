@@ -23,21 +23,28 @@ export function InviteCodeChecker() {
   const { data: inviter } = useInviterByCode(Number(inviteCode))
 
   useEffect(() => {
-    if (userPointsState === undefined) return
+    if (userPointsState) {
+      const isNewUser = userPointsState.height === 0n
 
-    const isNewUser = (userPointsState?.height ?? 0n) === 0n
-
-    if (!isNewUser) {
-      removeValue()
-      return
+      if (!isNewUser) {
+        removeValue()
+        const url = new URL(window.location.href)
+        if (url.searchParams.has('invite_code')) {
+          url.searchParams.delete('invite_code')
+          window.location.search = url.search
+        }
+        return
+      }
     }
 
     if (value) {
       if (inviteCode) {
         if (value !== Number(inviteCode)) {
           const url = new URL(window.location.href)
-          url.searchParams.delete('invite_code')
-          window.location.search = url.search
+          if (url.searchParams.has('invite_code')) {
+            url.searchParams.delete('invite_code')
+            window.location.search = url.search
+          }
         }
       }
     } else if (inviteCode && inviter !== undefined) {
@@ -45,8 +52,10 @@ export function InviteCodeChecker() {
         setValue(Number(inviteCode))
       } else {
         const url = new URL(window.location.href)
-        url.searchParams.delete('invite_code')
-        window.location.search = url.search
+        if (url.searchParams.has('invite_code')) {
+          url.searchParams.delete('invite_code')
+          window.location.search = url.search
+        }
       }
     }
   }, [
