@@ -1,8 +1,9 @@
 import { useTranslations } from 'next-intl'
+import type { PropsWithChildren } from 'react'
 import { AssetsOverview } from '~/components/assets-overview'
 import { AssetsTabs } from '~/components/assets-tabs'
 
-export default function AssetsLayout() {
+export default function AssetsLayout({ children }: PropsWithChildren) {
   const t = useTranslations('AssetsPage')
 
   return (
@@ -25,6 +26,7 @@ export default function AssetsLayout() {
       <section>
         <div className="container">
           <AssetsOverview />
+          {children}
         </div>
       </section>
     </div>
