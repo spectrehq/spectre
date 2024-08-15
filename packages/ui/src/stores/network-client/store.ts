@@ -1,6 +1,7 @@
 import {
   CreditsProgram,
   initialize,
+  MtspProgram,
   StCreditsPointsProgram,
   StCreditsProgram,
 } from 'spectre'
@@ -23,6 +24,8 @@ export type NetworkClientState = {
   creditsProgram: CreditsProgram
   stCreditsProgram: StCreditsProgram
   stCreditsPointsProgram: StCreditsPointsProgram
+
+  mtspProgram: MtspProgram
 }
 
 export type NetworkClientActions = {
@@ -81,6 +84,13 @@ export const getDefaultNetworkClientState: () => NetworkClientState = () => {
         DEFAULT_HOST,
         DEFAULT_NETWORK,
         STCREDITS_POINTS_PROGRAM_IDS[DEFAULT_NETWORK]
+      )
+    ),
+    mtspProgram: new MtspProgram(
+      generateGetMappingValueString(
+        DEFAULT_HOST,
+        DEFAULT_NETWORK,
+        'multi_token_support_program.aleo'
       )
     ),
   }
