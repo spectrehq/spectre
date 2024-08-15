@@ -25,6 +25,11 @@
     "description": "Lock stCredits and get points while locking."
   },
 
+  "AssetsPage": {
+    "title": "Assets",
+    "description": "Make it easier for your assets to participate in ZeFi."
+  },
+
   "PointsOverview": {
     "title": "Points Overview",
 
