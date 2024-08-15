@@ -1,5 +1,6 @@
 import { useTranslations } from 'next-intl'
 import { AssetsOverview } from '~/components/assets-overview'
+import { AssetsTabs } from '~/components/assets-tabs'
 
 export default function AssetsLayout() {
   const t = useTranslations('AssetsPage')
@@ -14,6 +15,11 @@ export default function AssetsLayout() {
             </h3>
             <p className="text-muted-foreground text-sm">{t('description')}</p>
           </div>
+        </div>
+      </section>
+      <section>
+        <div className="container">
+          <AssetsTabs />
         </div>
       </section>
       <section>
