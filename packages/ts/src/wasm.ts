@@ -32,5 +32,5 @@ export async function addressToField(address: string): Promise<string> {
 
 export async function fieldToAddress(field: string): Promise<string> {
   const aleo = await importAleo()
-  return aleo.Field.fromString(field).toAddress().toString()
+  return aleo.Field.fromString(field).toAddress().to_string()
 }

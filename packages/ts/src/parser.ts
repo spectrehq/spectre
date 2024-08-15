@@ -1,35 +1,26 @@
-import * as chevrotain from "chevrotain"
+import * as chevrotain from 'chevrotain'
 
 // ----------------- Lexer -----------------
 const createToken = chevrotain.createToken
 const Lexer = chevrotain.Lexer
 
-const LCurly = createToken({ name: "LCurly", pattern: /{/ })
-const RCurly = createToken({ name: "RCurly", pattern: /}/ })
-const LSquare = createToken({ name: "LSquare", pattern: /\[/ })
-const RSquare = createToken({ name: "RSquare", pattern: /]/ })
-const Comma = createToken({ name: "Comma", pattern: /,/ })
-const Colon = createToken({ name: "Colon", pattern: /:/ })
+const LCurly = createToken({ name: 'LCurly', pattern: /{/ })
+const RCurly = createToken({ name: 'RCurly', pattern: /}/ })
+const LSquare = createToken({ name: 'LSquare', pattern: /\[/ })
+const RSquare = createToken({ name: 'RSquare', pattern: /]/ })
+const Comma = createToken({ name: 'Comma', pattern: /,/ })
+const Colon = createToken({ name: 'Colon', pattern: /:/ })
 const StringLiteral = createToken({
-  name: "StringLiteral",
-  pattern: /(\w|\.)+/
+  name: 'StringLiteral',
+  pattern: /(\w|\.)+/,
 })
 const WhiteSpace = createToken({
-  name: "WhiteSpace",
+  name: 'WhiteSpace',
   pattern: /\s+/,
-  group: Lexer.SKIPPED
+  group: Lexer.SKIPPED,
 })
 
-const tokens = [
-  WhiteSpace,
-  StringLiteral,
-  RCurly,
-  LCurly,
-  LSquare,
-  RSquare,
-  Comma,
-  Colon
-]
+const tokens = [WhiteSpace, StringLiteral, RCurly, LCurly, LSquare, RSquare, Comma, Colon]
 
 const PlaintextLexer = new Lexer(tokens)
 
@@ -50,7 +41,7 @@ class PlaintextParser extends EmbeddedActionsParser {
 
     const $ = this as any
 
-    $.RULE("object", () => {
+    $.RULE('object', () => {
       const obj = {}
 
       $.CONSUME(LCurly)
@@ -58,14 +49,14 @@ class PlaintextParser extends EmbeddedActionsParser {
         SEP: Comma,
         DEF: () => {
           Object.assign(obj, $.SUBRULE($.objectItem))
-        }
+        },
       })
       $.CONSUME(RCurly)
 
       return obj
     })
 
-    $.RULE("objectItem", () => {
+    $.RULE('objectItem', () => {
       let lit, key, value
       const obj: any = {}
 
@@ -73,36 +64,34 @@ class PlaintextParser extends EmbeddedActionsParser {
       $.CONSUME(Colon)
       value = $.SUBRULE($.value)
 
-      key = lit.isInsertedInRecovery
-        ? "BAD_KEY"
-        : lit.image
+      key = lit.isInsertedInRecovery ? 'BAD_KEY' : lit.image
       obj[key] = value
       return obj
     })
 
-    $.RULE("array", () => {
+    $.RULE('array', () => {
       const arr: any[] = []
       $.CONSUME(LSquare)
       $.MANY_SEP({
         SEP: Comma,
         DEF: () => {
           arr.push($.SUBRULE($.value))
-        }
+        },
       })
       $.CONSUME(RSquare)
 
       return arr
     })
 
-    $.RULE("value", () =>
+    $.RULE('value', () =>
       $.OR([
         {
           ALT: () => {
             return $.CONSUME(StringLiteral).image
-          }
+          },
         },
         { ALT: () => $.SUBRULE($.object) },
-        { ALT: () => $.SUBRULE($.array) }
+        { ALT: () => $.SUBRULE($.array) },
       ])
     )
 
@@ -125,6 +114,6 @@ export function parsePlaintextToCst(text: string) {
   return {
     cst: cst,
     lexErrors: lexResult.errors,
-    parseErrors: parser.errors
+    parseErrors: parser.errors,
   }
 }

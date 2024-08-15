@@ -9137,7 +9137,7 @@ async function WA(t) {
   return (await Dr()).Address.from_string(t).to_field().toString();
 }
 async function VA(t) {
-  return (await Dr()).Field.fromString(t).toAddress().toString();
+  return (await Dr()).Field.fromString(t).toAddress().to_string();
 }
 class zA extends Mn {
   /**
