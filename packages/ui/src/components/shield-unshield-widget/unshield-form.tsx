@@ -313,14 +313,14 @@ export function UnshieldForm() {
                             variant="secondary"
                             role="combobox"
                             className={cn(
-                              'justify-between rounded-xl border-none text-xl',
+                              'justify-between rounded-xl border-none text-base',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
                             <Image
                               src={AleoStakingLogoIcon}
                               alt="AleoStaking Logo"
-                              width={22}
+                              width={14}
                               className="mr-1"
                             />
                             {field.value
@@ -331,7 +331,7 @@ export function UnshieldForm() {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-0">
+                      <PopoverContent className="w-64 p-0" align="start">
                         <Command>
                           {/* <CommandInput placeholder="Search language..." /> */}
                           <CommandList>

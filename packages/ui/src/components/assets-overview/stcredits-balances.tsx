@@ -25,7 +25,7 @@ export function StCreditsBalances() {
 
   return (
     <div>
-      <div className="font-medium text-sm sm:text-lg">stCredits</div>
+      <div className="font-medium text-xs sm:text-sm">stCredits</div>
       <div className="grid grid-cols-2 items-center">
         <div className="flex items-center">
           <div>Public:&nbsp;</div>

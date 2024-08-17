@@ -286,7 +286,7 @@ export function PublicToPublic() {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-0">
+                      <PopoverContent className="w-64 p-0" align="start">
                         <Command>
                           {/* <CommandInput placeholder="Search language..." /> */}
                           <CommandList>
