@@ -294,6 +294,12 @@ export function UnshieldForm() {
     name: 'amount',
   })
 
+  const [open, setOpen] = useState(false)
+
+  const handleOpenChange = useCallback((open: boolean) => {
+    setOpen(open)
+  }, [])
+
   return (
     <>
       <Form {...form}>
@@ -308,7 +314,7 @@ export function UnshieldForm() {
                 name="token"
                 render={({ field }) => (
                   <FormItem className="flex flex-col">
-                    <Popover>
+                    <Popover open={open} onOpenChange={handleOpenChange}>
                       <PopoverTrigger asChild>
                         <FormControl>
                           <Button
@@ -345,6 +351,7 @@ export function UnshieldForm() {
                                   key={token.id}
                                   onSelect={() => {
                                     form.setValue('token', token.id)
+                                    setOpen(false)
                                   }}
                                   className="min-h-10"
                                 >
