@@ -376,7 +376,7 @@ export function ShieldForm() {
       {isShowTransactionToast && (
         <TransactionToast
           title={{
-            Creating: '',
+            Creating: `You are shielding ${dn.format(dn.from(amountCache, 6), 6)} ${tokenInputValue}`,
             Pending: `You are shielding ${dn.format(dn.from(amountCache, 6), 6)} ${tokenInputValue}`,
             Settled: `You have shielded ${dn.format(dn.from(amountCache, 6), 6)} ${tokenInputValue}`,
             Failed: 'Transaction failed',
