@@ -56,6 +56,20 @@ export function MainNav() {
           </Link>
         </NavigationMenuItem>
         <NavigationMenuItem className="relative">
+          <Link href="/assets" legacyBehavior passHref>
+            <NavigationMenuLink
+              className={cn(
+                navigationMenuTriggerStyle(),
+                'text-base',
+                pathname.startsWith('/assets') &&
+                  'bg-accent text-accent-foreground outline-none'
+              )}
+            >
+              {t('assets')}
+            </NavigationMenuLink>
+          </Link>
+        </NavigationMenuItem>
+        <NavigationMenuItem className="relative">
           <Link href="/points" legacyBehavior passHref>
             <NavigationMenuLink
               className={cn(
