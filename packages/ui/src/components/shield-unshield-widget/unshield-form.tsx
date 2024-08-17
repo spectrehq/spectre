@@ -192,7 +192,9 @@ export function UnshieldForm() {
   )
 
   const isShowTransactionToast = useMemo(
-    () => Boolean(transactionStatus),
+    () =>
+      Boolean(transactionStatus) &&
+      transactionStatus !== TransactionStatus.Creating,
     [transactionStatus]
   )
   const [amountCache, setAmountCache] = useState<number>(0)
