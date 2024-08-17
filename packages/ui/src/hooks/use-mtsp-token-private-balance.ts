@@ -28,7 +28,7 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
 
   const { data: leoWalletRecords, isLoading: isLoadingLeoWalletBalance } =
     useQuery({
-      queryKey: ['leoWallet', 'mtspToken', 'privateBalance', tokenId],
+      queryKey: ['leoWallet', 'mtspToken', 'privateBalance', tokenId, address],
       queryFn: async () => {
         const res: {
           id: string
@@ -37,6 +37,8 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
           spent: boolean
           recordName: string
           data: RecordData
+          plaintext: string
+          ciphertext: string
         }[] =
           (await requestRecordPlaintexts!(multiTokenSupportProgramId).catch(
             () => {}
@@ -66,8 +68,8 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
               name: record.recordName,
               programId: record.program_id,
               data: record.data,
-              ciphertext: undefined,
-              plaintext: undefined,
+              ciphertext: record.ciphertext,
+              plaintext: record.plaintext,
               amount,
             }
           })
@@ -94,7 +96,13 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
 
   const { data: puzzleWalletRecords, isLoading: isLoadingPuzzleWalletBalance } =
     useQuery({
-      queryKey: ['puzzleWallet', 'mtspToken', 'privateBalance', tokenId],
+      queryKey: [
+        'puzzleWallet',
+        'mtspToken',
+        'privateBalance',
+        tokenId,
+        address,
+      ],
       queryFn: async () => {
         const res = await getRecords({
           address: address ?? undefined,
