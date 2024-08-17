@@ -254,7 +254,7 @@ export function PublicToPublic() {
                   <Input
                     {...field}
                     placeholder="Recipient address"
-                    className="p-3 h-auto text-lg"
+                    className="p-3 h-auto text-lg focus-visible:ring-0 focus-visible:ring-offset-0"
                   />
                 </FormControl>
               </FormItem>
