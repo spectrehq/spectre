@@ -23,10 +23,13 @@ export function MyBalance() {
             </h4>
             <div className="">
               <span className="text-2xl font-semibold">
-                {dn.format([(data ?? 0n) + (privateBalance ?? 0n), 6], {
-                  digits: 6,
-                  locale: 'en',
-                })}
+                {dn.format(
+                  [(data ?? 0n) + (privateBalance?.balance ?? 0n), 6],
+                  {
+                    digits: 6,
+                    locale: 'en',
+                  }
+                )}
               </span>{' '}
               <span className="text-muted-foreground">Credits</span>
             </div>
@@ -54,7 +57,7 @@ export function MyBalance() {
 
                 <div>
                   <span className="text-2xl font-semibold">
-                    {dn.format([privateBalance ?? 0n, 6], {
+                    {dn.format([privateBalance?.balance ?? 0n, 6], {
                       digits: 6,
                       locale: 'en',
                     })}
