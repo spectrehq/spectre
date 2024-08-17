@@ -38,7 +38,7 @@ export function WStCreditsBalances() {
 
   return (
     <div>
-      <div className="font-medium text-sm sm:text-lg">wstCredits</div>
+      <div className="font-medium text-xs sm:text-sm">wstCredits</div>
       <div className="grid grid-cols-2 items-center">
         <div className="flex items-center">
           <div>Public:&nbsp;</div>

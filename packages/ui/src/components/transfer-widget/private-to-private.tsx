@@ -347,7 +347,7 @@ export function PrivateToPrivate() {
                           </Button>
                         </FormControl>
                       </PopoverTrigger>
-                      <PopoverContent className="w-64 p-0">
+                      <PopoverContent className="w-64 p-0" align="start">
                         <Command>
                           {/* <CommandInput placeholder="Search language..." /> */}
                           <CommandList>
@@ -421,7 +421,8 @@ export function PrivateToPrivate() {
             </div>
             <div className="flex justify-end text-sm">
               <span>
-                Balance: {dn.format(dn.from(amountMax, 6), 6)} {tokenInputValue}
+                Max available: {dn.format(dn.from(amountMax, 6), 6)}{' '}
+                {tokenInputValue}
               </span>
             </div>
           </div>
