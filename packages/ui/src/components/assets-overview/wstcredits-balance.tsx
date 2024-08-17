@@ -56,7 +56,7 @@ export function WStCreditsBalances() {
             {isLoadingPrivateBalance ? (
               <Skeleton className="inline-block w-24">&nbsp;</Skeleton>
             ) : (
-              <span>{dn.format([privateBalance ?? 0n, 6], 6)}</span>
+              <span>{dn.format([privateBalance?.balance ?? 0n, 6], 6)}</span>
             )}
           </div>
         </div>

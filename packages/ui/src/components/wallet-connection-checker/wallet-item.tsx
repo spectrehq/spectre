@@ -42,7 +42,7 @@ export function WalletItem({ wallet, onConnected }: WalletItemProps) {
       if (walletAdapter?.readyState === WalletReadyState.Installed) {
         setIsConnecting(true)
         await walletAdapter?.connect(
-          DecryptPermission.AutoDecrypt,
+          DecryptPermission.OnChainHistory,
           WalletAdapterNetwork.TestnetBeta
         )
       }

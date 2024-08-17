@@ -45,7 +45,7 @@ export function Providers({ children }: PropsWithChildren) {
     <WalletProvider
       wallets={wallets}
       network={WalletAdapterNetwork.TestnetBeta}
-      decryptPermission={DecryptPermission.AutoDecrypt}
+      decryptPermission={DecryptPermission.OnChainHistory}
       programs={[
         creditsProgramId,
         stCreditsProgramId,

@@ -5,7 +5,7 @@ import { useMemo } from 'react'
 import { u128 } from 'spectre'
 import { MULTI_TOKEN_SUPPORT_PROGRAM_IDS } from '~/config'
 import { useNetworkClientStore } from '~/stores/network-client'
-import { WalletType, type AleoAddress } from '~/types'
+import { RecordStatus, WalletType, type AleoAddress } from '~/types'
 import { useAccount } from './use-account'
 
 type RecordData = {
@@ -18,7 +18,7 @@ type RecordData = {
 export function useMtspTokenPrivateBalance(tokenId?: string) {
   const { address, walletType } = useAccount()
 
-  const { requestRecords } = useWallet()
+  const { requestRecordPlaintexts } = useWallet()
 
   const network = useNetworkClientStore((store) => store.network)
   const multiTokenSupportProgramId = useMemo(
@@ -26,7 +26,7 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
     [network]
   )
 
-  const { data: leoWalletBalance, isLoading: isLoadingLeoWalletBalance } =
+  const { data: leoWalletRecords, isLoading: isLoadingLeoWalletBalance } =
     useQuery({
       queryKey: ['leoWallet', 'mtspToken', 'privateBalance', tokenId],
       queryFn: async () => {
@@ -37,32 +37,62 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
           spent: boolean
           recordName: string
           data: RecordData
-        }[] = (await requestRecords!(multiTokenSupportProgramId)) ?? []
+        }[] =
+          (await requestRecordPlaintexts!(multiTokenSupportProgramId).catch(
+            () => {}
+          )) ?? []
 
         return res
           .filter(
             (record) =>
               record.program_id === multiTokenSupportProgramId &&
               record.data.token_id.split('.')[0] === tokenId &&
+              record.owner === address &&
               !record.spent
           )
-          .reduce((acc, record) => {
+          .map((record) => {
+            let amount = 0n
+
             const amountStr = record.data.amount.split('.')[0]
 
             if (amountStr.endsWith('u128')) {
-              return acc + u128(amountStr)
+              amount = u128(amountStr)
             }
 
-            return acc
-          }, 0n)
+            return {
+              id: record.id,
+              owner: record.owner,
+              status: record.spent ? RecordStatus.Spent : RecordStatus.Unspent,
+              name: record.recordName,
+              programId: record.program_id,
+              data: record.data,
+              ciphertext: undefined,
+              plaintext: undefined,
+              amount,
+            }
+          })
       },
       enabled:
         tokenId !== undefined &&
-        Boolean(requestRecords) &&
+        Boolean(requestRecordPlaintexts) &&
         walletType === WalletType.LeoWallet,
     })
 
-  const { data: puzzleWalletBalance, isLoading: isLoadingPuzzleWalletBalance } =
+  const leoWalletBalance = useMemo(
+    () =>
+      leoWalletRecords?.reduce((acc, record) => {
+        const amountStr = record.data.amount.split('.')[0]
+
+        if (amountStr.endsWith('u128')) {
+          return acc + u128(amountStr)
+        }
+
+        return acc
+      }, 0n),
+    [leoWalletRecords]
+  )
+
+  const { data: puzzleWalletRecords, isLoading: isLoadingPuzzleWalletBalance } =
     useQuery({
       queryKey: ['puzzleWallet', 'mtspToken', 'privateBalance', tokenId],
       queryFn: async () => {
@@ -72,37 +102,69 @@ export function useMtspTokenPrivateBalance(tokenId?: string) {
             programIds: [multiTokenSupportProgramId],
             status: 'All', // TODO
           },
-        })
+        }).catch(() => {}) // TODO
 
-        return res.records
+        return res?.records
           ?.filter(
             (record) =>
               record.programId === multiTokenSupportProgramId &&
               (record.data.token_id as string).split('.')[0] === tokenId &&
               record.status === 'Unspent' // TODO
           )
-          .reduce((acc, record) => {
+          .map((record) => {
+            let amount = 0n
+
             const amountStr = (record.data.amount as string).split('.')[0]
 
             if (amountStr.endsWith('u128')) {
-              return acc + u128(amountStr)
+              amount = u128(amountStr)
             }
 
-            return acc
-          }, 0n)
+            return {
+              id: record._id,
+              owner: record.owner,
+              status: record.status as RecordStatus,
+              name: record.name,
+              programId: record.programId,
+              data: record.data,
+              ciphertext: record.ciphertext as string,
+              plaintext: record.plaintext as string,
+              amount,
+            }
+          })
       },
       enabled: Boolean(address) && walletType === WalletType.PuzzleWallet,
     })
 
+  const puzzleWalletBalance = useMemo(
+    () =>
+      puzzleWalletRecords?.reduce((acc, record) => {
+        const amountStr = (record.data.amount as string).split('.')[0]
+
+        if (amountStr.endsWith('u128')) {
+          return acc + u128(amountStr)
+        }
+
+        return acc
+      }, 0n),
+    [puzzleWalletRecords]
+  )
+
   const data = useMemo(() => {
     if (walletType === WalletType.LeoWallet) {
-      return leoWalletBalance
+      return { balance: leoWalletBalance, records: leoWalletRecords }
     }
 
     if (walletType === WalletType.PuzzleWallet) {
-      return puzzleWalletBalance
+      return { balance: puzzleWalletBalance, records: puzzleWalletRecords }
     }
-  }, [leoWalletBalance, walletType, puzzleWalletBalance])
+  }, [
+    walletType,
+    leoWalletBalance,
+    leoWalletRecords,
+    puzzleWalletBalance,
+    puzzleWalletRecords,
+  ])
 
   const isLoading = useMemo(
     () => isLoadingLeoWalletBalance || isLoadingPuzzleWalletBalance,

@@ -16,3 +16,16 @@ export enum TransactionStatus {
   Settled = 'Settled',
   Failed = 'Failed',
 }
+
+export enum RecordStatus {
+  Pending = 'Pending',
+  Unspent = 'Unspent',
+  Spent = 'Spent',
+}
+
+export enum TransferType {
+  Public = 'Public',
+  Private = 'Private',
+  PublicToPrivate = 'PublicToPrivate',
+  PrivateToPublic = 'PrivateToPublic',
+}
