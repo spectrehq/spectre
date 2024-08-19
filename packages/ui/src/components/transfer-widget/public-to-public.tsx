@@ -406,7 +406,7 @@ export function PublicToPublic() {
           title={{
             Creating: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
             Pending: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
-            Settled: `You have sended ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
+            Settled: `You have sent ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
