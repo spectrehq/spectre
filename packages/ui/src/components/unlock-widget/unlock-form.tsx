@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -19,7 +19,6 @@ import { useAccount } from '~/hooks/use-account'
 import { usePointsState } from '~/hooks/use-points-state'
 import { useUnlock } from '~/hooks/use-unlock'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
 
 export function UnlockForm() {
   const tPrompts = useTranslations('Prompts')
@@ -71,19 +70,16 @@ export function UnlockForm() {
     }
   }, [form, isFetchedUserPoints])
 
-  const { unlock, isSuccess, transactionStatus } = useUnlock()
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
+  const { unlock, reset, isPending, isSuccess, transactionStatus } = useUnlock()
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [pointsAmountCache, setPointsAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleUnlock = useCallback(
     (data: FormData) => {
@@ -193,15 +189,16 @@ export function UnlockForm() {
           <span>~ 0.5 Credits</span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are unlocking ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
             Pending: `You are unlocking ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
             Settled: `You have unlocked ${dn.format(dn.from(pointsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

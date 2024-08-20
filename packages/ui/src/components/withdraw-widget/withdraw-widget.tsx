@@ -11,7 +11,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -21,7 +21,6 @@ import { useCreditsFromStCredits } from '~/hooks/use-credits-from-stcredits'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useWithdraw } from '~/hooks/use-withdraw'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
 
 export function WithdrawWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -76,7 +75,8 @@ export function WithdrawWidget() {
     [received]
   )
 
-  const { withdraw, isSuccess, error, transactionStatus } = useWithdraw()
+  const { withdraw, reset, isPending, isSuccess, transactionStatus } =
+    useWithdraw()
 
   const [stCreditsAmountCache, setStCreditsAmountCache] = useState(0)
   const [receivedFormattedCache, setReceivedFormattedCache] = useState('')
@@ -93,11 +93,6 @@ export function WithdrawWidget() {
       setReceivedFormattedCache(receivedFormatted)
     },
     [address, receivedFormatted, stCreditsAmount, withdraw]
-  )
-
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
   )
 
   const queryClient = useQueryClient()
@@ -126,12 +121,13 @@ export function WithdrawWidget() {
     [exchangeRate]
   )
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -231,15 +227,16 @@ export function WithdrawWidget() {
           </li>
         </ul>
       </div>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are unstaking ${dn.format(dn.from(stCreditsAmountCache || 0, 6), 6)} stCredits`,
             Pending: `You are unstaking ${dn.format(dn.from(stCreditsAmountCache || 0, 6), 6)} stCredits`,
             Settled: `You have unstaked ${dn.format(dn.from(stCreditsAmountCache || 0, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </div>

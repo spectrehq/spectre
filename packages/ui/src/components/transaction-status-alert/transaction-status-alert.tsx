@@ -18,19 +18,19 @@ import {
 import { cn } from '~/lib/utils'
 import { TransactionStatus } from '~/types'
 
-export interface TransactionToastProps {
+export interface TransactionStatusAlertProps {
   title: string | Record<TransactionStatus, string>
   description?: string | Record<TransactionStatus, string>
   transactionStatus?: TransactionStatus
   onClose?: () => void
 }
 
-export function TransactionToast({
+export function TransactionStatusAlert({
   title: titleProps,
   description: descriptionProps,
   transactionStatus,
   onClose,
-}: TransactionToastProps) {
+}: TransactionStatusAlertProps) {
   const [open, setOpen] = useState(true)
 
   const title: string = useMemo(() => {
@@ -53,9 +53,10 @@ export function TransactionToast({
     if (transactionStatus === TransactionStatus.Settled) {
       setTimeout(() => {
         setOpen(false)
+        onClose?.()
       }, 3000)
     }
-  }, [transactionStatus])
+  }, [onClose, transactionStatus])
 
   const handleOpenChange = useCallback(
     (open: boolean) => {
@@ -81,7 +82,8 @@ export function TransactionToast({
         </AlertDialogHeader>
         <div className="text-center space-y-8">
           <div className="flex justify-center items-center">
-            {transactionStatus === TransactionStatus.Pending && (
+            {(transactionStatus === TransactionStatus.Pending ||
+              transactionStatus === TransactionStatus.Creating) && (
               <Loader2Icon className="animate-spin w-20 h-20" strokeWidth="1" />
             )}
             {transactionStatus === TransactionStatus.Settled && (
@@ -107,6 +109,12 @@ export function TransactionToast({
               <p className="text-muted-foreground">{description}</p>
             )}
           </div>
+
+          {transactionStatus === TransactionStatus.Creating && (
+            <p className="text-sm text-muted-foreground">
+              Waiting for wallet confirmation
+            </p>
+          )}
 
           {transactionStatus === TransactionStatus.Pending && (
             <p className="text-sm text-muted-foreground">

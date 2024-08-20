@@ -11,7 +11,8 @@ import { useForm, useWatch } from 'react-hook-form'
 import { useReadLocalStorage } from 'usehooks-ts'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TokenAllowanceChecker } from '~/components/token-allowance-checker'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -21,8 +22,6 @@ import { useApprove } from '~/hooks/use-approve'
 import { useLock } from '~/hooks/use-lock'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
-import { TokenAllowanceChecker } from '../token-allowance-checker'
 
 export function LockForm() {
   const tPrompts = useTranslations('Prompts')
@@ -74,18 +73,14 @@ export function LockForm() {
     }
   }, [form, isFetchedStCreditsBalance])
 
-  const { lock, isSuccess, transactionStatus } = useLock()
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
+  const { lock, reset, isPending, isSuccess, transactionStatus } = useLock()
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
-
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
-    [transactionStatus]
-  )
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
   const [stCreditsAmountCache, setStCreditsAmountCache] = useState<number>(0)
 
   const inviteCode = useReadLocalStorage<number>('aleostaking_invite_code')
@@ -195,15 +190,16 @@ export function LockForm() {
           </WalletConnectionChecker>
         </form>
       </Form>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are locking ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Pending: `You are locking ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Settled: `You have locked ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>
