@@ -10,19 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
-import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
-import { NumberInput } from '~/components/ui/number-input'
-import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
-import { useAccount } from '~/hooks/use-account'
-import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '~/components/ui/popover'
 import {
   Command,
   CommandEmpty,
@@ -30,12 +19,22 @@ import {
   CommandItem,
   CommandList,
 } from '~/components/ui/command'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
-import { useMtspBalance } from '~/hooks/use-mtsp-balance'
-import { useTransferPublic } from '~/hooks/use-transfer-public'
-import { useMtspTransferPublic } from '~/hooks/use-mtsp-transfer-public'
-import { shortenAddress } from '~/utils'
+import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
+import { NumberInput } from '~/components/ui/number-input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
+import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
+import { useAccount } from '~/hooks/use-account'
+import { useMtspBalance } from '~/hooks/use-mtsp-balance'
+import { useMtspTransferPublic } from '~/hooks/use-mtsp-transfer-public'
+import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
+import { useTransferPublic } from '~/hooks/use-transfer-public'
+import { cn } from '~/lib/utils'
+import { shortenAddress } from '~/utils'
 
 type ARC20Token = {
   id: string
@@ -145,15 +144,29 @@ export function PublicToPublic() {
 
   const {
     transferPublic,
+    reset: resetTransferPublic,
+    isPending: isTransferPublicPending,
     isSuccess: isTransferPublicSuccess,
     transactionStatus: transferPublicTransactionStatus,
   } = useTransferPublic()
 
   const {
     mtspTransferPublic,
+    reset: resetMtspTransferPublic,
+    isPending: isMtspTransferPublicPending,
     isSuccess: isMtspTransferPublicSuccess,
     transactionStatus: mtspTransferPublicTransactionStatus,
   } = useMtspTransferPublic()
+
+  const reset = useCallback(() => {
+    resetTransferPublic()
+    resetMtspTransferPublic()
+  }, [resetMtspTransferPublic, resetTransferPublic])
+
+  const isPending = useMemo(
+    () => isTransferPublicPending || isMtspTransferPublicPending,
+    [isMtspTransferPublicPending, isTransferPublicPending]
+  )
 
   const isSuccess = useMemo(
     () => isTransferPublicSuccess || isMtspTransferPublicSuccess,
@@ -166,21 +179,15 @@ export function PublicToPublic() {
     [transferPublicTransactionStatus, mtspTransferPublicTransactionStatus]
   )
 
-  const isPending = useMemo(
-    () =>
-      transferPublicTransactionStatus === TransactionStatus.Creating ||
-      mtspTransferPublicTransactionStatus === TransactionStatus.Creating,
-    [transferPublicTransactionStatus, mtspTransferPublicTransactionStatus]
-  )
-
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [amountCache, setAmountCache] = useState<number>(0)
   const [recipientCache, setRecipientCache] = useState<string>('')
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleTransferPublic = useCallback(
     async (data: FormData) => {
@@ -286,7 +293,7 @@ export function PublicToPublic() {
                             />
                             {field.value
                               ? tokens.find((token) => token.id === field.value)
-                                  ?.id
+                                ?.id
                               : 'Select token'}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -401,8 +408,8 @@ export function PublicToPublic() {
           </span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
             Creating: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
             Pending: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} public ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
@@ -410,6 +417,7 @@ export function PublicToPublic() {
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

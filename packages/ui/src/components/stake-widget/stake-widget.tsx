@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoLogoIcon from '~/assets/aleo-logo-icon-light.svg'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -20,7 +20,6 @@ import { useBalance } from '~/hooks/use-balance'
 import { useStake } from '~/hooks/use-stake'
 import { useStCreditsFromCredits } from '~/hooks/use-stcredits-from-credits'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
 
 export function StakeWidget() {
   const tPrompts = useTranslations('Prompts')
@@ -74,7 +73,7 @@ export function StakeWidget() {
   const [creditsAmountCache, setCreditsAmountCache] = useState(0)
   const [receivedFormattedCache, setReceivedFormattedCache] = useState('')
 
-  const { stake, isSuccess, error, transactionStatus } = useStake()
+  const { stake, reset, isPending, isSuccess, transactionStatus } = useStake()
 
   const handleStake = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -89,13 +88,7 @@ export function StakeWidget() {
     [address, creditsAmount, receivedFormatted, stake]
   )
 
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
-
   const queryClient = useQueryClient()
-
   useEffect(() => {
     if (balance !== undefined) {
       form.trigger('amount')
@@ -120,12 +113,13 @@ export function StakeWidget() {
     [exchangeRate]
   )
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -206,15 +200,16 @@ export function StakeWidget() {
           </li>
         </ul>
       </div>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are staking ${dn.format(dn.from(creditsAmountCache || 0, 6), 6)} Credits`,
             Pending: `You are staking ${dn.format(dn.from(creditsAmountCache || 0, 6), 6)} Credits`,
             Settled: `You have staked ${dn.format(dn.from(creditsAmountCache || 0, 6), 6)} Credits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </div>

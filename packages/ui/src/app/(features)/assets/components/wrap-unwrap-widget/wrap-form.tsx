@@ -10,7 +10,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -21,7 +21,6 @@ import { useMtspWrap } from '~/hooks/use-mtsp-wrap'
 import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { cn } from '~/lib/utils'
 import { useNetworkClientStore } from '~/stores/network-client'
-import { TransactionStatus } from '~/types'
 
 export function WrapForm() {
   const tPrompts = useTranslations('Prompts')
@@ -73,19 +72,16 @@ export function WrapForm() {
     }
   }, [form, isFetchedStCreditsBalance])
 
-  const { wrap, isSuccess, transactionStatus } = useMtspWrap()
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
+  const { wrap, isPending, isSuccess, transactionStatus, reset } = useMtspWrap()
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [stCreditsAmountCache, setStCreditsAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const network = useNetworkClientStore((store) => store.network)
 
@@ -202,15 +198,16 @@ export function WrapForm() {
           <span>~ 0.5 Credits</span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are wrapping ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Pending: `You are wrapping ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Settled: `You have wrapped ${dn.format(dn.from(stCreditsAmountCache, 6), 6)} stCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

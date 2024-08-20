@@ -11,7 +11,7 @@ import { useForm, useWatch } from 'react-hook-form'
 import { addressToField, field, programAddress } from 'spectre'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -22,7 +22,6 @@ import { useMtspBalance } from '~/hooks/use-mtsp-balance'
 import { useMtspUnwrap } from '~/hooks/use-mtsp-unwrap'
 import { cn } from '~/lib/utils'
 import { useNetworkClientStore } from '~/stores/network-client'
-import { TransactionStatus } from '~/types'
 
 export function UnwrapForm() {
   const tPrompts = useTranslations('Prompts')
@@ -93,19 +92,17 @@ export function UnwrapForm() {
     }
   }, [form, isFetchingWstCreditsBalance])
 
-  const { unwrap, isSuccess, transactionStatus } = useMtspUnwrap()
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
+  const { unwrap, reset, isPending, isSuccess, transactionStatus } =
+    useMtspUnwrap()
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [wstCreditsAmountCache, setWstCreditsAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleWrap = useCallback(
     (data: FormData) => {
@@ -215,15 +212,16 @@ export function UnwrapForm() {
           <span>~ 0.5 Credits</span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are unwrapping ${dn.format(dn.from(wstCreditsAmountCache, 6), 6)} wstCredits`,
             Pending: `You are unwrapping ${dn.format(dn.from(wstCreditsAmountCache, 6), 6)} wstCredits`,
             Settled: `You have unwrapped ${dn.format(dn.from(wstCreditsAmountCache, 6), 6)} wstCredits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

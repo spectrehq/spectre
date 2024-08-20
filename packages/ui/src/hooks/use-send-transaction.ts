@@ -48,6 +48,7 @@ export function useSendTransaction({
       if (!address || !walletType) return
 
       if (walletType === WalletType.LeoWallet) {
+        setTransactionStatus(TransactionStatus.Creating)
         const tx = Transaction.createTransaction(
           address,
           WalletAdapterNetwork.TestnetBeta, // TODO: replace mainnet
@@ -58,7 +59,6 @@ export function useSendTransaction({
           false
         )
 
-        setTransactionStatus(TransactionStatus.Creating)
         let transactionId: string | undefined
 
         try {

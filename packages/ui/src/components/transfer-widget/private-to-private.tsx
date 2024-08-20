@@ -10,19 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
-import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
-import { NumberInput } from '~/components/ui/number-input'
-import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
-import { useAccount } from '~/hooks/use-account'
-import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '~/components/ui/popover'
 import {
   Command,
   CommandEmpty,
@@ -30,12 +19,22 @@ import {
   CommandItem,
   CommandList,
 } from '~/components/ui/command'
-import { shortenAddress } from '~/utils'
+import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { Input } from '~/components/ui/input'
-import { usePrivateBalance } from '~/hooks/use-private-balance'
+import { NumberInput } from '~/components/ui/number-input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
+import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
+import { useAccount } from '~/hooks/use-account'
 import { useMtspTokenPrivateBalance } from '~/hooks/use-mtsp-token-private-balance'
-import { useTransferPrivate } from '~/hooks/use-transfer-private'
 import { useMtspTransferPrivate } from '~/hooks/use-mtsp-transfer-private'
+import { usePrivateBalance } from '~/hooks/use-private-balance'
+import { useTransferPrivate } from '~/hooks/use-transfer-private'
+import { cn } from '~/lib/utils'
+import { shortenAddress } from '~/utils'
 
 type ARC20Token = {
   id: string
@@ -165,15 +164,29 @@ export function PrivateToPrivate() {
 
   const {
     transferPrivate,
+    reset: resetTransferPrivate,
+    isPending: isTransferPrivatePending,
     isSuccess: isTransferPrivateSuccess,
     transactionStatus: transferPrivateTransactionStatus,
   } = useTransferPrivate()
 
   const {
     mtspTransferPrivate,
+    reset: resetMtspTransferPrivate,
+    isPending: isMtspTransferPrivatePending,
     isSuccess: isMtspTransferPrivateSuccess,
     transactionStatus: mtspTransferPrivateTransactionStatus,
   } = useMtspTransferPrivate()
+
+  const reset = useCallback(() => {
+    resetTransferPrivate()
+    resetMtspTransferPrivate()
+  }, [resetMtspTransferPrivate, resetTransferPrivate])
+
+  const isPending = useMemo(
+    () => isTransferPrivatePending || isMtspTransferPrivatePending,
+    [isTransferPrivatePending, isMtspTransferPrivatePending]
+  )
 
   const isSuccess = useMemo(
     () => isTransferPrivateSuccess || isMtspTransferPrivateSuccess,
@@ -186,21 +199,15 @@ export function PrivateToPrivate() {
     [transferPrivateTransactionStatus, mtspTransferPrivateTransactionStatus]
   )
 
-  const isPending = useMemo(
-    () =>
-      transferPrivateTransactionStatus === TransactionStatus.Creating ||
-      mtspTransferPrivateTransactionStatus === TransactionStatus.Creating,
-    [transferPrivateTransactionStatus, mtspTransferPrivateTransactionStatus]
-  )
-
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [amountCache, setAmountCache] = useState<number>(0)
   const [recipientCache, setRecipientCache] = useState<string>('')
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleTransferPrivate = useCallback(
     async (data: FormData) => {
@@ -347,7 +354,7 @@ export function PrivateToPrivate() {
                             />
                             {field.value
                               ? tokens.find((token) => token.id === field.value)
-                                  ?.id
+                                ?.id
                               : 'Select token'}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -463,8 +470,8 @@ export function PrivateToPrivate() {
           </span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
             Creating: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} private ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
             Pending: `You are sending ${dn.format(dn.from(amountCache, 6), 6)} private ${tokenInputValue} to ${shortenAddress(recipientCache)}`,
@@ -472,6 +479,7 @@ export function PrivateToPrivate() {
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

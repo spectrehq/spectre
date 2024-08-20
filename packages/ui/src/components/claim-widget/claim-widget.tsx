@@ -5,7 +5,7 @@ import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
 import { useCallback, useEffect, useMemo, useState } from 'react'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import {
   Tooltip,
@@ -18,20 +18,11 @@ import { useAccount } from '~/hooks/use-account'
 import { useBlockHeight } from '~/hooks/use-block-height'
 import { useClaim } from '~/hooks/use-claim'
 import { usePendingWithdraw } from '~/hooks/use-pending-withdraw'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
 import { useUserWithdraw } from '~/hooks/use-user-withdraw'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
 
 export function ClaimWidget() {
   const { address } = useAccount()
-
-  const { data: stCreditsBalance } = useStCreditsBalance(address)
-
-  const balanceDN = useMemo(
-    () => dn.from([stCreditsBalance ?? 0n, 6]),
-    [stCreditsBalance]
-  )
 
   const { data: userWithdraw } = useUserWithdraw(address)
 
@@ -40,11 +31,6 @@ export function ClaimWidget() {
   const userWithdrawAmountDN = useMemo(
     () => dn.from([userWithdraw?.amount ?? 0n, 6]),
     [userWithdraw]
-  )
-
-  const pendingWithdrawAmountDN = useMemo(
-    () => dn.from([pendingWithdraw?.amount ?? 0n, 6]),
-    [pendingWithdraw]
   )
 
   const { data: latestBlockHeight } = useBlockHeight()
@@ -57,7 +43,7 @@ export function ClaimWidget() {
     return userWithdraw.height <= BigInt(latestBlockHeight)
   }, [userWithdraw, latestBlockHeight])
 
-  const { claim, isSuccess, error, transactionStatus } = useClaim()
+  const { claim, isPending, isSuccess, reset, transactionStatus } = useClaim()
 
   const [userWithdrawAmountDNCache, setUserWithdrawAmountDNCache] =
     useState<dn.Dnum>([0n, 6])
@@ -69,11 +55,6 @@ export function ClaimWidget() {
     claim(userWithdraw.amount)
   }, [address, claim, userWithdraw, userWithdrawAmountDN])
 
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
-
   const queryClient = useQueryClient()
 
   useEffect(() => {
@@ -84,12 +65,14 @@ export function ClaimWidget() {
     }
   }, [isSuccess, queryClient, address])
 
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
+
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   return (
     <div className="max-w-lg mx-auto">
@@ -170,15 +153,16 @@ export function ClaimWidget() {
           </Button>
         </WalletConnectionChecker>
       </div>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: `You are claiming ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
             Pending: `You are claiming ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
             Settled: `You have claimed ${dn.format(userWithdrawAmountDNCache, 6)} Credits`,
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </div>

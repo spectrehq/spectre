@@ -10,20 +10,8 @@ import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
 import AleoStakingLogoIcon from '~/assets/logo-dark.png'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
-import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
-import { NumberInput } from '~/components/ui/number-input'
-import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
-import { useAccount } from '~/hooks/use-account'
-import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
-import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from '~/components/ui/popover'
 import {
   Command,
   CommandEmpty,
@@ -31,9 +19,20 @@ import {
   CommandItem,
   CommandList,
 } from '~/components/ui/command'
-import { useTransferPublicToPrivate } from '~/hooks/use-transfer-public-to-private'
-import { useMtspTransferPublicToPrivate } from '~/hooks/use-mtsp-transfer-public-to-private'
+import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
+import { NumberInput } from '~/components/ui/number-input'
+import {
+  Popover,
+  PopoverContent,
+  PopoverTrigger,
+} from '~/components/ui/popover'
+import { WalletConnectionChecker } from '~/components/wallet-connection-checker'
+import { useAccount } from '~/hooks/use-account'
 import { useMtspBalance } from '~/hooks/use-mtsp-balance'
+import { useMtspTransferPublicToPrivate } from '~/hooks/use-mtsp-transfer-public-to-private'
+import { useStCreditsBalance } from '~/hooks/use-stcredits-balance'
+import { useTransferPublicToPrivate } from '~/hooks/use-transfer-public-to-private'
+import { cn } from '~/lib/utils'
 
 type ARC20Token = {
   id: string
@@ -133,15 +132,30 @@ export function ShieldForm() {
 
   const {
     transferPublicToPrivate,
+    reset: resetTransferPublicToPrivate,
+    isPending: isTransferPublicToPrivatePending,
     isSuccess: isTransferPublicToPrivateSuccess,
     transactionStatus: transferPublicToPrivateTransactionStatus,
   } = useTransferPublicToPrivate()
 
   const {
     mtspTransferPublicToPrivate,
+    reset: resetMtspTransferPublicToPrivate,
+    isPending: isMtspTransferPublicToPrivatePending,
     isSuccess: isMtspTransferPublicToPrivateSuccess,
     transactionStatus: mtspTransferPublicToPrivateTransactionStatus,
   } = useMtspTransferPublicToPrivate()
+
+  const reset = useCallback(() => {
+    resetTransferPublicToPrivate()
+    resetMtspTransferPublicToPrivate()
+  }, [resetMtspTransferPublicToPrivate, resetTransferPublicToPrivate])
+
+  const isPending = useMemo(
+    () =>
+      isTransferPublicToPrivatePending || isMtspTransferPublicToPrivatePending,
+    [isMtspTransferPublicToPrivatePending, isTransferPublicToPrivatePending]
+  )
 
   const isSuccess = useMemo(
     () =>
@@ -159,18 +173,14 @@ export function ShieldForm() {
     ]
   )
 
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
-    [transactionStatus]
-  )
-
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
   const [amountCache, setAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleShield = useCallback(
     async (data: FormData) => {
@@ -262,7 +272,7 @@ export function ShieldForm() {
                             />
                             {field.value
                               ? tokens.find((token) => token.id === field.value)
-                                  ?.id
+                                ?.id
                               : 'Select token'}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
@@ -380,8 +390,8 @@ export function ShieldForm() {
           <span>~ 0.25 Credits</span>
         </li>
       </ul>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
             Creating: `You are shielding ${dn.format(dn.from(amountCache, 6), 6)} ${tokenInputValue}`,
             Pending: `You are shielding ${dn.format(dn.from(amountCache, 6), 6)} ${tokenInputValue}`,
@@ -389,6 +399,7 @@ export function ShieldForm() {
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </>

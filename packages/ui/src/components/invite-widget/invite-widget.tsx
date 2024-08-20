@@ -6,7 +6,7 @@ import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import { useCallback, useEffect, useMemo, useState } from 'react'
 import { toast } from 'sonner'
 import { useCopyToClipboard } from 'usehooks-ts'
-import { TransactionToast } from '~/components/transaction-toast'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Skeleton } from '~/components/ui/skeleton'
 import {
@@ -21,7 +21,6 @@ import { useGenerateInviteCode } from '~/hooks/use-generate-invite-code'
 import { usePointsState } from '~/hooks/use-points-state'
 import { useUserInviteCode } from '~/hooks/use-user-invite-code'
 import { cn } from '~/lib/utils'
-import { TransactionStatus } from '~/types'
 
 export function InviteWidget() {
   const { address } = useAccount()
@@ -65,23 +64,20 @@ export function InviteWidget() {
     }
   }, [isCopied])
 
-  const { generate, isSuccess, transactionStatus } = useGenerateInviteCode()
+  const { generate, reset, isPending, isSuccess, transactionStatus } =
+    useGenerateInviteCode()
 
   const handleGenerate = useCallback(() => {
     generate()
   }, [generate])
 
-  const isPending = useMemo(
-    () => transactionStatus === TransactionStatus.Creating,
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
     [transactionStatus]
   )
-
-  const isShowTransactionToast = useMemo(
-    () =>
-      Boolean(transactionStatus) &&
-      transactionStatus !== TransactionStatus.Creating,
-    [transactionStatus]
-  )
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const queryClient = useQueryClient()
   useEffect(() => {
@@ -236,15 +232,16 @@ export function InviteWidget() {
           </li>
         </ul>
       </div>
-      {isShowTransactionToast && (
-        <TransactionToast
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
           title={{
-            Creating: '',
+            Creating: 'You are generating your invite link',
             Pending: 'You are generating your invite link',
             Settled: 'You have generated your invite link',
             Failed: 'Transaction failed',
           }}
           transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
     </div>
