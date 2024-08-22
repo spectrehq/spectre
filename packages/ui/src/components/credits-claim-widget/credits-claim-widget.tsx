@@ -42,15 +42,15 @@ export function CreditsClaimWidget() {
     return 'Claim'
   }, [latestBlockHeight, unbonding])
 
-  const { mutate, isPending } = useCreditsClaim()
+  const { claim, isPending } = useCreditsClaim()
 
   const handleClaim = useCallback(async () => {
     if (!address || !unbonding) return
 
     const fee = 250_000 // TODO
 
-    mutate({ staker: address, fee })
-  }, [address, mutate, unbonding])
+    claim(address, fee)
+  }, [address, claim, unbonding])
 
   return (
     <div className="rounded-xl bg-secondary-foreground min-w-96 max-w-lg mx-auto">

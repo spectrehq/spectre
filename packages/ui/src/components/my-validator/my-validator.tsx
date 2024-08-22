@@ -1,11 +1,13 @@
 'use client'
 
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { CircleHelpIcon, Loader2Icon } from 'lucide-react'
 import Link from 'next/link'
-import { useCallback, useMemo, useState } from 'react'
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { toast } from 'sonner'
 import { BondDialog } from '~/components/bond-dialog'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Separator } from '~/components/ui/separator'
 import {
@@ -23,7 +25,7 @@ import { useCreditsClaim } from '~/hooks/use-credits-claim'
 import { useCreditsUnbonding } from '~/hooks/use-credits-unbonding'
 import { cn } from '~/lib/utils'
 import { useNetworkClientStore } from '~/stores/network-client'
-import type { AleoAddress } from '~/types'
+import { TransactionStatus, type AleoAddress } from '~/types'
 import { ValidatorInfo } from './validator-info'
 
 export function MyValidator() {
@@ -55,15 +57,35 @@ export function MyValidator() {
     [unbondingCreditsDN, unbonding, latestBlockHeight]
   )
 
-  const { mutate, isPending } = useCreditsClaim()
+  const { claim, reset, isPending, isSuccess, getTransactionStatus } =
+    useCreditsClaim()
+
+  const [transactionStatus, setTransactionStatus] =
+    useState<TransactionStatus>()
+
+  const [startGetTransactionStatus, setStartGetTransactionStatus] =
+    useState(false)
+
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
+    [transactionStatus]
+  )
+  const [amountDNCache, setAmountDNCache] = useState<dn.Dnum>([0n, 6])
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+    setStartGetTransactionStatus(false)
+    setTransactionStatus(getTransactionStatus())
+  }, [reset, getTransactionStatus])
 
   const handleClaim = useCallback(async () => {
     if (!address || !unbonding || unbonding.microcredits <= 0n) return
 
     const fee = 250_000 // TODO
 
-    mutate({ staker: address, fee })
-  }, [address, mutate, unbonding])
+    setAmountDNCache([unbonding.microcredits, 6])
+    claim(address, fee)
+    setStartGetTransactionStatus(true)
+  }, [address, claim, unbonding])
 
   const creditsProgram = useNetworkClientStore((store) => store.creditsProgram)
 
@@ -104,70 +126,49 @@ export function MyValidator() {
 
   const onClose = useCallback(() => setOpen(false), [])
 
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (isSuccess) {
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
+    }
+  }, [isSuccess, queryClient, address])
+
+  const timer = useRef<NodeJS.Timeout | null>(null)
+
+  useEffect(() => {
+    if (startGetTransactionStatus) {
+      timer.current = setInterval(() => {
+        setTransactionStatus(getTransactionStatus())
+      }, 100)
+    } else {
+      if (timer.current) clearInterval(timer.current)
+    }
+
+    return () => {
+      if (timer.current) clearInterval(timer.current)
+    }
+  }, [getTransactionStatus, startGetTransactionStatus])
+
+  useEffect(() => {
+    if (
+      transactionStatus === TransactionStatus.Settled ||
+      transactionStatus === TransactionStatus.Failed
+    ) {
+      setStartGetTransactionStatus(false)
+    }
+  }, [transactionStatus])
+
   return (
-    <section>
-      <div className="container">
-        <div className="pt-4 py-8 grid grid-cols-1 lg:grid-cols-6 items-start justify-between gap-8 lg:gap-0">
-          <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between flex-1 col-span-1 lg:col-span-3 gap-4 lg:gap-0">
-            <div className="w-full lg:w-auto">
-              <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
-                Staked
-                <TooltipProvider>
-                  <Tooltip>
-                    <TooltipTrigger>
-                      <CircleHelpIcon className="w-4 h-4 ml-1 text-muted-foreground" />
-                    </TooltipTrigger>
-                    <TooltipContent>
-                      <p>
-                        The amount of your Credits that are bonded to validators
-                      </p>
-                    </TooltipContent>
-                  </Tooltip>
-                </TooltipProvider>
-              </h6>
-              <div className="flex items-center gap-4">
-                <div>
-                  <span className="text-2xl font-semibold">
-                    {dn.format(bondedCreditsDN, {
-                      digits: 6,
-                      locale: 'en',
-                    })}
-                  </span>{' '}
-                  <span className="text-muted-foreground">Credits</span>
-                </div>
-              </div>
-            </div>
-            <div className="space-x-6 flex items-center w-full lg:w-auto justify-between">
-              <Button variant="secondary" onClick={openStakeDialog}>
-                Stake
-              </Button>
-              <UnbondDialog>
-                <Button variant="secondary">Unstake</Button>
-              </UnbondDialog>
-              <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full p-px w-fit">
-                <Button
-                  className="rounded-full border-muted-foreground border-none"
-                  variant="outline"
-                  asChild
-                >
-                  <Link href="/liquid-staking" target="_blank" rel="noreferrer">
-                    <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                      Liquid
-                    </span>
-                    &nbsp;
-                    <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                      Staking
-                    </span>
-                  </Link>
-                </Button>
-              </div>
-            </div>
-          </div>
-          <div className="col-span-1 lg:col-span-3 lg:ml-20 lg:pl-20 border-none lg:border-l">
-            <div className="flex items-center justify-between">
-              <div>
+    <>
+      <section>
+        <div className="container">
+          <div className="pt-4 py-8 grid grid-cols-1 lg:grid-cols-6 items-start justify-between gap-8 lg:gap-0">
+            <div className="flex flex-col lg:flex-row items-start lg:items-center justify-between flex-1 col-span-1 lg:col-span-3 gap-4 lg:gap-0">
+              <div className="w-full lg:w-auto">
                 <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
-                  Unstaking
+                  Staked
                   <TooltipProvider>
                     <Tooltip>
                       <TooltipTrigger>
@@ -175,8 +176,8 @@ export function MyValidator() {
                       </TooltipTrigger>
                       <TooltipContent>
                         <p>
-                          The amount of your Credits that are currently in the
-                          unbonding period
+                          The amount of your Credits that are bonded to
+                          validators
                         </p>
                       </TooltipContent>
                     </Tooltip>
@@ -185,7 +186,7 @@ export function MyValidator() {
                 <div className="flex items-center gap-4">
                   <div>
                     <span className="text-2xl font-semibold">
-                      {dn.format(unbondingCreditsDN, {
+                      {dn.format(bondedCreditsDN, {
                         digits: 6,
                         locale: 'en',
                       })}
@@ -194,51 +195,125 @@ export function MyValidator() {
                   </div>
                 </div>
               </div>
-              <div className="space-x-4">
-                <WalletConnectionChecker
-                  className="min-w-24"
-                  variant="secondary"
-                  label="Claim"
-                >
+              <div className="space-x-6 flex items-center w-full lg:w-auto justify-between">
+                <Button variant="secondary" onClick={openStakeDialog}>
+                  Stake
+                </Button>
+                <UnbondDialog>
+                  <Button variant="secondary">Unstake</Button>
+                </UnbondDialog>
+                <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-full p-px w-fit">
                   <Button
-                    className="min-w-24"
-                    variant="secondary"
-                    disabled={!claimable || isPending}
-                    onClick={handleClaim}
+                    className="rounded-full border-muted-foreground border-none"
+                    variant="outline"
+                    asChild
                   >
-                    {isPending && (
-                      <Loader2Icon
-                        className={cn('mr-2 h-4 w-4 animate-spin')}
-                      />
-                    )}
-                    {isPending ? 'Waiting for wallet confirmation' : 'Claim'}
+                    <Link
+                      href="/liquid-staking"
+                      target="_blank"
+                      rel="noreferrer"
+                    >
+                      <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                        Liquid
+                      </span>
+                      &nbsp;
+                      <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                        Staking
+                      </span>
+                    </Link>
                   </Button>
-                </WalletConnectionChecker>
+                </div>
               </div>
             </div>
-
-            {!dn.eq(unbondingCreditsDN, 0) && (
-              <div className="text-sm text-muted-foreground mt-1">
-                <span>
-                  Claim Height:{' '}
-                  {unbonding ? dn.format(dn.from(unbonding.height)) : '-'}
-                </span>{' '}
-                {/* <span>(ETA. 2024-12-31 12:30:00)</span> */}
+            <div className="col-span-1 lg:col-span-3 lg:ml-20 lg:pl-20 border-none lg:border-l">
+              <div className="flex items-center justify-between">
+                <div>
+                  <h6 className="text-sm font-medium text-muted-foreground flex items-center mb-3">
+                    Unstaking
+                    <TooltipProvider>
+                      <Tooltip>
+                        <TooltipTrigger>
+                          <CircleHelpIcon className="w-4 h-4 ml-1 text-muted-foreground" />
+                        </TooltipTrigger>
+                        <TooltipContent>
+                          <p>
+                            The amount of your Credits that are currently in the
+                            unbonding period
+                          </p>
+                        </TooltipContent>
+                      </Tooltip>
+                    </TooltipProvider>
+                  </h6>
+                  <div className="flex items-center gap-4">
+                    <div>
+                      <span className="text-2xl font-semibold">
+                        {dn.format(unbondingCreditsDN, {
+                          digits: 6,
+                          locale: 'en',
+                        })}
+                      </span>{' '}
+                      <span className="text-muted-foreground">Credits</span>
+                    </div>
+                  </div>
+                </div>
+                <div className="space-x-4">
+                  <WalletConnectionChecker
+                    className="min-w-24"
+                    variant="secondary"
+                    label="Claim"
+                  >
+                    <Button
+                      className="min-w-24"
+                      variant="secondary"
+                      disabled={!claimable || isPending}
+                      onClick={handleClaim}
+                    >
+                      {isPending && (
+                        <Loader2Icon
+                          className={cn('mr-2 h-4 w-4 animate-spin')}
+                        />
+                      )}
+                      {isPending ? 'Claiming' : 'Claim'}
+                    </Button>
+                  </WalletConnectionChecker>
+                </div>
               </div>
-            )}
-          </div>
-        </div>
 
-        {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />}
-      </div>
-      {open && (
-        <BondDialog
-          open={open}
-          validator={validator}
-          step={step}
-          onClose={onClose}
+              {!dn.eq(unbondingCreditsDN, 0) && (
+                <div className="text-sm text-muted-foreground mt-1">
+                  <span>
+                    Claim Height:{' '}
+                    {unbonding ? dn.format(dn.from(unbonding.height)) : '-'}
+                  </span>{' '}
+                  {/* <span>(ETA. 2024-12-31 12:30:00)</span> */}
+                </div>
+              )}
+            </div>
+          </div>
+
+          {!dn.eq(unbondingCreditsDN, 0) ? <ValidatorInfo /> : <Separator />}
+        </div>
+        {open && (
+          <BondDialog
+            open={open}
+            validator={validator}
+            step={step}
+            onClose={onClose}
+          />
+        )}
+      </section>
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
+          title={{
+            Creating: `You are claiming ${dn.format(amountDNCache, 6)} Credits`,
+            Pending: `You are claiming ${dn.format(amountDNCache, 6)} Credits`,
+            Settled: `You have claimed ${dn.format(amountDNCache, 6)} Credits`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
         />
       )}
-    </section>
+    </>
   )
 }
