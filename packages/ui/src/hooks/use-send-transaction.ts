@@ -13,7 +13,7 @@ import {
 } from '@puzzlehq/sdk'
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
-import { useState } from 'react'
+import { useCallback, useRef } from 'react'
 import { TransactionStatus, WalletType } from '~/types'
 
 export interface SendTransactionMutationParams {
@@ -32,11 +32,50 @@ export function useSendTransaction({
   address,
   walletType,
 }: UseSendTransactionOptions) {
-  const { requestTransaction, transactionStatus: getTransactionStatus } =
-    useWallet()
+  const {
+    requestTransaction,
+    transactionStatus: getLeoWalletTransactionStatus,
+  } = useWallet()
 
-  const [transactionStatus, setTransactionStatus] =
-    useState<TransactionStatus>()
+  const transactionStatusRef = useRef<TransactionStatus | undefined>(undefined)
+
+  const setTransactionStatus = useCallback(
+    (status: TransactionStatus | undefined) => {
+      if (status === undefined) {
+        transactionStatusRef.current = undefined
+      }
+
+      if (
+        status === TransactionStatus.Creating &&
+        transactionStatusRef.current === undefined
+      ) {
+        transactionStatusRef.current = status
+      }
+
+      if (
+        status === TransactionStatus.Pending &&
+        transactionStatusRef.current === TransactionStatus.Creating
+      ) {
+        transactionStatusRef.current = status
+      }
+
+      if (
+        status === TransactionStatus.Settled &&
+        transactionStatusRef.current === TransactionStatus.Pending
+      ) {
+        transactionStatusRef.current = status
+      }
+
+      if (
+        status === TransactionStatus.Failed &&
+        (transactionStatusRef.current === TransactionStatus.Creating ||
+          transactionStatusRef.current === TransactionStatus.Pending)
+      ) {
+        transactionStatusRef.current = status
+      }
+    },
+    []
+  )
 
   const mutation = useMutation({
     mutationFn: async ({
@@ -82,9 +121,13 @@ export function useSendTransaction({
         setTransactionStatus(TransactionStatus.Pending)
 
         while (true) {
-          const transactionStatus = await getTransactionStatus?.(transactionId)
+          // break after reset
+          if (transactionStatusRef.current === undefined) break
 
-          if (transactionStatus === 'Finalized') {
+          const transactionStatusInner =
+            await getLeoWalletTransactionStatus?.(transactionId)
+
+          if (transactionStatusInner === 'Finalized') {
             setTransactionStatus(TransactionStatus.Settled)
             break
           }
@@ -120,41 +163,55 @@ export function useSendTransaction({
           setTransactionStatus(TransactionStatus.Pending)
 
           while (true) {
-            const { event, error } = await getEvent({ id: eventId, address })
+            // break after reset
+            if (transactionStatusRef.current === undefined) break
 
-            if (error) {
-              console.log(error)
+            try {
+              const { event, error } = await getEvent({ id: eventId, address })
 
-              if (error.includes('Internal server error')) {
-                await new Promise((resolve) => setTimeout(resolve, 1000))
+              if (error) {
+                console.log(error)
+
+                if (error.includes('Internal server error')) {
+                  await new Promise((resolve) => setTimeout(resolve, 1000))
+                  continue
+                }
+
+                // TODO
+                // throw new Error(error)
                 continue
               }
 
-              // TODO
-              throw new Error(error)
+              if (!event) {
+                throw new Error('Unknown error')
+              }
+
+              if (event.status === EventStatus.Creating) {
+                setTransactionStatus(TransactionStatus.Pending)
+              } else {
+                setTransactionStatus(
+                  event.status as unknown as TransactionStatus
+                )
+              }
+
+              if (
+                event.status === EventStatus.Settled ||
+                event.status === EventStatus.Failed
+              ) {
+                break
+              }
+            } catch (error) {
+              console.log(error)
             }
 
-            if (!event) {
-              throw new Error('Unknown error')
-            }
-
-            if (event.status === EventStatus.Creating) {
-              setTransactionStatus(TransactionStatus.Pending)
-            } else {
-              setTransactionStatus(event.status as unknown as TransactionStatus)
-            }
-
-            if (
-              event.status === EventStatus.Settled ||
-              event.status === EventStatus.Failed
-            ) {
-              break
-            }
-
-            await new Promise((resolve) => setTimeout(resolve, 500))
+            await new Promise((resolve) => setTimeout(resolve, 1000))
           }
         }
       }
+    },
+    onMutate: () => {
+      setTransactionStatus(undefined)
+      setTransactionStatus(TransactionStatus.Creating)
     },
   })
 
@@ -163,5 +220,15 @@ export function useSendTransaction({
     setTransactionStatus(undefined)
   }
 
-  return { ...mutation, reset, transactionStatus }
+  const getTransactionStatus = useCallback(
+    () => transactionStatusRef.current,
+    []
+  )
+
+  return {
+    ...mutation,
+    reset,
+    transactionStatus: transactionStatusRef.current,
+    getTransactionStatus,
+  }
 }

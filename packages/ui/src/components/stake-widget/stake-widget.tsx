@@ -71,7 +71,6 @@ export function StakeWidget() {
   )
 
   const [creditsAmountCache, setCreditsAmountCache] = useState(0)
-  const [receivedFormattedCache, setReceivedFormattedCache] = useState('')
 
   const { stake, reset, isPending, isSuccess, transactionStatus } = useStake()
 
@@ -83,9 +82,8 @@ export function StakeWidget() {
 
       stake(amount, 250_000)
       setCreditsAmountCache(creditsAmount)
-      setReceivedFormattedCache(receivedFormatted)
     },
-    [address, creditsAmount, receivedFormatted, stake]
+    [address, creditsAmount, stake]
   )
 
   const queryClient = useQueryClient()

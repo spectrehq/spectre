@@ -1,12 +1,14 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
-import { useCallback, useEffect, useMemo } from 'react'
+import { useCallback, useEffect, useMemo, useState } from 'react'
 import { useForm, useWatch } from 'react-hook-form'
 import { z } from 'zod'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import { Form, FormControl, FormField, FormItem } from '~/components/ui/form'
 import { NumberInput } from '~/components/ui/number-input'
@@ -64,18 +66,46 @@ export function UnbondWidget() {
 
   const amountValue = useWatch({ control: form.control, name: 'amount' })
 
-  const { mutate, isPending } = useCreditsUnbond()
+  const { unbond, reset, isPending, isSuccess, transactionStatus } =
+    useCreditsUnbond()
 
-  const handleBond = useCallback(
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
+    [transactionStatus]
+  )
+  const [amountCache, setAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
+
+  const handleUnbond = useCallback(
     async (data: z.infer<typeof formSchema>) => {
       if (!address) return
 
       const amount = dn.from(data.amount, 6)[0]
 
-      mutate({ amount, fee: 250_000 })
+      setAmountCache(data.amount || 0)
+      unbond(amount, 250_000)
     },
-    [address, mutate]
+    [address, unbond]
   )
+
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (bondState !== undefined) {
+      form.trigger('amount')
+    }
+  }, [bondState, form])
+
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset()
+      form.trigger()
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
+    }
+  }, [isSuccess, form, queryClient, address])
 
   return (
     <div className="rounded-xl w-full mx-auto">
@@ -98,7 +128,10 @@ export function UnbondWidget() {
       </div>
       <div className="rounded-xl bg-primary-foreground p-6 w-full">
         <Form {...form}>
-          <form onSubmit={form.handleSubmit(handleBond)} className="space-y-6">
+          <form
+            onSubmit={form.handleSubmit(handleUnbond)}
+            className="space-y-6"
+          >
             <FormField
               control={form.control}
               name="amount"
@@ -180,6 +213,18 @@ export function UnbondWidget() {
           </form>
         </Form>
       </div>
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
+          title={{
+            Creating: `You are unstaking ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits`,
+            Pending: `You are unstaking ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits`,
+            Settled: `You have unstaked ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
+        />
+      )}
     </div>
   )
 }

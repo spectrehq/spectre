@@ -68,7 +68,7 @@ export function BondWidget() {
     form.trigger()
   }, [form])
 
-  const { mutate, isPending } = useCreditsBond()
+  const { bond, isPending } = useCreditsBond()
 
   const handleBond = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -76,14 +76,9 @@ export function BondWidget() {
 
       const amount = dn.from(data.amount, 6)[0]
 
-      mutate({
-        validator: data.validator as AleoAddress,
-        recipient: address,
-        amount,
-        fee: 250_000,
-      })
+      bond(data.validator as string, address, amount, 250_000)
     },
-    [address, mutate]
+    [address, bond]
   )
 
   return (

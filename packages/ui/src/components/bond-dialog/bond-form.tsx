@@ -1,6 +1,7 @@
 'use client'
 
 import { zodResolver } from '@hookform/resolvers/zod'
+import { useQueryClient } from '@tanstack/react-query'
 import * as dn from 'dnum'
 import { CircleCheckIcon, CopyIcon, Loader2Icon } from 'lucide-react'
 import { useTranslations } from 'next-intl'
@@ -13,6 +14,7 @@ import { z } from 'zod'
 import Aleo123Logo from '~/assets/aleo123-logo.png'
 import AleoscanLogo from '~/assets/aleoscan-logo.png'
 import { GradientsAvatar } from '~/components/gradients-avatar'
+import { TransactionStatusAlert } from '~/components/transaction-status-alert'
 import { Button } from '~/components/ui/button'
 import {
   Card,
@@ -105,7 +107,18 @@ export function BondForm({ validator }: BondFormProps) {
     form.trigger()
   }, [form])
 
-  const { mutate, isPending } = useCreditsBond()
+  const { bond, reset, isPending, isSuccess, transactionStatus } =
+    useCreditsBond()
+
+  const isShowTransactionStatusAlert = useMemo(
+    () => Boolean(transactionStatus),
+    [transactionStatus]
+  )
+  const [validatorCache, setValidatorCache] = useState<string>('')
+  const [amountCache, setAmountCache] = useState<number>(0)
+  const handleTransactionStatusAlertClose = useCallback(() => {
+    reset()
+  }, [reset])
 
   const handleBond = useCallback(
     async (data: z.infer<typeof formSchema>) => {
@@ -113,14 +126,11 @@ export function BondForm({ validator }: BondFormProps) {
 
       const amount = dn.from(data.amount, 6)[0]
 
-      mutate({
-        validator: validator,
-        recipient: address,
-        amount,
-        fee: 250_000,
-      })
+      setValidatorCache(validator)
+      setAmountCache(data.amount || 0)
+      bond(validator, address, amount, 250_000)
     },
-    [address, mutate, validator]
+    [address, bond, validator]
   )
 
   const { prevStep } = useStepper()
@@ -145,81 +155,99 @@ export function BondForm({ validator }: BondFormProps) {
     }
   }, [isCopied])
 
+  const queryClient = useQueryClient()
+  useEffect(() => {
+    if (balance !== undefined) {
+      form.trigger('amount')
+    }
+  }, [balance, form])
+
+  useEffect(() => {
+    if (isSuccess) {
+      form.reset()
+      form.trigger()
+      void queryClient.refetchQueries({
+        predicate: ({ queryKey }) => queryKey.includes(address),
+      })
+    }
+  }, [isSuccess, form, queryClient, address])
+
   return (
-    <Card className="border-none shadow-none w-screen max-w-full lg:max-w-xl">
-      <CardHeader className="px-0 pt-0">
-        <CardTitle className="flex items-center space-x-2">
-          <GradientsAvatar text={validator} size={40} />
-          <span>{validator && shortenAddress(validator)}</span>
-          <button type="button" onClick={handleCopyAddress}>
-            {isCopied ? (
-              <CircleCheckIcon className="h-5 w-5 text-green-600" />
-            ) : (
-              <CopyIcon className="h-5 w-5" />
-            )}
-          </button>
-        </CardTitle>
-        <CardDescription className="flex items-center space-x-2">
-          <span>View on explorer: </span>
-          <Link
-            href={`https://testnet.aleoscan.io/address?a=${validator}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
-          </Link>
-          <Link
-            href={`https://testnetbeta.aleo123.io/address/${validator}`}
-            target="_blank"
-            rel="noopener noreferrer"
-          >
-            <Image src={Aleo123Logo} alt="Aleo123" width={16} height={16} />
-          </Link>
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="p-0">
-        <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
-          <div className="bg-primary-foreground p-6 rounded-xl">
-            <ul className="grid gap-2 text-sm">
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Stake</span>
-                <span>
-                  {dn.format([BigInt(data?.Info.Stake ?? 0), 6], {
-                    digits: 2,
-                    trailingZeros: true,
-                  })}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Total Earning</span>
-                <span>
-                  {dn.format(
-                    [BigInt(data?.Info.ValidatorTotalProfit ?? 0), 6],
-                    {
+    <>
+      <Card className="border-none shadow-none w-screen max-w-full lg:max-w-xl">
+        <CardHeader className="px-0 pt-0">
+          <CardTitle className="flex items-center space-x-2">
+            <GradientsAvatar text={validator} size={40} />
+            <span>{validator && shortenAddress(validator)}</span>
+            <button type="button" onClick={handleCopyAddress}>
+              {isCopied ? (
+                <CircleCheckIcon className="h-5 w-5 text-green-600" />
+              ) : (
+                <CopyIcon className="h-5 w-5" />
+              )}
+            </button>
+          </CardTitle>
+          <CardDescription className="flex items-center space-x-2">
+            <span>View on explorer: </span>
+            <Link
+              href={`https://testnet.aleoscan.io/address?a=${validator}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
+            </Link>
+            <Link
+              href={`https://testnetbeta.aleo123.io/address/${validator}`}
+              target="_blank"
+              rel="noopener noreferrer"
+            >
+              <Image src={Aleo123Logo} alt="Aleo123" width={16} height={16} />
+            </Link>
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="p-0">
+          <div className="grid grid-cols-1 md:grid-cols-1 gap-8">
+            <div className="bg-primary-foreground p-6 rounded-xl">
+              <ul className="grid gap-2 text-sm">
+                <li className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Total Stake</span>
+                  <span>
+                    {dn.format([BigInt(data?.Info.Stake ?? 0), 6], {
                       digits: 2,
                       trailingZeros: true,
-                    }
-                  )}
-                </span>
-              </li>
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Commission</span>
-                <span>
-                  {dn.format(dn.from(validatorState?.commission ?? 0), {
-                    digits: 2,
-                  })}
-                  %
-                </span>
-              </li>
+                    })}
+                  </span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Total Earning</span>
+                  <span>
+                    {dn.format(
+                      [BigInt(data?.Info.ValidatorTotalProfit ?? 0), 6],
+                      {
+                        digits: 2,
+                        trailingZeros: true,
+                      }
+                    )}
+                  </span>
+                </li>
+                <li className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Commission</span>
+                  <span>
+                    {dn.format(dn.from(validatorState?.commission ?? 0), {
+                      digits: 2,
+                    })}
+                    %
+                  </span>
+                </li>
 
-              <li className="flex items-center justify-between">
-                <span className="text-muted-foreground">Status</span>
-                <span>{validatorState?.is_open ? 'OPEN' : 'CLOSE'}</span>
-              </li>
-            </ul>
-          </div>
-          <div className="rounded-xl mx-auto w-full">
-            {/* <div className="p-6">
+                <li className="flex items-center justify-between">
+                  <span className="text-muted-foreground">Status</span>
+                  <span>{validatorState?.is_open ? 'OPEN' : 'CLOSE'}</span>
+                </li>
+              </ul>
+            </div>
+            <div className="rounded-xl mx-auto w-full">
+              {/* <div className="p-6">
               <div className="grid">
                 <div>
                   <div className="font-medium text-lg/6 sm:text-sm/6">
@@ -232,136 +260,149 @@ export function BondForm({ validator }: BondFormProps) {
                 </div>
               </div>
             </div> */}
-            {creditsWithdrawAddress && creditsWithdrawAddress !== address && (
-              <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
-                Please note that your withdrawal address{' '}
-                {creditsWithdrawAddress} is not your current wallet address. If
-                you want to change it to your wallet address, you must unstake
-                all your Credits and then stake again.
-              </div>
-            )}
-            <div className="rounded-xl bg-primary-foreground p-6">
-              <Form {...form}>
-                <form
-                  onSubmit={form.handleSubmit(handleBond)}
-                  className="space-y-4"
-                >
-                  <FormField
-                    control={form.control}
-                    name="amount"
-                    render={({ field }) => (
-                      <FormItem className="relative">
-                        <FormControl>
-                          <div className="flex items-center border rounded-xl p-3 bg-background">
-                            <NumberInput
-                              {...field}
-                              className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
-                              placeholder="0.000000"
-                              onChange={(event) => {
-                                const value = event.currentTarget.value ?? ''
-                                if (
-                                  value === '' ||
-                                  /^[0-9]+(.[0-9]{1,6})?$/.test(value)
-                                ) {
-                                  field.onChange(value)
-                                }
-                              }}
-                            />
-                            <Button
-                              className="rounded-lg"
-                              variant="secondary"
-                              type="button"
-                              size="sm"
-                              onClick={() => {
-                                field.onChange(dn.toNumber(balanceDN))
-                              }}
-                            >
-                              MAX
-                            </Button>
-                          </div>
-                        </FormControl>
-                      </FormItem>
-                    )}
-                  />
-                  <div className="flex items-center justify-end text-sm py-1">
-                    <span className="text-muted-foreground">Available:</span>
-                    &nbsp;
-                    <span className="font-medium">
-                      {dn.format(balanceDN, {
-                        digits: 6,
-                      })}{' '}
-                      Credits
-                    </span>
-                  </div>
-                  <WalletConnectionChecker
-                    className="w-full"
-                    variant="secondary"
-                    size="xl"
+              {creditsWithdrawAddress && creditsWithdrawAddress !== address && (
+                <div className="bg-amber-100 rounded-xl text-primary-foreground text-sm p-5 mb-6">
+                  Please note that your withdrawal address{' '}
+                  {creditsWithdrawAddress} is not your current wallet address.
+                  If you want to change it to your wallet address, you must
+                  unstake all your Credits and then stake again.
+                </div>
+              )}
+              <div className="rounded-xl bg-primary-foreground p-6">
+                <Form {...form}>
+                  <form
+                    onSubmit={form.handleSubmit(handleBond)}
+                    className="space-y-4"
                   >
-                    <Button
-                      className="w-full"
-                      type="submit"
-                      variant="secondary"
-                      size="xl"
-                      disabled={
-                        !data?.Info.IsOpen ||
-                        (creditsWithdrawAddress &&
-                          creditsWithdrawAddress !== address) ||
-                        !form.formState.isValid ||
-                        isPending
-                      }
-                    >
-                      {isPending && (
-                        <Loader2Icon
-                          className={cn('mr-2 h-4 w-4 animate-spin')}
-                        />
+                    <FormField
+                      control={form.control}
+                      name="amount"
+                      render={({ field }) => (
+                        <FormItem className="relative">
+                          <FormControl>
+                            <div className="flex items-center border rounded-xl p-3 bg-background">
+                              <NumberInput
+                                {...field}
+                                className="flex-1 h-auto rounded-none pl-2 pr-3 py-0 text-lg bg-transparent border-0 focus-visible:ring-0 focus-visible:ring-offset-0"
+                                placeholder="0.000000"
+                                onChange={(event) => {
+                                  const value = event.currentTarget.value ?? ''
+                                  if (
+                                    value === '' ||
+                                    /^[0-9]+(.[0-9]{1,6})?$/.test(value)
+                                  ) {
+                                    field.onChange(value)
+                                  }
+                                }}
+                              />
+                              <Button
+                                className="rounded-lg"
+                                variant="secondary"
+                                type="button"
+                                size="sm"
+                                onClick={() => {
+                                  field.onChange(dn.toNumber(balanceDN))
+                                }}
+                              >
+                                MAX
+                              </Button>
+                            </div>
+                          </FormControl>
+                        </FormItem>
                       )}
-                      {form.formState.errors.amount?.message ||
-                        (isPending
-                          ? 'Waiting for wallet confirmation'
-                          : 'Stake')}
-                    </Button>
-                  </WalletConnectionChecker>
-                  <div className="grid grid-cols-2 items-center gap-4">
-                    <Button
-                      className="w-full border-none"
-                      variant="secondary"
-                      type="button"
-                      size="xl"
-                      disabled={isPending}
-                      onClick={prevStep}
-                    >
-                      Back
-                    </Button>
-                    <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-px w-full box-content">
-                      <Button
-                        className="rounded-xl border-muted-foreground border-none w-full h-[46px]"
-                        variant="outline"
-                        size="xl"
-                        asChild
-                      >
-                        <Link
-                          href="/liquid-staking"
-                          target="_blank"
-                          rel="noreferrer"
-                        >
-                          <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                            Liquid
-                          </span>
-                          &nbsp;
-                          <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
-                            Staking
-                          </span>
-                        </Link>
-                      </Button>
+                    />
+                    <div className="flex items-center justify-end text-sm py-1">
+                      <span className="text-muted-foreground">Available:</span>
+                      &nbsp;
+                      <span className="font-medium">
+                        {dn.format(balanceDN, {
+                          digits: 6,
+                        })}{' '}
+                        Credits
+                      </span>
                     </div>
-                  </div>
-                </form>
-              </Form>
+                    <WalletConnectionChecker
+                      className="w-full"
+                      variant="secondary"
+                      size="xl"
+                    >
+                      <Button
+                        className="w-full"
+                        type="submit"
+                        variant="secondary"
+                        size="xl"
+                        disabled={
+                          !data?.Info.IsOpen ||
+                          (creditsWithdrawAddress &&
+                            creditsWithdrawAddress !== address) ||
+                          !form.formState.isValid ||
+                          isPending
+                        }
+                      >
+                        {isPending && (
+                          <Loader2Icon
+                            className={cn('mr-2 h-4 w-4 animate-spin')}
+                          />
+                        )}
+                        {form.formState.errors.amount?.message ||
+                          (isPending
+                            ? 'Waiting for wallet confirmation'
+                            : 'Stake')}
+                      </Button>
+                    </WalletConnectionChecker>
+                    <div className="grid grid-cols-2 items-center gap-4">
+                      <Button
+                        className="w-full border-none"
+                        variant="secondary"
+                        type="button"
+                        size="xl"
+                        disabled={isPending}
+                        onClick={prevStep}
+                      >
+                        Back
+                      </Button>
+                      <div className="bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 rounded-xl p-px w-full box-content">
+                        <Button
+                          className="rounded-xl border-muted-foreground border-none w-full h-[46px]"
+                          variant="outline"
+                          size="xl"
+                          asChild
+                        >
+                          <Link
+                            href="/liquid-staking"
+                            target="_blank"
+                            rel="noreferrer"
+                          >
+                            <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                              Liquid
+                            </span>
+                            &nbsp;
+                            <span className="inline-block text-transparent bg-gradient-to-r from-indigo-500 via-purple-500 to-pink-500 bg-clip-text">
+                              Staking
+                            </span>
+                          </Link>
+                        </Button>
+                      </div>
+                    </div>
+                  </form>
+                </Form>
+              </div>
             </div>
           </div>
-        </div>
-      </CardContent>
-    </Card>
+        </CardContent>
+      </Card>
+      {isShowTransactionStatusAlert && (
+        <TransactionStatusAlert
+          title={{
+            Creating: `You are staking ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits to ${shortenAddress(validatorCache)}`,
+            Pending: `You are staking ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits to ${shortenAddress(validatorCache)}`,
+            Settled: `You have staked ${dn.format(dn.from(amountCache || 0, 6), 6)} Credits to ${shortenAddress(validatorCache)}`,
+            Failed: 'Transaction failed',
+          }}
+          transactionStatus={transactionStatus}
+          onClose={handleTransactionStatusAlertClose}
+        />
+      )}
+    </>
   )
 }
