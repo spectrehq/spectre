@@ -1,10 +1,21 @@
+'use client'
+
 import Link from 'next/link'
+import { useState } from 'react'
 import { Button } from '~/components/ui/button'
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '~/components/ui/tabs'
 import { ShieldForm } from './shield-form'
 import { UnshieldForm } from './unshield-form'
 
 export function ShieldUnshieldWidget() {
+  const [defaultValues, setDefaultValues] = useState<{
+    token?: string
+    amount?: string
+  }>({
+    token: 'stCredits',
+    amount: '',
+  })
+
   return (
     <div className="max-w-lg mx-auto">
       <div className="rounded-xl bg-primary-foreground p-6">
@@ -45,11 +56,17 @@ export function ShieldUnshieldWidget() {
             </TabsTrigger>
           </TabsList>
           <TabsContent value="shield">
-            <ShieldForm />
+            <ShieldForm
+              defaultValues={defaultValues}
+              onFormValuesChange={setDefaultValues}
+            />
           </TabsContent>
 
           <TabsContent value="unshield">
-            <UnshieldForm />
+            <UnshieldForm
+              defaultValues={defaultValues}
+              onFormValuesChange={setDefaultValues}
+            />
           </TabsContent>
         </Tabs>
       </div>
