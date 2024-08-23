@@ -57,14 +57,8 @@ export function MyValidator() {
     [unbondingCreditsDN, unbonding, latestBlockHeight]
   )
 
-  const { claim, reset, isPending, isSuccess, getTransactionStatus } =
+  const { claim, reset, isPending, isSuccess, transactionStatus } =
     useCreditsClaim()
-
-  const [transactionStatus, setTransactionStatus] =
-    useState<TransactionStatus>()
-
-  const [startGetTransactionStatus, setStartGetTransactionStatus] =
-    useState(false)
 
   const isShowTransactionStatusAlert = useMemo(
     () => Boolean(transactionStatus),
@@ -73,9 +67,7 @@ export function MyValidator() {
   const [amountDNCache, setAmountDNCache] = useState<dn.Dnum>([0n, 6])
   const handleTransactionStatusAlertClose = useCallback(() => {
     reset()
-    setStartGetTransactionStatus(false)
-    setTransactionStatus(getTransactionStatus())
-  }, [reset, getTransactionStatus])
+  }, [reset])
 
   const handleClaim = useCallback(async () => {
     if (!address || !unbonding || unbonding.microcredits <= 0n) return
@@ -84,7 +76,6 @@ export function MyValidator() {
 
     setAmountDNCache([unbonding.microcredits, 6])
     claim(address, fee)
-    setStartGetTransactionStatus(true)
   }, [address, claim, unbonding])
 
   const creditsProgram = useNetworkClientStore((store) => store.creditsProgram)
@@ -134,31 +125,6 @@ export function MyValidator() {
       })
     }
   }, [isSuccess, queryClient, address])
-
-  const timer = useRef<NodeJS.Timeout | null>(null)
-
-  useEffect(() => {
-    if (startGetTransactionStatus) {
-      timer.current = setInterval(() => {
-        setTransactionStatus(getTransactionStatus())
-      }, 100)
-    } else {
-      if (timer.current) clearInterval(timer.current)
-    }
-
-    return () => {
-      if (timer.current) clearInterval(timer.current)
-    }
-  }, [getTransactionStatus, startGetTransactionStatus])
-
-  useEffect(() => {
-    if (
-      transactionStatus === TransactionStatus.Settled ||
-      transactionStatus === TransactionStatus.Failed
-    ) {
-      setStartGetTransactionStatus(false)
-    }
-  }, [transactionStatus])
 
   return (
     <>
