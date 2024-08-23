@@ -39,7 +39,7 @@ export function InviteWidget() {
   const inviteLink = useMemo(
     () =>
       inviteCode
-        ? `${window.location.protocol}//${window.location.host}?invite_code=${inviteCode}`
+        ? `${window.location.protocol}//${window.location.host}/points?invite_code=${inviteCode}`
         : null,
     [inviteCode]
   )
@@ -209,7 +209,8 @@ export function InviteWidget() {
                   </TooltipTrigger>
                   <TooltipContent className="max-w-xs">
                     <p>
-                      You will earn +8% on top of any Points your invites earn
+                      You will earn +8% on top of any Points your invites&apos;
+                      invites earn
                     </p>
                   </TooltipContent>
                 </Tooltip>
