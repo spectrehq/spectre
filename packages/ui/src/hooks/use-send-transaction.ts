@@ -13,7 +13,7 @@ import {
 } from '@puzzlehq/sdk'
 import { useMutation } from '@tanstack/react-query'
 import * as dn from 'dnum'
-import { useCallback, useRef } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import { TransactionStatus, WalletType } from '~/types'
 
 export interface SendTransactionMutationParams {
@@ -38,11 +38,15 @@ export function useSendTransaction({
   } = useWallet()
 
   const transactionStatusRef = useRef<TransactionStatus | undefined>(undefined)
+  const [transactionStatus, setTransactionStatus_] = useState<
+    TransactionStatus | undefined
+  >(undefined)
 
   const setTransactionStatus = useCallback(
     (status: TransactionStatus | undefined) => {
       if (status === undefined) {
-        transactionStatusRef.current = undefined
+        transactionStatusRef.current = status
+        setTransactionStatus_(status)
       }
 
       if (
@@ -50,6 +54,7 @@ export function useSendTransaction({
         transactionStatusRef.current === undefined
       ) {
         transactionStatusRef.current = status
+        setTransactionStatus_(status)
       }
 
       if (
@@ -57,6 +62,7 @@ export function useSendTransaction({
         transactionStatusRef.current === TransactionStatus.Creating
       ) {
         transactionStatusRef.current = status
+        setTransactionStatus_(status)
       }
 
       if (
@@ -64,6 +70,7 @@ export function useSendTransaction({
         transactionStatusRef.current === TransactionStatus.Pending
       ) {
         transactionStatusRef.current = status
+        setTransactionStatus_(status)
       }
 
       if (
@@ -72,6 +79,7 @@ export function useSendTransaction({
           transactionStatusRef.current === TransactionStatus.Pending)
       ) {
         transactionStatusRef.current = status
+        setTransactionStatus_(status)
       }
     },
     []
@@ -220,15 +228,9 @@ export function useSendTransaction({
     setTransactionStatus(undefined)
   }
 
-  const getTransactionStatus = useCallback(
-    () => transactionStatusRef.current,
-    []
-  )
-
   return {
     ...mutation,
     reset,
-    transactionStatus: transactionStatusRef.current,
-    getTransactionStatus,
+    transactionStatus,
   }
 }
