@@ -99,7 +99,8 @@ export function LockForm() {
     if (isSuccess) {
       form.reset()
       void queryClient.refetchQueries({
-        predicate: ({ queryKey }) => queryKey.includes(address),
+        predicate: ({ queryKey }) =>
+          queryKey.includes(address) || queryKey.includes('blockHeight'),
       })
     }
   }, [address, form, isSuccess, queryClient])
