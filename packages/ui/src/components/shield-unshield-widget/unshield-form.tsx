@@ -61,7 +61,18 @@ const tokens: (ARC20Token | ARC21Token)[] = [
   },
 ]
 
-export function UnshieldForm() {
+export interface UnshieldFormProps {
+  defaultValues?: {
+    token?: string
+    amount?: string
+  }
+  onFormValuesChange?: (values: { token?: string; amount?: string }) => void
+}
+
+export function UnshieldForm({
+  defaultValues,
+  onFormValuesChange,
+}: UnshieldFormProps) {
   const tPrompts = useTranslations('Prompts')
 
   const { address } = useAccount()
@@ -135,15 +146,19 @@ export function UnshieldForm() {
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      token: 'stCredits',
-      amount: '',
-    },
+    defaultValues,
   })
 
   useEffect(() => {
     form.trigger()
   }, [form])
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      onFormValuesChange?.(value)
+    })
+    return () => subscription.unsubscribe()
+  }, [form.watch, onFormValuesChange])
 
   useEffect(() => {
     if (stCreditsBalance || wstCreditsBalance) {
@@ -337,7 +352,7 @@ export function UnshieldForm() {
                             />
                             {field.value
                               ? tokens.find((token) => token.id === field.value)
-                                ?.id
+                                  ?.id
                               : 'Select token'}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>

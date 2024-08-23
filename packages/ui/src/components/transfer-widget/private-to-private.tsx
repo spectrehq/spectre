@@ -63,7 +63,23 @@ const tokens: (ARC20Token | ARC21Token)[] = [
   },
 ]
 
-export function PrivateToPrivate() {
+export interface PrivateToPrivateProps {
+  defaultValues?: {
+    token?: string
+    amount?: string
+    recipient?: string
+  }
+  onFormValuesChange?: (values: {
+    token?: string
+    amount?: string
+    recipient?: string
+  }) => void
+}
+
+export function PrivateToPrivate({
+  defaultValues,
+  onFormValuesChange,
+}: PrivateToPrivateProps) {
   const tPrompts = useTranslations('Prompts')
 
   const { address } = useAccount()
@@ -145,16 +161,19 @@ export function PrivateToPrivate() {
     mode: 'onChange',
     reValidateMode: 'onChange',
     resolver: zodResolver(formSchema),
-    defaultValues: {
-      token: 'stCredits',
-      amount: '',
-      recipient: '',
-    },
+    defaultValues,
   })
 
   useEffect(() => {
     form.trigger()
   }, [form])
+
+  useEffect(() => {
+    const subscription = form.watch((value, { name, type }) => {
+      onFormValuesChange?.(value)
+    })
+    return () => subscription.unsubscribe()
+  }, [form.watch, onFormValuesChange])
 
   useEffect(() => {
     if (stCreditsBalance || wstCreditsBalance) {
@@ -354,7 +373,7 @@ export function PrivateToPrivate() {
                             />
                             {field.value
                               ? tokens.find((token) => token.id === field.value)
-                                ?.id
+                                  ?.id
                               : 'Select token'}
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
