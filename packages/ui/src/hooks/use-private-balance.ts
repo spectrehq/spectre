@@ -126,7 +126,7 @@ export function usePrivateBalance(token = 'credits.aleo') {
 
             // TODO
             // @ts-ignore
-            const amountStr = record.data.amount.split('.')[0]
+            const amountStr = record.data.amount?.split('.')[0]
 
             if (amountStr) {
               if (amountStr.endsWith('u128')) {
