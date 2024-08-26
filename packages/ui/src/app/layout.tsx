@@ -2,8 +2,10 @@ import type { Metadata } from 'next'
 import { NextIntlClientProvider } from 'next-intl'
 import { getLocale, getMessages } from 'next-intl/server'
 import { Inter as FontSans } from 'next/font/google'
+import { Suspense } from 'react'
 import { Toaster } from 'sonner'
 import { ConnectingWalletDialog } from '~/components/connecting-wallet-dialog'
+import { CurrentBlockHeight } from '~/components/current-block-height'
 import { Footer } from '~/components/footer'
 import { Header } from '~/components/header'
 import { InviteCodeChecker } from '~/components/invite-code-checker'
@@ -14,7 +16,6 @@ import { NetworkClientStoreProvider } from '~/stores/network-client'
 import { Providers } from './providers'
 
 import './globals.css'
-import { Suspense } from 'react'
 
 const fontSans = FontSans({
   subsets: ['latin'],
@@ -71,6 +72,7 @@ export default async function RootLayout({
                     <InviteCodeChecker />
                   </Suspense>
                   <ConnectingWalletDialog />
+                  <CurrentBlockHeight />
                 </AccountStoreProvider>
               </Providers>
             </NetworkClientStoreProvider>

@@ -33,5 +33,6 @@ export function useLatestBlock() {
           'Content-Type': 'application/json',
         },
       }).then((res) => res.json()),
+    refetchInterval: 10 * 1000,
   })
 }

@@ -64,7 +64,10 @@ export function Providers({ children }: PropsWithChildren) {
               {children}
             </ReactQueryStreamedHydration>
             {process.env.NODE_ENV === 'development' && (
-              <ReactQueryDevtools initialIsOpen={false} />
+              <ReactQueryDevtools
+                initialIsOpen={false}
+                buttonPosition="bottom-left"
+              />
             )}
           </QueryClientProvider>
         </PuzzleWalletProvider>
