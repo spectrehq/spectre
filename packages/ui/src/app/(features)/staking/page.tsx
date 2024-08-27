@@ -1,7 +1,7 @@
 import { useTranslations } from 'next-intl'
 import { MyBalance } from '~/components/my-balance'
 import { MyValidator } from '~/components/my-validator'
-import { MyDelegation } from '~/components/my-delegation'
+// import { MyDelegation } from '~/components/my-delegation'
 import { ValidatorList } from '~/components/validator-list'
 import { ValidatorsOverview } from '~/components/validators-overview'
 

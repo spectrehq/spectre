@@ -7,6 +7,7 @@ import { Button } from '~/components/ui/button'
 import {
   Dialog,
   DialogContent,
+  DialogDescription,
   DialogHeader,
   DialogTitle,
   DialogTrigger,
@@ -52,6 +53,7 @@ export function Account() {
       <DialogContent>
         <DialogHeader>
           <DialogTitle>Account</DialogTitle>
+          <DialogDescription />
         </DialogHeader>
         <AccountInfo onDisconnect={handleDisconnectWallet} />
       </DialogContent>

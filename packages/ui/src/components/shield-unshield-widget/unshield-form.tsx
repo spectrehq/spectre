@@ -158,7 +158,7 @@ export function UnshieldForm({
       onFormValuesChange?.(value)
     })
     return () => subscription.unsubscribe()
-  }, [form.watch, onFormValuesChange])
+  }, [form, form.watch, onFormValuesChange])
 
   useEffect(() => {
     if (stCreditsBalance || wstCreditsBalance) {
@@ -284,7 +284,7 @@ export function UnshieldForm({
   const queryClient = useQueryClient()
   useEffect(() => {
     if (isSuccess) {
-      form.reset()
+      form.reset({ amount: '' })
       void queryClient.refetchQueries({
         predicate: ({ queryKey }) => queryKey.includes(address),
       })
