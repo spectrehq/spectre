@@ -99,6 +99,28 @@ export function MobileNav() {
               </Link>
             </li>
 
+            <li className="border-b py-2">
+              <Link
+                className="w-full p-2 flex justify-between items-center"
+                href="/assets"
+                onClick={() => setOpen(false)}
+              >
+                {t('assets')}
+                <ChevronRightIcon />
+              </Link>
+            </li>
+
+            <li className="border-b py-2">
+              <Link
+                className="w-full p-2 flex justify-between items-center"
+                href="/points"
+                onClick={() => setOpen(false)}
+              >
+                {t('points')}
+                <ChevronRightIcon />
+              </Link>
+            </li>
+
             <li className="py-2">
               <Link
                 className="w-full p-2 flex justify-between items-center"
