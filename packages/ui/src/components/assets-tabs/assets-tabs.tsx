@@ -15,7 +15,7 @@ export function AssetsTabs() {
 
   return (
     <Tabs defaultValue={tabsValue} value={tabsValue} className="mb-8">
-      <TabsList className="mx-auto grid w-fit grid-cols-3 rounded-full">
+      <TabsList className="mx-auto flex justify-between md:grid w-fit grid-cols-3 rounded-full">
         <TabsTrigger className="rounded-full" value="wrap-unwrap" asChild>
           <Link href="/assets">Wrap & Unwrap</Link>
         </TabsTrigger>
