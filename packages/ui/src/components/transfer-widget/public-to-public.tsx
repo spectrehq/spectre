@@ -287,12 +287,12 @@ export function PublicToPublic({
             )}
           />
           <div className="space-y-2">
-            <div className="flex items-center border rounded-xl p-3 bg-background">
+            <div className="flex flex-col space-y-6 md:space-y-0 md:flex-row items-center md:border rounded-xl bg-transparent md:p-3 md:bg-background">
               <FormField
                 control={form.control}
                 name="token"
                 render={({ field }) => (
-                  <FormItem className="flex flex-col">
+                  <FormItem className="w-full md:w-auto flex flex-col">
                     <Popover open={open} onOpenChange={handleOpenChange}>
                       <PopoverTrigger asChild>
                         <FormControl>
@@ -300,20 +300,22 @@ export function PublicToPublic({
                             variant="secondary"
                             role="combobox"
                             className={cn(
-                              'justify-between rounded-xl border-none text-base',
+                              'justify-between rounded-xl border-none text-base h-14 md:h-auto',
                               !field.value && 'text-muted-foreground'
                             )}
                           >
-                            <Image
-                              src={AleoStakingLogoIcon}
-                              alt="AleoStaking Logo"
-                              width={14}
-                              className="mr-1"
-                            />
-                            {field.value
-                              ? tokens.find((token) => token.id === field.value)
-                                  ?.id
-                              : 'Select token'}
+                            <div className="flex items-center">
+                              <Image
+                                src={AleoStakingLogoIcon}
+                                alt="AleoStaking Logo"
+                                className="mr-1 w-5 md:w-[14px]"
+                              />
+                              {field.value
+                                ? tokens.find(
+                                    (token) => token.id === field.value
+                                  )?.id
+                                : 'Select token'}
+                            </div>
                             <ChevronDownIcon className="ml-2 h-4 w-4 shrink-0 opacity-50" />
                           </Button>
                         </FormControl>
@@ -357,7 +359,7 @@ export function PublicToPublic({
                 control={form.control}
                 name="amount"
                 render={({ field }) => (
-                  <FormItem className="flex-1">
+                  <FormItem className="w-full flex-1 border md:border-none rounded-xl md:rounded-none p-3 md:p-0">
                     <FormControl>
                       <div className="flex items-center">
                         <NumberInput
