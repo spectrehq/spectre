@@ -321,6 +321,12 @@ export function BondForm({ validator }: BondFormProps) {
                         Credits
                       </span>
                     </div>
+                    {form.formState.errors.amount?.message ===
+                      'First time staking needs at least 10,000 Credits.' && (
+                      <div className="bg-amber-100 rounded-xl text-primary-foreground text-xs md:text-sm p-3 md:p-5 mb-6">
+                        First time staking needs at least 10,000 Credits.
+                      </div>
+                    )}
                     <WalletConnectionChecker
                       className="w-full"
                       variant="secondary"
@@ -344,10 +350,13 @@ export function BondForm({ validator }: BondFormProps) {
                             className={cn('mr-2 h-4 w-4 animate-spin')}
                           />
                         )}
-                        {form.formState.errors.amount?.message ||
-                          (isPending
-                            ? 'Waiting for wallet confirmation'
-                            : 'Stake')}
+                        {form.formState.errors.amount?.message ===
+                        'First time staking needs at least 10,000 Credits.'
+                          ? 'Stake'
+                          : form.formState.errors.amount?.message ||
+                            (isPending
+                              ? 'Waiting for wallet confirmation'
+                              : 'Stake')}
                       </Button>
                     </WalletConnectionChecker>
                     <div className="grid grid-cols-2 items-center gap-4">
