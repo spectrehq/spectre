@@ -139,7 +139,7 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
               <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
             </Link>
             <Link
-              href={`https://testnetbeta.aleo123.io/address/${address}`}
+              href={`https://testnet.aleo123.io/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
             >

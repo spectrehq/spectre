@@ -197,7 +197,7 @@ export function BondForm({ validator }: BondFormProps) {
               <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
             </Link>
             <Link
-              href={`https://testnetbeta.aleo123.io/address/${validator}`}
+              href={`https://testnet.aleo123.io/address/${validator}`}
               target="_blank"
               rel="noopener noreferrer"
             >
