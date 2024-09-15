@@ -17,6 +17,7 @@ import {
   STCREDITS_PROGRAM_IDS,
   STCREDITS_POINTS_PROGRAM_IDS,
 } from '~/config'
+import { FoxWalletAdapter } from '~/lib/foxwallet'
 import { getQueryClient } from '~/lib/query'
 import { useNetworkClientStore } from '~/stores/network-client'
 
@@ -24,6 +25,9 @@ export function Providers({ children }: PropsWithChildren) {
   const wallets = useMemo(
     () => [
       new LeoWalletAdapter({
+        appName: 'AleoStaking',
+      }),
+      new FoxWalletAdapter({
         appName: 'AleoStaking',
       }),
     ],
@@ -44,7 +48,9 @@ export function Providers({ children }: PropsWithChildren) {
   return (
     <WalletProvider
       wallets={wallets}
-      network={WalletAdapterNetwork.TestnetBeta}
+      // network={WalletAdapterNetwork.MainnetBeta}
+      // @ts-ignore
+      network="mainnet"
       decryptPermission={DecryptPermission.OnChainHistory}
       programs={[
         creditsProgramId,

@@ -15,7 +15,7 @@ import { Network } from '~/types'
 
 // export const DEFAULT_HOST = 'https://api.explorer.aleo.org/v1'
 export const DEFAULT_HOST = 'https://rpc.aleostaking.org'
-export const DEFAULT_NETWORK: Network = Network.Testnet
+export const DEFAULT_NETWORK: Network = Network.Mainnet
 
 export type NetworkClientState = {
   host: string

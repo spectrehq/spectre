@@ -14,7 +14,7 @@ export interface AccountInfoProps {
 }
 
 export function AccountInfo({ onDisconnect }: AccountInfoProps) {
-  const { address, walletType } = useAccount()
+  const { address, walletType, walletName } = useAccount()
   const { disconnect } = useDisconnect()
 
   const handleDisconnectWallet = useCallback(async () => {
@@ -45,7 +45,7 @@ export function AccountInfo({ onDisconnect }: AccountInfoProps) {
     <div className="space-y-2">
       <div className="flex items-center justify-between">
         <p className="text-muted-foreground text-sm">
-          Connected to {walletType ?? 'Wallet'}
+          Connected to {walletName ?? 'Wallet'}
         </p>
         <Button variant="secondary" size="sm" onClick={handleDisconnectWallet}>
           <UnplugIcon className="mr-1 h-3 w-3" />

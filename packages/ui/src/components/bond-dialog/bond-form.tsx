@@ -84,13 +84,10 @@ export function BondForm({ validator }: BondFormProps) {
               ? 'First time staking needs at least 10,000 Credits.'
               : 'You must stake at least 1 Credits.',
           })
-          .max(
-            balance ? dn.toNumber(balanceDN) : Number.MAX_SAFE_INTEGER,
-            tPrompts('Insufficient balance')
-          )
+          .max(dn.toNumber(balanceDN), tPrompts('Insufficient balance'))
           .default(0),
       }),
-    [tPrompts, isFirstBond, balance, balanceDN]
+    [tPrompts, isFirstBond, balanceDN]
   )
 
   const form = useForm<z.infer<typeof formSchema>>({
@@ -190,14 +187,14 @@ export function BondForm({ validator }: BondFormProps) {
           <CardDescription className="flex items-center space-x-2">
             <span>View on explorer: </span>
             <Link
-              href={`https://testnet.aleoscan.io/address?a=${validator}`}
+              href={`https://aleoscan.io/address?a=${validator}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
             </Link>
             <Link
-              href={`https://testnet.aleo123.io/address/${validator}`}
+              href={`https://aleo123.io/address/${validator}`}
               target="_blank"
               rel="noopener noreferrer"
             >

@@ -33,6 +33,7 @@ export function useSendTransaction({
   walletType,
 }: UseSendTransactionOptions) {
   const {
+    wallet,
     requestTransaction,
     transactionStatus: getLeoWalletTransactionStatus,
   } = useWallet()
@@ -98,7 +99,7 @@ export function useSendTransaction({
         setTransactionStatus(TransactionStatus.Creating)
         const tx = Transaction.createTransaction(
           address,
-          WalletAdapterNetwork.TestnetBeta, // TODO: replace mainnet
+          'mainnet',
           programId,
           functionName,
           inputs,
@@ -135,8 +136,19 @@ export function useSendTransaction({
           const transactionStatusInner =
             await getLeoWalletTransactionStatus?.(transactionId)
 
-          if (transactionStatusInner === 'Finalized') {
+          // TODO
+          if (
+            (wallet?.adapter.name === 'Leo Wallet' &&
+              transactionStatusInner === 'Finalized') ||
+            (wallet?.adapter.name === 'Fox Wallet' &&
+              transactionStatusInner === 'Completed')
+          ) {
             setTransactionStatus(TransactionStatus.Settled)
+            break
+          }
+
+          if (transactionStatusInner === 'Failed') {
+            setTransactionStatus(TransactionStatus.Failed)
             break
           }
 

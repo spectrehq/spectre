@@ -13,6 +13,7 @@ import { ThemeProvider } from '~/components/theme-provider'
 import { cn } from '~/lib/utils'
 import { AccountStoreProvider } from '~/stores/account'
 import { NetworkClientStoreProvider } from '~/stores/network-client'
+import { ComingSoon } from './coming-soon'
 import { Providers } from './providers'
 
 import './globals.css'
@@ -61,6 +62,7 @@ export default async function RootLayout({
           defaultTheme="dark"
           disableTransitionOnChange
         >
+          <ComingSoon />
           <NextIntlClientProvider messages={messages}>
             <NetworkClientStoreProvider>
               <Providers>

@@ -37,14 +37,27 @@ export function WalletItem({ wallet, onConnected }: WalletItemProps) {
         if (wallet.name === 'LeoWallet') {
           open('https://www.leo.app/download', '_blank', 'noreferrer')
         }
+
+        if (wallet.name === 'Fox Wallet') {
+          open('https://foxwallet.com/download', '_blank', 'noreferrer')
+        }
       }
 
       if (walletAdapter?.readyState === WalletReadyState.Installed) {
         setIsConnecting(true)
-        await walletAdapter?.connect(
-          DecryptPermission.OnChainHistory,
-          WalletAdapterNetwork.TestnetBeta
-        )
+        if (wallet.name === 'LeoWallet') {
+          await walletAdapter?.connect(
+            DecryptPermission.OnChainHistory,
+            // @ts-ignore
+            'mainnet'
+          )
+        } else if (wallet.name === 'Fox Wallet') {
+          await walletAdapter?.connect(
+            DecryptPermission.OnChainHistory,
+            // @ts-ignore
+            'mainnet'
+          )
+        }
       }
     } catch (e) {
       console.log(e)

@@ -4,7 +4,11 @@ import { useMemo } from 'react'
 import { type AleoAddress, WalletType } from '~/types'
 
 export function useAccount() {
-  const { publicKey, connected: isLeoConnected } = useLeoWallet()
+  const {
+    publicKey,
+    connected: isLeoConnected,
+    wallet: leoWallet,
+  } = useLeoWallet()
   const { isConnected: isPuzzleConnected } = useConnect()
   const { account } = usePuzzleAccount()
 
@@ -37,5 +41,18 @@ export function useAccount() {
     return null
   }, [isLeoConnected, isPuzzleConnected])
 
-  return { address, isConnected, walletType }
+  // TODO
+  const walletName = useMemo(() => {
+    if (isLeoConnected) {
+      return leoWallet?.adapter.name ?? 'Leo Wallet'
+    }
+
+    if (isPuzzleConnected) {
+      return WalletType.PuzzleWallet
+    }
+
+    return null
+  }, [isLeoConnected, isPuzzleConnected, leoWallet?.adapter.name])
+
+  return { address, isConnected, walletType, walletName }
 }

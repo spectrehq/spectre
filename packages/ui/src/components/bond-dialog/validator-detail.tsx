@@ -132,14 +132,14 @@ export function ValidatorDetail({ address }: ValidatorDetailProps) {
           <CardDescription className="flex items-center space-x-2">
             <span>View on explorer: </span>
             <Link
-              href={`https://testnet.aleoscan.io/address?a=${address}`}
+              href={`https://aleoscan.io/address?a=${address}`}
               target="_blank"
               rel="noopener noreferrer"
             >
               <Image src={AleoscanLogo} alt="Aleoscan" width={16} height={16} />
             </Link>
             <Link
-              href={`https://testnet.aleo123.io/address/${address}`}
+              href={`https://aleo123.io/address/${address}`}
               target="_blank"
               rel="noopener noreferrer"
             >

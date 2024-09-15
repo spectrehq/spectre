@@ -31,7 +31,7 @@ export function useQueryValidator(address?: AleoAddress | null) {
     queryKey: ['aleo123', 'validator', address],
     queryFn: async () => {
       const res = await fetch(
-        `https://testnet.aleo123.io/api/v5/mainnetv0/validat/validator/${address}`,
+        `https://mainnet.aleo123.io/api/v5/mainnet/validat/validator/${address}`,
         {
           headers: {
             Accept: 'application/json',

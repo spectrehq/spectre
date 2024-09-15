@@ -24,7 +24,7 @@ export function useValidatorsFromAleo123() {
     queryKey: ['aleo123', 'validators'],
     queryFn: async () => {
       const res = await fetch(
-        'https://testnet.aleo123.io/api/v5/mainnetv0/validat/validatorlist',
+        'https://mainnet.aleo123.io/api/v5/mainnet/validat/validatorlist',
         {
           headers: {
             Accept: 'application/json',
