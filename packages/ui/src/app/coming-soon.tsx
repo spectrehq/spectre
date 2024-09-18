@@ -12,7 +12,7 @@ export function ComingSoon() {
   return (
     <div className="bg-amber-600">
       <div className="container py-3 text-white sm:text-center">
-        <p className="font-medium">Coming soon!</p>
+        <p className="font-medium">Liquid staking is coming soon!</p>
       </div>
     </div>
   )

@@ -130,3 +130,9 @@ button:disabled {
   cursor: not-allowed;
   pointer-events: all !important;
 }
+
+.disable-input form,
+.disable-input form input,
+.disable-input form button[type='submit'] {
+  pointer-events: none;
+}

@@ -10,7 +10,7 @@ export default function PointsLayout({ children }: PropsWithChildren) {
   const t = useTranslations('PointsPage')
 
   return (
-    <div className="py-16">
+    <div className="py-16 disable-input">
       <section>
         <div className="container mb-8">
           <div className="text-center">

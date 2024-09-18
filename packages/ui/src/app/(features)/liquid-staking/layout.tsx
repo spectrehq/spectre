@@ -11,7 +11,7 @@ export default function WithdrawalsLayout({ children }: PropsWithChildren) {
 
   return (
     <>
-      <section>
+      <section className="disable-input">
         <div className="container py-16">
           <div className="text-center mb-8">
             <h3 className="scroll-m-20 font-semibold text-2xl tracking-tight mb-1">
