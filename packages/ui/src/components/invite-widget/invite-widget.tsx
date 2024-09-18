@@ -153,7 +153,9 @@ export function InviteWidget() {
               className="w-full"
               variant="secondary"
               size="xl"
-              disabled={isPending}
+              // TODO: remove
+              // disabled={isPending}
+              disabled
               onClick={handleGenerate}
             >
               {isPending && (
